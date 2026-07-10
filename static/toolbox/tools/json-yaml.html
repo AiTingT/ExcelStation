@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON ↔ YAML</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <link rel="stylesheet" href="../css/common.css">
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <style>
+    textarea {
+      font-family: var(--font-mono);
+      min-height: 280px;
+    }
+
+    .conv-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      margin: var(--space-3) 0;
+    }
+
+    .conv-bar .arrow {
+      color: var(--fg-muted);
+      font-size: 20px;
+    }
+
+    .conv-bar .btn {
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .pane-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 768px) {
+      .pane-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pane-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pane-title select {
+      font-size: var(--text-xs);
+      padding: 2px 6px;
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      font-family: inherit;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="tool-header">
+        <h2><i class="mgc_file_code_line"></i> JSON ↔ YAML</h2>
+        <p>JSON 与 YAML 格式互转，支持 K8s、配置文件场景</p>
+      </div>
+      <div class="pane-row">
+        <div>
+          <div class="pane-title">
+            <span>输入（JSON 或 YAML）</span>
+            <button class="copy-part" id="swapBtn" title="交换左右"><i class="mgc_exchange_2_line"></i> 交换</button>
+          </div>
+          <textarea id="input" placeholder='粘贴 JSON 或 YAML…'></textarea>
+        </div>
+        <div>
+          <div class="pane-title">
+            <span style="width: 36px;">输出</span>
+            <select id="outFmt">
+              <option value="yaml">YAML</option>
+              <option value="json">JSON</option>
+              <option value="json-compact">JSON（压缩）</option>
+            </select>
+          </div>
+          <textarea id="output" readonly placeholder="结果将显示在此…"></textarea>
+        </div>
+      </div>
+      <div class="conv-bar">
+        <button class="btn" id="toYamlBtn"><i class="mgc_arrow_down_line"></i> → YAML</button>
+        <button class="btn" id="toJsonBtn"><i class="mgc_arrow_up_line"></i> → JSON</button>
+        <button class="btn secondary" id="copyBtn"><i class="mgc_copy_2_line"></i> 复制输出</button>
+        <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+      </div>
+      <div class="error" id="error"></div>
+    </div>
+  </div>
+  <script src="../js/common.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var input = document.getElementById('input');
+      var output = document.getElementById('output');
+      var error = document.getElementById('error');
+      var outFmt = document.getElementById('outFmt');
+
+      function detect(s) {
+        var t = s.trim();
+        if (!t) return 'empty';
+        if (t.startsWith('{') || t.startsWith('[')) return 'json';
+        return 'yaml';
+      }
+
+      function parseInput(s) {
+        var kind = detect(s);
+        if (kind === 'empty') return null;
+        if (kind === 'json') return jsyaml.load(JSON.stringify(JSON.parse(s))); // validate JSON then pass object
+        return jsyaml.load(s);
+      }
+
+      // Simpler: parse to JS object
+      function toObject(s) {
+        var kind = detect(s);
+        if (kind === 'empty') return null;
+        if (kind === 'json') return JSON.parse(s);
+        return jsyaml.load(s);
+      }
+
+      function render(obj) {
+        var fmt = outFmt.value;
+        if (fmt === 'yaml') return jsyaml.dump(obj, { lineWidth: -1, noRefs: true });
+        if (fmt === 'json') return JSON.stringify(obj, null, 2);
+        return JSON.stringify(obj);
+      }
+
+      function run() {
+        error.textContent = '';
+        var s = input.value;
+        if (!s.trim()) { output.value = ''; return; }
+        try {
+          var obj = toObject(s);
+          output.value = render(obj);
+        } catch (e) {
+          error.textContent = '❌ 解析失败：' + e.message;
+          output.value = '';
+        }
+      }
+
+      document.getElementById('toYamlBtn').addEventListener('click', function () { outFmt.value = 'yaml'; run(); });
+      document.getElementById('toJsonBtn').addEventListener('click', function () { outFmt.value = 'json'; run(); });
+      outFmt.addEventListener('change', run);
+      document.getElementById('swapBtn').addEventListener('click', function () {
+        var a = input.value, b = output.value;
+        input.value = b; output.value = a;
+      });
+      document.getElementById('copyBtn').addEventListener('click', function () {
+        Toolbox.copyText(output.value, '已复制');
+      });
+      document.getElementById('clearBtn').addEventListener('click', function () {
+        input.value = ''; output.value = ''; error.textContent = '';
+      });
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,165 @@
+/* =========================================================
+ * Design Tokens (v2)
+ * ========================================================= */
+
+:root {
+  /* ---------- 品牌与语义色 (light) ---------- */
+  --brand-h: 211;
+  --brand-s: 65%;
+  --brand-l: 57%;
+
+  --color-brand: hsl(var(--brand-h) var(--brand-s) var(--brand-l));
+  --color-brand-hover: hsl(var(--brand-h) var(--brand-s) 52%);
+  --color-brand-soft: hsl(var(--brand-h) 90% 96%);
+  --color-brand-ring: hsl(var(--brand-h) var(--brand-s) var(--brand-l) / 0.32);
+
+  --color-success: hsl(152 62% 42%);
+  --color-warning: hsl(35 92% 52%);
+  --color-danger:  hsl(0 78% 58%);
+  --color-info:    hsl(210 88% 56%);
+
+  /* ---------- 中性色 ---------- */
+  --bg-page: hsl(230 30% 98%);
+  --bg-page-2: hsl(230 30% 96%);
+  --bg-surface: #ffffff;
+  --bg-surface-2: hsl(230 25% 97.5%);
+  --bg-elevated: #ffffff;
+  --bg-inverse: hsl(230 20% 12%);
+
+  --fg-strong: hsl(230 25% 12%);
+  --fg-base:   hsl(230 18% 22%);
+  --fg-muted:  hsl(230 10% 46%);
+  --fg-subtle: hsl(230 8% 62%);
+  --fg-invert: #ffffff;
+  --fg-on-inverse: #ffffff;
+
+  --border-base: hsl(230 18% 90%);
+  --border-strong: hsl(230 16% 82%);
+  --border-subtle: hsl(230 20% 94%);
+  --overlay-scrim: hsl(230 20% 10% / 0.35);
+
+  /* ---------- 字体 ---------- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC",
+               "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+               "Source Han Sans CN", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.75;
+
+  /* ---------- 间距(4 的倍数) ---------- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ---------- 圆角 ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+
+  /* ---------- 阴影 ---------- */
+  --shadow-xs: 0 1px 2px hsl(230 20% 20% / 0.05);
+  --shadow-sm: 0 2px 6px hsl(230 20% 20% / 0.06);
+  --shadow-md: 0 8px 24px hsl(230 25% 20% / 0.08);
+  --shadow-lg: 0 18px 48px hsl(230 30% 18% / 0.12);
+  --shadow-focus: 0 0 0 4px var(--color-brand-ring);
+  --shadow-brand: 0 4px 12px hsl(var(--brand-h) var(--brand-s) var(--brand-l) / 0.25);
+
+  /* ---------- 层级 ---------- */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-dock: 400;
+  --z-modal: 600;
+  --z-toast: 800;
+
+  /* ---------- 动效 ---------- */
+  --ease-standard: cubic-bezier(.2, .7, .2, 1);
+  --ease-emph: cubic-bezier(.22, 1, .36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+
+  /* ---------- 布局尺寸 ---------- */
+  --container-max: 1240px;
+  --container-px: clamp(16px, 4vw, 32px);
+  --header-h: 60px;
+  --dock-size: 48px;
+
+  /* ---------- 项目特有 ---------- */
+  --sidebar-width: 260px;
+  --iframe-header-h: 56px;
+}
+
+/* 深色 */
+[data-theme="dark"] {
+  --bg-page: hsl(230 18% 8%);
+  --bg-page-2: hsl(230 18% 10%);
+  --bg-surface: hsl(230 18% 12%);
+  --bg-surface-2: hsl(230 16% 14%);
+  --bg-elevated: hsl(230 16% 16%);
+  --bg-inverse: hsl(230 25% 98%);
+
+  --fg-strong: hsl(230 20% 96%);
+  --fg-base:   hsl(230 14% 88%);
+  --fg-muted:  hsl(230 10% 66%);
+  --fg-subtle: hsl(230 8% 50%);
+  --fg-invert: #ffffff;
+  --fg-on-inverse: hsl(230 20% 12%);
+
+  --border-base: hsl(230 12% 22%);
+  --border-strong: hsl(230 12% 30%);
+  --border-subtle: hsl(230 14% 18%);
+  --overlay-scrim: hsl(230 60% 2% / 0.55);
+
+  --color-brand-soft: hsl(var(--brand-h) 40% 20%);
+  --color-brand-ring: hsl(var(--brand-h) var(--brand-s) 70% / 0.36);
+
+  --shadow-xs: 0 1px 2px hsl(230 50% 2% / 0.5);
+  --shadow-sm: 0 2px 6px hsl(230 50% 2% / 0.45);
+  --shadow-md: 0 8px 24px hsl(230 60% 2% / 0.45);
+  --shadow-lg: 0 18px 48px hsl(230 60% 2% / 0.55);
+}
+
+/* 低性能模式：降低动画与模糊 */
+[data-performance="low"] {
+  --dur-fast: 0ms;
+  --dur-base: 0ms;
+  --dur-slow: 0ms;
+  --shadow-md: var(--shadow-sm);
+  --shadow-lg: var(--shadow-sm);
+}
+
+/* 尊重用户系统减弱动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

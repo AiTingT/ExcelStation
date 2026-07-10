@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+data/
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+sessions/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Claude
+.claude/
+
+# PyInstaller
+*.manifest
+*.spec.bak
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (if any frontend build added later)
+node_modules/
