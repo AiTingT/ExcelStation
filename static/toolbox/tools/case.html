@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大小写转换</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  textarea { font-family: var(--font-mono); }
+  .case-list { display: flex; flex-direction: column; gap: var(--space-2); }
+  .case-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 36px;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--bg-page);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    transition: border-color var(--dur-fast);
+  }
+  .case-row:hover { border-color: var(--border-strong); }
+  .case-label {
+    font-size: var(--text-sm); font-weight: 600; color: var(--fg-base);
+    white-space: nowrap;
+  }
+  .case-label small {
+    display: block; font-weight: 400; font-size: var(--text-xs);
+    color: var(--fg-subtle); margin-top: 1px;
+  }
+  .case-value {
+    font-family: var(--font-mono); font-size: var(--text-sm);
+    color: var(--fg-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    user-select: all;
+  }
+  .copy-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--fg-muted); font-size: 18px;
+    padding: 4px; border-radius: var(--radius-sm);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: var(--bg-surface); color: var(--color-brand); }
+  .copy-btn.copied { color: var(--color-success); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_letter_spacing_line"></i> 大小写转换</h2>
+      <p>输入文本，实时显示 14 种大小写格式</p>
+    </div>
+    <textarea id="input" placeholder="输入要转换的文本… 支持用空格、下划线、连字符、驼峰、点号分隔单词"></textarea>
+    <div class="actions">
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_list_check_line"></i> 转换结果</h2>
+    </div>
+    <div class="case-list" id="caseList"></div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  var input = document.getElementById('input');
+  var caseList = document.getElementById('caseList');
+
+  // ---- Tokenize: split input into words ----
+  function toWords(s) {
+    s = s.trim();
+    if (!s) return [];
+    // If already space/underscore/hyphen/dot separated
+    if (/[ _\-\.\/]/.test(s)) {
+      return s.split(/[ _\-\.\/]+/).filter(Boolean);
+    }
+    // CamelCase / PascalCase split
+    var result = [];
+    var buf = '';
+    for (var i = 0; i < s.length; i++) {
+      var c = s[i];
+      if (c >= 'A' && c <= 'Z') {
+        if (buf) { result.push(buf); buf = ''; }
+        buf = c;
+      } else {
+        buf += c;
+      }
+    }
+    if (buf) result.push(buf);
+    return result.filter(Boolean);
+  }
+
+  // ---- Case functions ----
+  function lowercase(w)    { return w.map(function(x) { return x.toLowerCase(); }).join(' '); }
+  function uppercase(w)    { return w.map(function(x) { return x.toUpperCase(); }).join(' '); }
+  function camelcase(w) {
+    if (!w.length) return '';
+    return w[0].toLowerCase() + w.slice(1).map(function(x) {
+      return x.charAt(0).toUpperCase() + x.slice(1).toLowerCase();
+    }).join('');
+  }
+  function capitalcase(w) {
+    return w.map(function(x) {
+      return x.charAt(0).toUpperCase() + x.slice(1).toLowerCase();
+    }).join(' ');
+  }
+  function constantcase(w) {
+    return w.map(function(x) { return x.toUpperCase(); }).join('_');
+  }
+  function dotcase(w) {
+    return w.map(function(x) { return x.toLowerCase(); }).join('.');
+  }
+  function headercase(w) {
+    return w.map(function(x) {
+      return x.charAt(0).toUpperCase() + x.slice(1).toLowerCase();
+    }).join('-');
+  }
+  function nocase(w) {
+    return w.map(function(x) { return x.toLowerCase(); }).join(' ');
+  }
+  function paramcase(w) {
+    return w.map(function(x) { return x.toLowerCase(); }).join('-');
+  }
+  function pascalcase(w) {
+    return w.map(function(x) {
+      return x.charAt(0).toUpperCase() + x.slice(1).toLowerCase();
+    }).join('');
+  }
+  function pathcase(w) {
+    return w.map(function(x) { return x.toLowerCase(); }).join('/');
+  }
+  function sentencecase(w) {
+    var joined = w.map(function(x) { return x.toLowerCase(); }).join(' ');
+    return joined.charAt(0).toUpperCase() + joined.slice(1);
+  }
+  function snakecase(w) {
+    return w.map(function(x) { return x.toLowerCase(); }).join('_');
+  }
+  function mockingcase(w) {
+    var full = w.map(function(x) { return x.toLowerCase(); }).join('');
+    var result = '';
+    for (var i = 0; i < full.length; i++) {
+      result += (Math.random() > 0.5) ? full[i].toUpperCase() : full[i];
+    }
+    return result;
+  }
+
+  // ---- Format definitions ----
+  var FORMATS = [
+    { id: 'lowercase',   label: '全小写',     en: 'Lowercase',   fn: lowercase },
+    { id: 'uppercase',   label: '全大写',     en: 'Uppercase',   fn: uppercase },
+    { id: 'camelcase',   label: '驼峰式',     en: 'Camelcase',   fn: camelcase },
+    { id: 'capitalcase', label: '首词大写',   en: 'Capitalcase', fn: capitalcase },
+    { id: 'constantcase',label: '常量式',     en: 'Constantcase',fn: constantcase },
+    { id: 'dotcase',     label: '点分隔',     en: 'Dotcase',     fn: dotcase },
+    { id: 'headercase',  label: '标题式',     en: 'Headercase',  fn: headercase },
+    { id: 'nocase',      label: '自然空格',   en: 'Nocase',      fn: nocase },
+    { id: 'paramcase',   label: '参数式',     en: 'Paramcase',   fn: paramcase },
+    { id: 'pascalcase',  label: '帕斯卡式',   en: 'Pascalcase',  fn: pascalcase },
+    { id: 'pathcase',    label: '路径式',     en: 'Pathcase',    fn: pathcase },
+    { id: 'sentencecase',label: '句首大写',   en: 'Sentencecase',fn: sentencecase },
+    { id: 'snakecase',   label: '蛇形式',     en: 'Snakecase',   fn: snakecase },
+    { id: 'mockingcase', label: '嘲讽式',     en: 'Mockingcase', fn: mockingcase }
+  ];
+
+  // ---- Render ----
+  function render() {
+    var words = toWords(input.value);
+    caseList.innerHTML = FORMATS.map(function(f) {
+      var val = words.length ? f.fn(words) : '';
+      return '<div class="case-row" data-id="' + f.id + '">' +
+        '<div class="case-label">' + f.label + '<small>' + f.en + '</small></div>' +
+        '<div class="case-value" title="' + val.replace(/"/g, '&quot;') + '">' + (val || '—') + '</div>' +
+        '<button class="copy-btn" title="复制" data-val="' + val.replace(/"/g, '&quot;') + '"><i class="mgc_copy_line"></i></button>' +
+      '</div>';
+    }).join('');
+    caseList.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var v = btn.dataset.val;
+        if (!v) { Toolbox.showToast('没有可复制的内容'); return; }
+        Toolbox.copyText(v, '已复制');
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="mgc_check_line"></i>';
+        setTimeout(function() {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<i class="mgc_copy_line"></i>';
+        }, 1200);
+      });
+    });
+  }
+
+  var timer;
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    timer = setTimeout(render, 80);
+  });
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; caseList.innerHTML = ''; Toolbox.showToast('已清空');
+  });
+
+  // Init with sample
+  input.value = 'hello world example';
+  render();
+})();
+</script>
+</body>
+</html>

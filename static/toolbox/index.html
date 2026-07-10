@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表格工作台工具箱</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235B7CF5'/><stop offset='1' stop-color='%234064E0'/></linearGradient></defs><rect width='36' height='36' rx='6' fill='url(%23g)'/><text x='18' y='25' text-anchor='middle' fill='white' font-family='system-ui,sans-serif' font-weight='700' font-size='20'>T</text></svg>">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <style>
+    /* MingCute icon - inherit color from parent (must load after MingCute) */
+    [class^="mgc_"]::before,
+    [class*=" mgc_"]::before {
+      color: inherit;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: var(--text-md);
+      line-height: var(--leading-normal);
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-h);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-base);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-8);
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--color-brand), hsl(var(--brand-h) var(--brand-s) 66%));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--fg-strong);
+    }
+
+    .slogan {
+      font-size: var(--text-xs);
+      color: var(--fg-muted);
+      margin-left: var(--space-2);
+    }
+
+    .header-tool-info {
+      display: none;
+      align-items: center;
+      gap: var(--space-3);
+      margin-left: var(--space-2);
+      padding-left: var(--space-2);
+      border-left: 1px solid var(--border-base);
+    }
+
+    .header-tool-info.show {
+      display: flex;
+    }
+
+    .header-tool-title {
+      font-size: var(--text-md);
+      font-weight: 600;
+      color: var(--fg-strong);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-tool-desc {
+      font-size: var(--text-xs);
+      color: var(--fg-muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .header-actions {
+      display: none;
+      gap: var(--space-2);
+    }
+
+    .header-actions.show {
+      display: flex;
+    }
+
+    .header-actions .btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-base);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-standard);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      font-family: inherit;
+    }
+
+    .header-actions .btn:hover {
+      background: var(--color-brand);
+      color: #fff;
+      border-color: var(--color-brand);
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-base);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: transform var(--dur-base) var(--ease-standard),
+        box-shadow var(--dur-base) var(--ease-standard);
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* 返回工作站按钮 */
+    .back-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-base);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-standard);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      font-family: inherit;
+      margin-right: var(--space-2);
+    }
+
+    .back-btn:hover {
+      background: var(--color-brand);
+      color: #fff;
+      border-color: var(--color-brand);
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-base);
+      overflow-y: auto;
+      padding: var(--space-2);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 96px);
+    }
+
+    .category {
+      margin-bottom: var(--space-6);
+    }
+
+    .category-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--space-2);
+      padding-left: var(--space-2);
+    }
+
+    .tool-list {
+      list-style: none;
+    }
+
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease-standard),
+        color var(--dur-fast) var(--ease-standard);
+      font-size: var(--text-md);
+      font-weight: 500;
+      color: var(--fg-base);
+      margin-bottom: 4px;
+    }
+
+    .tool-item:hover {
+      background: var(--bg-page);
+    }
+
+    .tool-item.active {
+      background: var(--color-brand);
+      color: #fff;
+      box-shadow: var(--shadow-brand);
+    }
+
+    .tool-item.active .t-icon {
+      color: #fff;
+    }
+
+    .tool-item .t-icon {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-home {
+      margin-bottom: var(--space-2);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--border-base);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border-base);
+    }
+
+    /* Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .iframe-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-page);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-page);
+      z-index: 10;
+      font-size: var(--text-md);
+      color: var(--fg-muted);
+    }
+
+    .loading.hidden {
+      display: none;
+    }
+
+    /* Welcome / Tool Cards */
+    .welcome {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      background: var(--bg-page);
+      z-index: 5;
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .welcome-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
+
+    .welcome-header h1 {
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--color-brand), hsl(var(--brand-h) var(--brand-s) 66%));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-2);
+    }
+
+    .welcome-header p {
+      color: var(--fg-muted);
+      font-size: var(--text-lg);
+    }
+
+    .tool-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-4);
+      max-width: var(--container-max);
+      margin: 0 auto;
+    }
+
+    .tool-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      cursor: pointer;
+      transition: transform var(--dur-base) var(--ease-standard),
+        box-shadow var(--dur-base) var(--ease-standard),
+        border-color var(--dur-base) var(--ease-standard);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--color-brand);
+    }
+
+    .tool-card .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-2);
+      color: var(--color-brand);
+    }
+
+    .tool-card .card-icon i {
+      font-size: 32px;
+    }
+
+    .tool-card h3 {
+      font-size: var(--text-md);
+      margin-bottom: var(--space-1);
+      font-weight: 700;
+      color: var(--fg-strong);
+    }
+
+    .tool-card p {
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+      line-height: 1.5;
+    }
+
+    .tool-card .card-category {
+      display: inline-block;
+      margin-top: var(--space-2);
+      padding: 3px 10px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-pill);
+      font-size: var(--text-xs);
+      color: var(--fg-muted);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-base);
+      padding: var(--space-2) var(--space-8);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--fg-muted);
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        flex-direction: column;
+      }
+
+      .welcome {
+        padding: var(--space-4);
+      }
+
+      .tool-cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        padding: 0 var(--space-6);
+      }
+    }
+
+    /* 表格工作台统一视觉 */
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
+        var(--bg-page);
+      color: var(--fg-base);
+    }
+
+    .header {
+      height: 72px;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom-color: var(--border-base);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      padding: 0 24px;
+    }
+
+    [data-theme="dark"] .header {
+      background: rgba(15, 23, 42, 0.92);
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2563eb, #14b8a6);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+      font-size: 13px;
+    }
+
+    .brand {
+      color: var(--fg-strong);
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .slogan {
+      color: var(--fg-muted);
+      margin-left: 0;
+      display: block;
+      line-height: 1.4;
+    }
+
+    .header-tool-info {
+      border-left-color: var(--border-base);
+      margin-left: var(--space-3);
+      padding-left: var(--space-4);
+    }
+
+    .header-actions .btn,
+    .back-btn,
+    .theme-toggle {
+      background: var(--bg-surface);
+      border-color: var(--border-base);
+      border-radius: 8px;
+      color: var(--fg-base);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      font-weight: 650;
+    }
+
+    .header-actions .btn:hover,
+    .back-btn:hover,
+    .theme-toggle:hover {
+      transform: translateY(0);
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #2563eb;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+
+    .main {
+      background: var(--bg-page);
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #0f172a 0%, #0b1222 100%);
+      border-right: none;
+      padding: 12px 10px;
+      height: calc(100vh - 112px);
+      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .sidebar-home {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-footer {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .category-title {
+      color: #94a3b8;
+      letter-spacing: 0;
+      text-transform: none;
+      padding-left: 10px;
+    }
+
+    .tool-item {
+      border-radius: 9px;
+      color: #cbd5e1;
+      font-weight: 650;
+    }
+
+    .tool-item:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: #ffffff;
+    }
+
+    .tool-item.active {
+      background: rgba(37, 99, 235, 0.24);
+      color: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.42);
+    }
+
+    .tool-item .t-icon {
+      color: #94a3b8;
+    }
+
+    .tool-item.active .t-icon,
+    .tool-item:hover .t-icon {
+      color: #ffffff;
+    }
+
+    .iframe-wrap,
+    .welcome,
+    .loading {
+      background: var(--bg-page);
+    }
+
+    .welcome {
+      padding: 32px 28px;
+    }
+
+    .welcome-header {
+      text-align: left;
+      max-width: var(--container-max);
+      margin: 0 auto 24px;
+    }
+
+    .welcome-header h1 {
+      background: none;
+      -webkit-text-fill-color: currentColor;
+      color: var(--fg-strong);
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .welcome-header p {
+      color: var(--fg-muted);
+      font-size: 14px;
+    }
+
+    .tool-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .tool-card {
+      border-color: var(--border-base);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      padding: 18px;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-2px);
+      border-color: #bfdbfe;
+      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+    }
+
+    .tool-card .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #dbeafe, #ccfbf1);
+      color: #2563eb;
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+    }
+
+    .tool-card .card-icon i {
+      font-size: 24px;
+    }
+
+    .tool-card .card-category {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #2563eb;
+    }
+
+    .footer {
+      background: #0f172a;
+      border-top: none;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        height: auto;
+        min-height: 72px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 16px;
+      }
+
+      .header-left,
+      .header-right {
+        width: 100%;
+      }
+
+      .header-right {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">T</div>
+      <div>
+        <span class="brand">表格工作台工具箱</span>
+        <span class="slogan">本地处理 · 数据工具 · 即开即用</span>
+      </div>
+      <div class="header-tool-info" id="headerToolInfo">
+        <div>
+          <div class="header-tool-title" id="headerToolTitle">工具名称</div>
+          <div class="header-tool-desc" id="headerToolDesc">工具简介</div>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="back-btn" id="backBtn" title="返回工作站"><i class="mgc_arrow_left_line"></i> 返回工作站</button>
+      <div class="header-actions" id="headerActions">
+        <button class="btn" id="homeBtn"><i class="mgc_home_4_line"></i> 返回首页</button>
+        <button class="btn" id="refreshBtn"><i class="mgc_refresh_1_line"></i> 刷新</button>
+      </div>
+      <button class="theme-toggle" id="themeBtn" title="切换主题"><i class="mgc_moon_line"></i></button>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="workspace">
+      <div class="iframe-wrap" id="iframeWrap">
+        <div class="welcome" id="welcome">
+          <div class="welcome-header">
+            <h1>表格工作台工具箱</h1>
+            <p>常用文本、开发、计算工具，保持本地处理和工作台一致体验</p>
+          </div>
+          <div class="tool-cards-grid" id="toolCardsGrid"></div>
+        </div>
+        <div class="loading hidden" id="loading">正在加载工具…</div>
+        <iframe id="toolFrame" name="toolFrame"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    © 2026 表格工作台工具箱
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // 只保留 8 个工具
+      var tools = [
+        {
+          category: '编码加密',
+          items: [
+            { id: 'base64', name: 'Base64 编解码', icon: 'mgc_lock_line', desc: '文本编码、文本解码', path: 'tools/base64.html' },
+            { id: 'hash', name: '哈希生成器', icon: 'mgc_fingerprint_line', desc: 'MD5 / SHA-1 / SHA-256 / SHA-512 摘要', path: 'tools/hash.html' }
+          ]
+        },
+        {
+          category: '格式转换',
+          items: [
+            { id: 'json-format', name: 'JSON 格式化', icon: 'mgc_code_line', desc: '格式化 JSON、压缩 JSON、错误提示', path: 'tools/json-format.html' },
+            { id: 'json-yaml', name: 'JSON ↔ YAML', icon: 'mgc_file_code_line', desc: 'JSON 与 YAML 互转，支持配置文件', path: 'tools/json-yaml.html' },
+            { id: 'url-codec', name: 'URL 编解码', icon: 'mgc_link_line', desc: 'URL 编码 / 解码，query string 解析', path: 'tools/url-codec.html' },
+            { id: 'markdown', name: 'Markdown 预览', icon: 'mgc_text_2_line', desc: '实时编辑、实时渲染、复制 HTML', path: 'tools/markdown.html' },
+            { id: 'case', name: '大小写转换', icon: 'mgc_letter_spacing_line', desc: '驼峰/蛇形/帕斯卡等 14 种格式实时转换', path: 'tools/case.html' }
+          ]
+        },
+        {
+          category: '开发工具',
+          items: [
+            { id: 'timestamp', name: '时间戳转换', icon: 'mgc_time_line', desc: '时间戳转日期、日期转时间戳', path: 'tools/timestamp.html' }
+          ]
+        }
+      ];
+
+      var sidebar = document.getElementById('sidebar');
+      var toolFrame = document.getElementById('toolFrame');
+      var welcome = document.getElementById('welcome');
+      var loading = document.getElementById('loading');
+      var headerToolInfo = document.getElementById('headerToolInfo');
+      var headerToolTitle = document.getElementById('headerToolTitle');
+      var headerToolDesc = document.getElementById('headerToolDesc');
+      var headerActions = document.getElementById('headerActions');
+      var themeBtn = document.getElementById('themeBtn');
+      var toolCardsGrid = document.getElementById('toolCardsGrid');
+      var activeId = null;
+
+      function renderSidebar() {
+        sidebar.innerHTML = '';
+
+        // 首页按钮
+        var homeDiv = document.createElement('div');
+        homeDiv.className = 'sidebar-home';
+        var homeBtn = document.createElement('div');
+        homeBtn.className = 'tool-item';
+        homeBtn.id = 'sidebarHomeBtn';
+        homeBtn.style.cursor = 'pointer';
+        homeBtn.innerHTML = '<span class="t-icon"><i class="mgc_home_4_line"></i></span><span>首页</span>';
+        homeBtn.addEventListener('click', goHome);
+        homeDiv.appendChild(homeBtn);
+        sidebar.appendChild(homeDiv);
+
+        tools.forEach(function (cat) {
+          var div = document.createElement('div');
+          div.className = 'category';
+          var h = document.createElement('div');
+          h.className = 'category-title';
+          h.textContent = cat.category;
+          div.appendChild(h);
+          var ul = document.createElement('ul');
+          ul.className = 'tool-list';
+          cat.items.forEach(function (t) {
+            var li = document.createElement('li');
+            li.className = 'tool-item';
+            li.dataset.id = t.id;
+            li.innerHTML = '<span class="t-icon"><i class="' + t.icon + '"></i></span><span>' + t.name + '</span>';
+            li.addEventListener('click', function () { openTool(t); });
+            ul.appendChild(li);
+          });
+          div.appendChild(ul);
+          sidebar.appendChild(div);
+        });
+      }
+
+      function renderToolCards() {
+        toolCardsGrid.innerHTML = '';
+        tools.forEach(function (cat) {
+          cat.items.forEach(function (t) {
+            var card = document.createElement('div');
+            card.className = 'tool-card';
+            card.innerHTML =
+              '<div class="card-icon"><i class="' + t.icon + '"></i></div>' +
+              '<h3>' + t.name + '</h3>' +
+              '<p>' + t.desc + '</p>' +
+              '<span class="card-category">' + cat.category + '</span>';
+            card.addEventListener('click', function () { openTool(t); });
+            toolCardsGrid.appendChild(card);
+          });
+        });
+      }
+
+      function openTool(t) {
+        activeId = t.id;
+        document.querySelectorAll('.tool-item').forEach(function (el) {
+          el.classList.toggle('active', el.dataset.id === t.id);
+        });
+        headerToolInfo.classList.add('show');
+        headerToolTitle.innerHTML = '<i class="' + t.icon + '"></i> ' + t.name;
+        headerToolDesc.textContent = t.desc;
+        headerActions.classList.add('show');
+        welcome.style.display = 'none';
+        loading.classList.remove('hidden');
+        toolFrame.style.display = 'none';
+        toolFrame.src = t.path;
+      }
+
+      toolFrame.addEventListener('load', function () {
+        loading.classList.add('hidden');
+        toolFrame.style.display = '';
+        // Sync theme to iframe after load
+        var theme = Toolbox.ThemeManager.get();
+        try {
+          if (toolFrame.contentDocument && toolFrame.contentDocument.documentElement) {
+            toolFrame.contentDocument.documentElement.setAttribute('data-theme', theme);
+          }
+          // Also sync to any nested iframes
+          var nested = toolFrame.contentDocument.querySelectorAll('iframe');
+          for (var i = 0; i < nested.length; i++) {
+            if (nested[i].contentDocument && nested[i].contentDocument.documentElement) {
+              nested[i].contentDocument.documentElement.setAttribute('data-theme', theme);
+            }
+          }
+        } catch (e) { }
+      });
+
+      function goHome() {
+        activeId = null;
+        document.querySelectorAll('.tool-item').forEach(function (el) { el.classList.remove('active'); });
+        var sidebarHomeBtn = document.getElementById('sidebarHomeBtn');
+        if (sidebarHomeBtn) sidebarHomeBtn.classList.add('active');
+        headerToolInfo.classList.remove('show');
+        headerActions.classList.remove('show');
+        toolFrame.src = 'about:blank';
+        toolFrame.style.display = 'none';
+        welcome.style.display = '';
+        loading.classList.add('hidden');
+      }
+
+      document.getElementById('homeBtn').addEventListener('click', goHome);
+
+      document.getElementById('refreshBtn').addEventListener('click', function () {
+        if (toolFrame.src && toolFrame.src !== 'about:blank') {
+          toolFrame.contentWindow.location.reload();
+        }
+      });
+
+      // 返回工作站按钮
+      document.getElementById('backBtn').addEventListener('click', function () {
+        try {
+          window.parent.postMessage({ type: 'exit-toolbox' }, '*');
+        } catch (e) { }
+      });
+
+      function updateThemeIcon(theme) {
+        themeBtn.innerHTML = theme === 'dark' ? '<i class="mgc_sun_line"></i>' : '<i class="mgc_moon_line"></i>';
+      }
+      Toolbox.ThemeManager.onChange(updateThemeIcon);
+      Toolbox.ThemeManager.init();
+
+      themeBtn.addEventListener('click', function () {
+        Toolbox.ThemeManager.toggle();
+      });
+
+      renderSidebar();
+      renderToolCards();
+      // 初始化时首页按钮选中
+      var sidebarHomeBtn = document.getElementById('sidebarHomeBtn');
+      if (sidebarHomeBtn) sidebarHomeBtn.classList.add('active');
+    })();
+  </script>
+</body>
+
+</html>

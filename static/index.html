@@ -1,0 +1,4698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格工作台</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235ba3e6'/><stop offset='1' stop-color='%233a7bc8'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><rect x='7' y='8' width='18' height='3' rx='1' fill='white' opacity='0.95'/><rect x='7' y='14' width='18' height='10' rx='1.5' fill='white' opacity='0.25'/><line x1='7' y1='18' x2='25' y2='18' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='13' y1='14' x2='13' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='19' y1='14' x2='19' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 左侧会话列表 */
+        .sidebar {
+            width: 240px;
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: 40px;
+        }
+
+        .sidebar.collapsed .session-name,
+        .sidebar.collapsed .session-meta,
+        .sidebar.collapsed .session-delete,
+        .sidebar.collapsed .sidebar-title span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-header h2 {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .sidebar-header p {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-footer .btn span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-footer .btn {
+            padding: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .sidebar.collapsed .session-item {
+            padding: 9px 6px;
+            text-align: center;
+        }
+
+        .collapse-btn {
+            cursor: pointer;
+            padding: 8px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafbfc;
+            user-select: none;
+        }
+
+        .collapse-btn:hover {
+            color: #4a90d9;
+            background: #e8f0fe;
+        }
+
+        .sidebar-header {
+            padding: 18px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-header h2 {
+            font-size: 15px;
+            line-height: 1.35;
+            color: #4a90d9;
+            overflow-wrap: anywhere;
+        }
+
+        .sidebar-header p {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .session-item {
+            padding: 9px 11px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .session-item:hover {
+            background: #e8f0fe;
+            border-color: #e0e0e0;
+        }
+
+        .session-item.active {
+            background: #e8f0fe;
+            border-color: #4a90d9;
+        }
+
+        .session-item .session-name {
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #333;
+        }
+
+        .session-item .session-meta {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .session-item .session-delete {
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1;
+            display: none;
+        }
+
+        .session-item:hover .session-delete {
+            display: block;
+        }
+
+        .session-item .session-delete:hover {
+            color: #e74c3c;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .sidebar-footer .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 主区域 */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 14px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: padding 0.3s ease, max-height 0.3s ease, border 0.3s ease;
+            max-height: 200px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .header.collapsed {
+            padding: 0 24px;
+            max-height: 0;
+            border-bottom: none;
+        }
+
+        .header.collapsed .header-left,
+        .header.collapsed .header-right {
+            visibility: hidden;
+        }
+
+        .header-toggle-btn {
+            position: absolute;
+            top: 0;
+            right: 24px;
+            cursor: pointer;
+            padding: 4px 16px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            color: #888;
+            font-size: 12px;
+            z-index: 20;
+            user-select: none;
+            transition: top 0.3s ease;
+        }
+
+        .header.collapsed+.content .header-toggle-btn {
+            top: 0;
+        }
+
+        .header-toggle-btn:hover {
+            color: #4a90d9;
+            background: #e8f0fe;
+        }
+
+        .header-left h1 {
+            font-size: 18px;
+            color: #4a90d9;
+        }
+
+        .header-left p {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .header-right .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .sys-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 11px;
+            color: #888;
+            padding-right: 8px;
+            border-right: 1px solid #e0e0e0;
+            margin-right: 4px;
+        }
+
+        .sys-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .sys-stat .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .sys-stat .dot.green {
+            background: #27ae60;
+        }
+
+        .sys-stat .dot.yellow {
+            background: #f9a825;
+        }
+
+        .sys-stat .dot.red {
+            background: #e74c3c;
+        }
+
+        .sys-stat .val {
+            color: #555;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .content {
+            flex: 1;
+            overflow: hidden;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-primary {
+            background: #4a90d9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3a7bc8;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upload-section {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 26px;
+            margin-bottom: 16px;
+            border: 2px dashed #d0d0d0;
+        }
+
+        .upload-section.dragover {
+            border-color: #4a90d9;
+            background: #e8f0fe;
+        }
+
+        .upload-zone {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .upload-text span {
+            color: #4a90d9;
+        }
+
+        .upload-hint {
+            font-size: 11px;
+            color: #888;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 14px;
+            background: #f0f2f5;
+            padding: 4px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+
+        .tab-item {
+            padding: 7px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: #888;
+        }
+
+        .tab-item:hover {
+            color: #333;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .tab-item.active {
+            background: #4a90d9;
+            color: white;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar select,
+        .toolbar input[type="text"] {
+            padding: 7px 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .toolbar select:focus,
+        .toolbar input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .toolbar select {
+            min-width: 90px;
+        }
+
+        .toolbar input[type="text"] {
+            min-width: 180px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4a90d9;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .filter-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #e8f0fe;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid #c4d9f0;
+        }
+
+        .filter-tag span {
+            color: #4a90d9;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .filter-tag button {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        .filter-tag button:hover {
+            color: #e74c3c;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            border: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            background: #f0f2f5;
+            padding: 9px 26px 9px 10px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        th:hover {
+            background: #e8f0fe;
+        }
+
+        th.filtered {
+            background: #e8f0fe;
+            color: #4a90d9;
+        }
+
+        th .sort-icon {
+            margin-left: 3px;
+            opacity: 0.5;
+            font-size: 9px;
+        }
+
+        th.sorted .sort-icon {
+            opacity: 1;
+            color: #4a90d9;
+        }
+
+        th .filter-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 3px;
+            border-radius: 3px;
+            opacity: 0.6;
+        }
+
+        th:hover .filter-btn {
+            opacity: 1;
+        }
+
+        th .filter-btn:hover {
+            color: #4a90d9;
+            background: #e8f0fe;
+        }
+
+        th .filter-btn.active {
+            color: #4a90d9;
+            opacity: 1;
+        }
+
+        td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr:hover {
+            background: #e8f0fe;
+        }
+
+        td.editing {
+            background: #fffbe6;
+        }
+
+        td.editing input {
+            background: #fffbe6;
+            color: #333;
+            font-size: 12px;
+        }
+
+        td.updated {
+            background: #e8fdf5;
+            animation: updatedFlash 1.5s ease-out;
+        }
+
+        @keyframes updatedFlash {
+            0% {
+                background: #98ffd0;
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 9px;
+            padding: 12px;
+        }
+
+        .pagination button {
+            padding: 7px 13px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 6px;
+            color: #333;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #4a90d9;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 36px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 54px;
+            color: #888;
+            display: none;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 14px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        #chart {
+            width: 100%;
+            height: 280px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #dataSection {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #dataSection.hidden {
+            display: none !important;
+        }
+
+        #tab-browse {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #tab-browse.hidden {
+            display: none !important;
+        }
+
+        /* 滚动懒加载 */
+        .loading-more {
+            text-align: center;
+            padding: 8px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4a90d9;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(74, 144, 217, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .scroll-top-btn:hover {
+            background: #3a7bc8;
+        }
+
+        .scroll-top-btn.visible {
+            display: flex;
+        }
+
+        #scrollSentinel td {
+            padding: 0;
+            height: 1px;
+            border: none;
+        }
+
+        /* 折叠 / 性能模式 */
+        .performance-mode .chart-container {
+            display: none;
+        }
+
+        .performance-mode .chart-section-wrap {
+            display: none;
+        }
+
+        .mode-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 1001;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 6px 0;
+            min-width: 140px;
+        }
+
+        .mode-dropdown-item {
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mode-dropdown-item:hover {
+            background: #e8f0fe;
+        }
+
+        .mode-dropdown-item.active {
+            color: #4a90d9;
+            font-weight: 600;
+        }
+
+        .mode-dropdown-item .check {
+            width: 14px;
+            text-align: center;
+        }
+
+        /* 筛选下拉弹窗 */
+        .filter-dropdown {
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            left: 0;
+            min-width: 220px;
+            max-width: 300px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 7px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .filter-dropdown-header {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-dropdown-header input[type="text"] {
+            flex: 1;
+            padding: 5px 7px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-size: 11px;
+        }
+
+        .filter-dropdown-header input[type="text"]:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .filter-dropdown-actions {
+            padding: 7px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 5px;
+        }
+
+        .filter-dropdown-actions .btn {
+            font-size: 10px;
+            padding: 3px 7px;
+        }
+
+        .filter-dropdown-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .filter-dropdown-list label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 7px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            color: #333;
+        }
+
+        .filter-dropdown-list label:hover {
+            background: #e8f0fe;
+        }
+
+        .filter-dropdown-list label input[type="checkbox"] {
+            accent-color: #4a90d9;
+            width: 13px;
+            height: 13px;
+        }
+
+        .filter-dropdown-list label span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .filter-dropdown-list label .count {
+            color: #888;
+            font-size: 10px;
+        }
+
+        .filter-dropdown-footer {
+            padding: 7px 10px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-dropdown-footer .selected-count {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .filter-dropdown-footer .btn {
+            font-size: 10px;
+            padding: 3px 9px;
+        }
+
+        /* 面板通用样式 */
+        .panel {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .panel h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #4a90d9;
+        }
+
+        .panel-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .panel-row label {
+            font-size: 12px;
+            color: #888;
+            min-width: 70px;
+        }
+
+        .panel-row select,
+        .panel-row input[type="text"] {
+            padding: 6px 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            background: #fff;
+            color: #333;
+            font-size: 12px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .panel-row select:focus,
+        .panel-row input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .panel-actions .btn {
+            flex: none;
+        }
+
+        /* AI 对话 */
+        .ai-chat {
+            background: #ffffff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 260px);
+            border: 1px solid #e0e0e0;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+        }
+
+        .ai-message {
+            margin-bottom: 12px;
+            max-width: 85%;
+        }
+
+        .ai-message.user {
+            margin-left: auto;
+        }
+
+        .ai-message .msg-content {
+            padding: 9px 13px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .ai-message.user .msg-content {
+            background: #4a90d9;
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai-message.ai .msg-content {
+            background: #f0f2f5;
+            color: #333;
+            border-bottom-left-radius: 2px;
+        }
+
+        .ai-message .msg-result {
+            margin-top: 8px;
+            background: #f9fafb;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .ai-message .msg-result table {
+            font-size: 11px;
+        }
+
+        .ai-message .msg-result th {
+            position: static;
+            padding: 6px 8px;
+            background: #f0f2f5;
+        }
+
+        .ai-message .msg-result td {
+            padding: 5px 8px;
+            border-bottom-color: #f0f0f0;
+        }
+
+        .ai-chat-input {
+            padding: 12px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-chat-input input {
+            flex: 1;
+            padding: 9px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 7px;
+            background: #fff;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .ai-chat-input input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .ai-chat-input .btn {
+            padding: 9px 18px;
+        }
+
+        @keyframes aiPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes aiDots {
+            0% {
+                content: ".";
+            }
+
+            33% {
+                content: "..";
+            }
+
+            66% {
+                content: "...";
+            }
+        }
+
+        #aiSendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 列设置 */
+        .column-setting-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: move;
+            user-select: none;
+        }
+
+        .column-setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .column-setting-item:hover {
+            background: #f5f5f5;
+        }
+
+        .column-setting-item.dragging {
+            opacity: 0.5;
+            background: #e8f0fe;
+        }
+
+        .column-setting-item .drag-handle {
+            cursor: move;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .column-setting-item input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .column-setting-item .column-name {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .column-setting-item .column-order {
+            font-size: 11px;
+            color: #888;
+            min-width: 20px;
+            text-align: right;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            width: 420px;
+            max-width: 90vw;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .modal h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #4a90d9;
+        }
+
+        .modal-row {
+            margin-bottom: 12px;
+        }
+
+        .modal-row label {
+            font-size: 12px;
+            color: #888;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal-row select,
+        .modal-row input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .modal-row select:focus,
+        .modal-row input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        /* 对比分析 */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .compare-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .compare-item h4 {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .compare-item select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            background: #fff;
+            color: #333;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .compare-stat {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .compare-stat span {
+            color: #4a90d9;
+            font-weight: bold;
+        }
+
+        /* ==================== 工具箱覆盖层 ==================== */
+        .toolbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background: #f5f7fa;
+            display: none;
+            flex-direction: column;
+        }
+
+        .toolbox-overlay.active {
+            display: flex;
+        }
+
+        .toolbox-overlay iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex: 1;
+        }
+
+        .toolbox-exit-bar {
+            height: 40px;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            flex-shrink: 0;
+        }
+
+        .toolbox-exit-btn {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            background: #4a90d9;
+            color: white;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbox-exit-btn:hover {
+            background: #3a7bc8;
+        }
+
+        .toolbox-title {
+            font-size: 13px;
+            color: #888;
+            margin-left: 12px;
+        }
+
+        /* ==================== 现代数据工作台主题 ==================== */
+        :root {
+            --color-bg: #f6f8fb;
+            --color-surface: #ffffff;
+            --color-surface-soft: #f8fafc;
+            --color-sidebar: #0f172a;
+            --color-sidebar-soft: #111c33;
+            --color-primary: #2563eb;
+            --color-primary-hover: #1d4ed8;
+            --color-accent: #14b8a6;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-text: #111827;
+            --color-muted: #64748b;
+            --color-faint: #94a3b8;
+            --color-border: #e2e8f0;
+            --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+            --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
+        }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        .sidebar {
+            width: 256px;
+            background: linear-gradient(180deg, var(--color-sidebar) 0%, #0b1222 100%);
+            border-right: none;
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar.collapsed {
+            width: 54px;
+        }
+
+        .collapse-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--color-faint);
+            font-size: 13px;
+        }
+
+        .collapse-btn:hover {
+            background: rgba(37, 99, 235, 0.18);
+            color: #ffffff;
+        }
+
+        .sidebar-header {
+            padding: 22px 18px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-header h2 {
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0;
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+        }
+
+        .brand-mark {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+        }
+
+        .sidebar-header p {
+            color: var(--color-faint);
+            margin-top: 7px;
+        }
+
+        .session-list {
+            padding: 10px;
+        }
+
+        .session-item {
+            border-radius: 9px;
+            border: 1px solid transparent;
+            color: #e2e8f0;
+        }
+
+        .session-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .session-item.active {
+            background: rgba(37, 99, 235, 0.22);
+            border-color: rgba(96, 165, 250, 0.48);
+        }
+
+        .session-item .session-name {
+            color: #f8fafc;
+        }
+
+        .session-item .session-meta,
+        .session-item .session-delete {
+            color: var(--color-faint);
+        }
+
+        .session-item .session-delete:hover {
+            color: #fecaca;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(2, 6, 23, 0.24);
+        }
+
+        .sidebar-footer .btn {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+        }
+
+        .sidebar-footer .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .sidebar-footer .btn-primary {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #ffffff;
+        }
+
+        .main {
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+                var(--color-bg);
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 24px;
+            gap: 16px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .header-left {
+            flex: 1 1 320px;
+            min-width: 260px;
+        }
+
+        .header-left h1 {
+            color: var(--color-text);
+            font-size: 20px;
+            font-weight: 760;
+            line-height: 1.25;
+        }
+
+        .header-left p {
+            color: var(--color-muted);
+            margin-top: 4px;
+        }
+
+        .header-right {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 9px;
+        }
+
+        .sys-stats {
+            gap: 7px;
+            border-right: none;
+            padding-right: 0;
+            margin-right: 2px;
+            color: var(--color-muted);
+        }
+
+        .sys-stat {
+            background: var(--color-surface-soft);
+            border: 1px solid var(--color-border);
+            border-radius: 999px;
+            padding: 6px 9px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .sys-stat .dot.green {
+            background: var(--color-accent);
+        }
+
+        .sys-stat .dot.yellow {
+            background: var(--color-warning);
+        }
+
+        .sys-stat .dot.red {
+            background: var(--color-danger);
+        }
+
+        .sys-stat .val {
+            color: var(--color-text);
+            font-weight: 650;
+        }
+
+        .content {
+            padding: 20px 24px;
+        }
+
+        .header-toggle-btn {
+            background: var(--color-surface);
+            color: var(--color-muted);
+            border-color: var(--color-border);
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .header-toggle-btn:hover {
+            color: var(--color-primary);
+            background: #eff6ff;
+        }
+
+        .btn,
+        .pagination button {
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-surface);
+            color: #334155;
+            font-weight: 650;
+            box-shadow: var(--shadow-card);
+        }
+
+        .btn:hover,
+        .pagination button:hover:not(:disabled) {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: var(--color-primary);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            border-color: var(--color-primary-hover);
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: #fff1f2;
+            border-color: #fecdd3;
+            color: #be123c;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .upload-section {
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            border: 1px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--color-primary);
+            background: #eff6ff;
+        }
+
+        .upload-zone {
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #dbeafe, #ccfbf1);
+            color: var(--color-primary);
+            font-size: 29px;
+            box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+        }
+
+        .upload-text {
+            color: var(--color-text);
+            font-size: 16px;
+            font-weight: 650;
+        }
+
+        .upload-text span {
+            color: var(--color-primary);
+        }
+
+        .upload-hint {
+            color: var(--color-muted);
+            margin-top: 2px;
+        }
+
+        .tab-bar {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 5px;
+            gap: 4px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .tab-item {
+            color: var(--color-muted);
+            border-radius: 9px;
+            font-weight: 650;
+            padding: 8px 15px;
+        }
+
+        .tab-item:hover {
+            background: #f1f5f9;
+            color: var(--color-text);
+        }
+
+        .tab-item.active {
+            background: var(--color-sidebar);
+            color: #ffffff;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+        }
+
+        .toolbar select,
+        .toolbar input[type="text"],
+        .panel-row select,
+        .panel-row input[type="text"],
+        .modal-row select,
+        .modal-row input,
+        .ai-chat-input input,
+        .compare-item select {
+            border-color: var(--color-border);
+            border-radius: 9px;
+            color: var(--color-text);
+            background: var(--color-surface);
+        }
+
+        .toolbar select:focus,
+        .toolbar input:focus,
+        .panel-row select:focus,
+        .panel-row input:focus,
+        .modal-row select:focus,
+        .modal-row input:focus,
+        .ai-chat-input input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .stats-bar,
+        .table-container,
+        .panel,
+        .chart-container,
+        .ai-chat,
+        .modal,
+        .compare-item {
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .stats-bar {
+            gap: 18px;
+            background: var(--color-surface);
+        }
+
+        .stat-item {
+            min-width: 86px;
+            text-align: left;
+        }
+
+        .stat-value {
+            color: var(--color-primary);
+            font-size: 22px;
+            line-height: 1.1;
+        }
+
+        .stat-label,
+        .panel-row label,
+        .modal-row label,
+        .compare-item h4,
+        .compare-stat,
+        .pagination span,
+        .loading,
+        .empty-state,
+        .toolbox-title {
+            color: var(--color-muted);
+        }
+
+        .panel h3,
+        .modal h3,
+        .chart-container h3,
+        .empty-state h3 {
+            color: var(--color-text);
+        }
+
+        th {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--color-border);
+            color: #334155;
+        }
+
+        th:hover,
+        th.filtered,
+        tr:hover,
+        .filter-dropdown-list label:hover,
+        .mode-dropdown-item:hover,
+        .column-setting-item:hover {
+            background: #eff6ff;
+        }
+
+        th.filtered,
+        th.sorted .sort-icon,
+        th .filter-btn:hover,
+        th .filter-btn.active,
+        .filter-tag span,
+        .mode-dropdown-item.active,
+        .compare-stat span {
+            color: var(--color-primary);
+        }
+
+        td {
+            border-bottom-color: #eef2f7;
+        }
+
+        .filter-tag {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            border-radius: 999px;
+        }
+
+        .ai-message.user .msg-content {
+            background: var(--color-primary);
+        }
+
+        .ai-message.ai .msg-content {
+            background: #f1f5f9;
+            color: var(--color-text);
+        }
+
+        .scroll-top-btn,
+        .toolbox-exit-btn {
+            background: var(--color-primary);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+        }
+
+        .scroll-top-btn:hover,
+        .toolbox-exit-btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .mode-dropdown,
+        .filter-dropdown {
+            border-color: var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+        }
+
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.42);
+        }
+
+        .toolbox-overlay {
+            background: var(--color-bg);
+        }
+
+        .toolbox-exit-bar {
+            background: var(--color-surface);
+            border-bottom-color: var(--color-border);
+        }
+
+        .toolbox-overlay .toolbox-exit-bar {
+            display: none;
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                width: 72px;
+            }
+
+            .sidebar.collapsed {
+                width: 54px;
+            }
+
+            .sidebar-header {
+                padding: 16px 10px;
+            }
+
+            .sidebar-header h2 {
+                justify-content: center;
+            }
+
+            .sidebar-header h2 span:not(.brand-mark),
+            .sidebar-header p,
+            .session-name,
+            .session-meta,
+            .session-delete,
+            .sidebar-footer .btn span {
+                display: none;
+            }
+
+            .session-item {
+                min-height: 34px;
+                padding: 8px;
+            }
+
+            .sidebar-footer {
+                padding: 10px 8px;
+            }
+
+            .sidebar-footer .btn {
+                min-height: 34px;
+                padding: 7px;
+                font-size: 0;
+            }
+
+            .sidebar-footer .btn::before {
+                content: "+";
+                font-size: 13px;
+            }
+
+            #toolboxBtn::before {
+                content: "T";
+            }
+
+            .main {
+                min-width: 0;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 14px 14px 12px;
+                max-height: none;
+                overflow: visible;
+            }
+
+            .header-left {
+                min-width: 0;
+                width: 100%;
+                flex: none;
+            }
+
+            .header-left h1 {
+                font-size: 16px;
+                line-height: 1.35;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 6px;
+            }
+
+            .header-right .btn {
+                padding: 6px 9px;
+                font-size: 11px;
+            }
+
+            .sys-stats {
+                width: 100%;
+                overflow-x: visible;
+                flex-wrap: wrap;
+                padding-bottom: 2px;
+            }
+
+            .content {
+                padding: 14px 12px;
+            }
+
+            .upload-section {
+                padding: 20px;
+            }
+
+            .upload-text {
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .tab-bar {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .tab-item {
+                flex: 0 0 auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- 左侧会话列表 -->
+        <div class="sidebar" id="sidebar">
+            <div class="collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</div>
+            <div class="sidebar-header">
+                <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
+                <p>会话列表</p>
+            </div>
+            <div class="session-list" id="sessionList"></div>
+            <div class="sidebar-footer">
+                <button class="btn" id="toolboxBtn" style="width:100%;margin-bottom:6px;text-align:center;">
+                    <span>工具箱</span>
+                </button>
+                <button class="btn btn-primary" id="newUploadBtn"><span>+</span> <span>上传新文件</span></button>
+            </div>
+        </div>
+
+        <!-- 主区域 -->
+        <div class="main">
+            <div class="header">
+                <div class="header-left">
+                    <h1 id="mainTitle">表格工作台</h1>
+                    <p id="mainSubtitle">超大 Excel 文件本地化 AI 处理平台</p>
+                </div>
+                <div class="header-right">
+                    <div class="sys-stats" id="sysStats">
+                        <div class="sys-stat">
+                            <div class="dot green" id="dotUptime"></div>运行 <span class="val" id="sysUptime">0s</span>
+                        </div>
+                        <div class="sys-stat">
+                            <div class="dot green" id="dotMem"></div>内存 <span class="val" id="sysMem">0MB</span>
+                        </div>
+                        <div class="sys-stat">
+                            <div class="dot green" id="dotCpu"></div>CPU <span class="val" id="sysCpu">0%</span>
+                        </div>
+                        <div class="sys-stat">
+                            <div class="dot green" id="dotDisk"></div>磁盘 <span class="val" id="sysDisk">0K/0K</span>
+                        </div>
+                    </div>
+                    <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
+                    <button class="btn" id="performanceBtn" title="性能模式" style="position:relative">性能</button>
+                    <button class="btn" id="exportBtn">导出</button>
+                    <button class="btn" id="settingsBtn">AI 设置</button>
+                </div>
+            </div>
+            <div class="content" id="mainContent">
+                <div class="header-toggle-btn" id="headerToggleBtn" title="折叠顶部栏">▲ 收起</div>
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">▦</div>
+                        <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
+                        <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+                </div>
+
+                <div id="loadingState" class="loading hidden">准备解析...</div>
+
+                <div id="dataSection" class="hidden">
+                    <div class="tab-bar">
+                        <div class="tab-item active" data-tab="browse">数据浏览</div>
+                        <div class="tab-item" data-tab="pivot">透视表</div>
+                        <div class="tab-item" data-tab="clean">数据清洗</div>
+                        <div class="tab-item" data-tab="compare">对比分析</div>
+                        <div class="tab-item" data-tab="ai">AI 对话</div>
+                    </div>
+
+                    <!-- 数据浏览 -->
+                    <div id="tab-browse">
+                        <div class="toolbar">
+                            <select id="sheetSelect">
+                                <option value="">选择工作表</option>
+                            </select>
+                            <select id="pageSizeSelect">
+                                <option value="100" selected>100条/次</option>
+                                <option value="500">500条/次</option>
+                                <option value="1000">1000条/次</option>
+                                <option value="2000">2000条/次</option>
+                            </select>
+                            <input type="text" id="searchInput" placeholder="全局搜索...">
+                            <button class="btn" id="clearFilterBtn">清除筛选</button>
+                            <button class="btn" id="toggleChartBtn">显示图表</button>
+                            <button class="btn" id="columnSettingsBtn">列设置</button>
+                            <span style="border-left:1px solid #ddd;margin:0 6px"></span>
+                            <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
+                            <button class="btn btn-danger" id="deleteRowBtn">- 行</button> -->
+                        </div>
+                        <div id="activeFilters" class="active-filters"></div>
+                        <div class="stats-bar" id="statsBar">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalRows">0</div>
+                                <div class="stat-label">总行数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="filteredRows">0</div>
+                                <div class="stat-label">当前显示</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="loadedRowsDisplay">0</div>
+                                <div class="stat-label">已加载</div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-wrapper" id="tableWrapper">
+                                <table id="dataTable">
+                                    <thead id="tableHead"></thead>
+                                    <tbody id="tableBody"></tbody>
+                                </table>
+                            </div>
+                            <div id="loadingMore" class="loading-more hidden">加载中...</div>
+                            <div id="scrollInfo" style="text-align:center;padding:8px;font-size:12px;color:#888;"></div>
+                        </div>
+                        <div id="chartSection" class="chart-container hidden chart-section-wrap">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                                <h3 style="margin:0">数据图表</h3>
+                                <div style="display:flex;gap:6px;align-items:center">
+                                    <select id="chartType"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px">
+                                        <option value="bar">柱状图</option>
+                                        <option value="line">折线图</option>
+                                        <option value="pie">饼图</option>
+                                        <option value="scatter">散点图</option>
+                                    </select>
+                                    <select id="chartXAxis"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                    <select id="chartYAxis"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                    <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">
+                                        AI 推荐</button>
+                                </div>
+                            </div>
+                            <div id="chart"></div>
+                            <div id="chartExplanation" style="margin-top:8px;font-size:11px;color:#888"></div>
+                        </div>
+                    </div>
+
+                    <!-- 透视表 -->
+                    <div id="tab-pivot" class="hidden">
+                        <div class="panel">
+                            <h3>透视表</h3>
+                            <div class="panel-row">
+                                <label>行字段</label>
+                                <select id="pivotRowField"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>值字段</label>
+                                <select id="pivotValueField"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>列字段</label>
+                                <select id="pivotColField">
+                                    <option value="">（无）</option>
+                                </select>
+                            </div>
+                            <div class="panel-row">
+                                <label>聚合方式</label>
+                                <select id="pivotAggFunc">
+                                    <option value="sum">求和</option>
+                                    <option value="count">计数</option>
+                                    <option value="avg">平均值</option>
+                                    <option value="min">最小值</option>
+                                    <option value="max">最大值</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="pivotRunBtn">生成透视表</button>
+                                <button class="btn" id="pivotExportBtn">导出 CSV</button>
+                            </div>
+                        </div>
+                        <div class="table-container" id="pivotResultSection" style="display:none">
+                            <div class="table-wrapper">
+                                <table id="pivotTable">
+                                    <thead id="pivotHead"></thead>
+                                    <tbody id="pivotBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据清洗 -->
+                    <div id="tab-clean" class="hidden" style="overflow: auto;">
+                        <div class="panel">
+                            <h3>数据去重</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">删除重复行，保留第一条记录</p>
+                            <div class="panel-row">
+                                <label>去重列</label>
+                                <select id="dedupColumn">
+                                    <option value="">所有列</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="dedupBtn">执行去重</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>📝 填充空值</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">将指定列的空值替换为指定内容</p>
+                            <div class="panel-row">
+                                <label>选择列</label>
+                                <select id="fillColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>填充值</label>
+                                <input type="text" id="fillValue" placeholder="请输入填充内容">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="fillBtn">执行填充</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>🔤 正则替换</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">用正则表达式批量替换列中的内容</p>
+                            <div class="panel-row">
+                                <label>选择列</label><select id="regexColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>匹配模式</label><input type="text" id="regexPattern" placeholder="正则表达式或文本">
+                            </div>
+                            <div class="panel-row">
+                                <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="regexReplaceBtn">执行替换</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>✂️ 列拆分</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">按分隔符将一列拆分为多列</p>
+                            <div class="panel-row">
+                                <label>源列</label><select id="splitSourceColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>分隔符</label><input type="text" id="splitDelimiter" value=","
+                                    placeholder="如 , ; | 等">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="splitColumnBtn">执行拆分</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>🔄 数据类型转换</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">批量转换列的数据类型</p>
+                            <div class="panel-row">
+                                <label>选择列</label><select id="convertColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>目标类型</label>
+                                <select id="convertTargetType">
+                                    <option value="string">字符串</option>
+                                    <option value="number">数值</option>
+                                    <option value="date">日期</option>
+                                </select>
+                            </div>
+                            <div class="panel-row" id="dateFormatRow" style="display:none">
+                                <label>日期格式</label><input type="text" id="convertDateFormat" value="%Y-%m-%d">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="convertTypeBtn">执行转换</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>✅ 数据校验</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">检查列数据是否符合规则</p>
+                            <div id="validationRules"></div>
+                            <button class="btn" id="addValidationRuleBtn" style="margin-bottom:10px">+ 添加规则</button>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="validateBtn">执行校验</button>
+                            </div>
+                            <div id="validationResults" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+
+                    <!-- 对比分析 -->
+                    <div id="tab-compare" class="hidden">
+                        <div class="panel">
+                            <h3>多文件对比分析</h3>
+                            <div class="compare-grid">
+                                <div class="compare-item">
+                                    <h4>文件 A</h4>
+                                    <select id="compareFileA">
+                                        <option value="">选择文件</option>
+                                    </select>
+                                    <select id="compareSheetA">
+                                        <option value="">选择工作表</option>
+                                    </select>
+                                    <div class="compare-stat">行数: <span id="compareRowsA">-</span></div>
+                                </div>
+                                <div class="compare-item">
+                                    <h4>文件 B</h4>
+                                    <select id="compareFileB">
+                                        <option value="">选择文件</option>
+                                    </select>
+                                    <select id="compareSheetB">
+                                        <option value="">选择工作表</option>
+                                    </select>
+                                    <div class="compare-stat">行数: <span id="compareRowsB">-</span></div>
+                                </div>
+                            </div>
+                            <div class="panel-row" style="margin-top:14px">
+                                <label>对比列</label>
+                                <select id="compareKeyCol">
+                                    <option value="">选择用于对比的列</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
+                            </div>
+                        </div>
+                        <div id="compareResult" class="table-container hidden">
+                            <div class="stats-bar" style="margin:12px">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareOnlyA">0</div>
+                                    <div class="stat-label">仅在A中</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareOnlyB">0</div>
+                                    <div class="stat-label">仅在B中</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareBoth">0</div>
+                                    <div class="stat-label">两者共有</div>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table id="compareTable">
+                                    <thead id="compareHead"></thead>
+                                    <tbody id="compareBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI 对话 -->
+                    <div id="tab-ai" class="hidden">
+                        <div class="ai-chat">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee">
+                                <span style="font-size:13px;color:#888">💬 支持多轮追问，AI 会记住上下文</span>
+                                <button class="btn" id="aiClearBtn"
+                                    style="padding:4px 10px;font-size:12px">清空对话</button>
+                            </div>
+                            <div class="ai-chat-messages" id="aiChatMessages">
+                                <div class="ai-message ai">
+                                    <div class="msg-content">
+                                        👋 你好！我是 Excel AI 助手。<br>
+                                        你可以用自然语言问我关于这个 Excel 的问题，比如：<br>
+                                        • "统计每个部门的总金额"<br>
+                                        • "找出金额大于10000的记录"<br>
+                                        • "按日期分组统计数量"<br><br>
+                                        请先在右上角 AI 设置中配置 API Key。
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ai-chat-input">
+                                <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
+                                <button class="btn btn-primary" id="aiSendBtn">发送</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <h3>暂无数据</h3>
+                    <p>请上传 Excel 文件开始分析</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具箱覆盖层 -->
+    <div class="toolbox-overlay" id="toolboxOverlay">
+        <div class="toolbox-exit-bar">
+            <button class="toolbox-exit-btn" id="toolboxExitBtn">← 返回工作站</button>
+            <span class="toolbox-title">表格工作台工具箱</span>
+        </div>
+        <iframe id="toolboxFrame" src="about:blank"></iframe>
+    </div>
+
+    <!-- 性能模式下拉 -->
+    <div class="mode-dropdown hidden" id="performanceDropdown">
+        <div class="mode-dropdown-item active" data-mode="standard"><span class="check">✓</span> 标准模式</div>
+        <div class="mode-dropdown-item" data-mode="performance"><span class="check"></span> 性能模式</div>
+    </div>
+
+    <!-- AI 设置模态框 -->
+    <div class="modal-overlay hidden" id="dbConfigModal">
+        <div class="modal">
+            <h3>数据库配置</h3>
+            <div class="modal-row">
+                <label>数据库类型</label>
+                <select id="dbTypeSelect">
+                    <option value="sqlite">本地 SQLite（默认）</option>
+                    <option value="mysql">远程 MySQL</option>
+                </select>
+            </div>
+            <div id="mysqlConfigFields" style="display:none">
+                <div class="modal-row">
+                    <label>MySQL 主机</label>
+                    <input type="text" id="mysqlHost" placeholder="127.0.0.1">
+                </div>
+                <div class="modal-row">
+                    <label>MySQL 端口</label>
+                    <input type="number" id="mysqlPort" value="3306">
+                </div>
+                <div class="modal-row">
+                    <label>MySQL 用户</label>
+                    <input type="text" id="mysqlUser" placeholder="root">
+                </div>
+                <div class="modal-row">
+                    <label>MySQL 密码</label>
+                    <input type="password" id="mysqlPassword" placeholder="请输入密码">
+                </div>
+                <div class="modal-row">
+                    <label>MySQL 数据库</label>
+                    <input type="text" id="mysqlDatabase" placeholder="excel_station">
+                </div>
+            </div>
+            <div style="background:#f0f2f5;padding:10px;border-radius:6px;margin-bottom:12px;font-size:11px;color:#888">
+                <strong>提示：</strong><br>
+                - SQLite：数据存储在本地，无需额外配置，适合单机使用<br>
+                - MySQL：数据存储在远程服务器，支持多用户共享，需配置连接信息
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="dbTestBtn">测试连接</button>
+                <button class="btn" id="dbConfigCancelBtn">取消</button>
+                <button class="btn btn-primary" id="dbConfigSaveBtn">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal">
+            <h3>AI 设置</h3>
+            <div class="modal-row">
+                <label>AI 提供商</label>
+                <select id="settingsProvider">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai">OpenAI / 兼容协议</option>
+                    <option value="qwen">通义千问</option>
+                    <option value="ollama">Ollama（本地）</option>
+                </select>
+            </div>
+            <div class="modal-row">
+                <label>API Key</label>
+                <input type="password" id="settingsApiKey" placeholder="请输入 API Key（Ollama 不需要）">
+            </div>
+            <div class="modal-row">
+                <label>Base URL（可选）</label>
+                <input type="text" id="settingsBaseUrl" placeholder="留空使用默认地址">
+            </div>
+            <div class="modal-row">
+                <label>模型名称</label>
+                <input type="text" id="settingsModel" placeholder="如 deepseek-chat / gpt-4o-mini / qwen-plus">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="settingsTestBtn">测试连接</button>
+                <button class="btn" id="settingsCancelBtn">取消</button>
+                <button class="btn btn-primary" id="settingsSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="encryptModal">
+        <div class="modal">
+            <h3>🔒 文件已加密</h3>
+            <p style="color:#888;margin-bottom:12px;font-size:13px">检测到文件被加密，请选择以下方式处理：</p>
+
+            <div style="background:#e8f0fe;padding:12px;border-radius:6px;margin-bottom:12px">
+                <div style="font-weight:bold;margin-bottom:8px;color:#4a90d9">方式一：输入密码解密</div>
+                <div style="display:flex;gap:8px">
+                    <input type="password" id="encryptPassword" placeholder="请输入文件密码"
+                        style="flex:1;padding:8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333">
+                    <button class="btn btn-primary" id="encryptDecryptBtn">解密</button>
+                </div>
+            </div>
+
+            <div style="background:#f0f2f5;padding:12px;border-radius:6px">
+                <div style="font-weight:bold;margin-bottom:8px;color:#27ae60">方式二：绕过透明加密（推荐）</div>
+                <div style="font-size:12px;color:#888;line-height:1.6">
+                    <p style="margin:4px 0"><b>如果是企业加密系统（如亿赛通/IP-guard）：</b></p>
+                    <p style="margin:4px 0">1. 用 Excel 打开文件</p>
+                    <p style="margin:4px 0">2. 按 <b>Ctrl + A</b> 全选，<b>Ctrl + C</b> 复制</p>
+                    <p style="margin:4px 0">3. 新建一个 Excel 文件，粘贴保存</p>
+                    <p style="margin:4px 0">4. 把新文件上传到这里</p>
+                    <p style="margin:8px 0 4px 0"><b>或者：</b>文件 → 另存为 → CSV 格式</p>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" id="encryptCancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 列设置对话框 -->
+    <div class="modal-overlay hidden" id="columnSettingsModal">
+        <div class="modal" style="max-width:500px">
+            <h3>列设置</h3>
+            <p style="font-size:12px;color:#888;margin-bottom:12px">拖拽调整列顺序，取消勾选隐藏列</p>
+            <div id="columnSettingsList"
+                style="max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:8px">
+                <!-- 动态生成 -->
+            </div>
+            <div class="modal-actions" style="margin-top:12px">
+                <!-- <button class="btn" id="colSettingsAddColBtn">+ 新增列</button>
+                <button class="btn" id="colSettingsRenameBtn">改名</button>
+                <button class="btn btn-danger" id="colSettingsDeleteHiddenBtn">删除隐藏列</button> -->
+            </div>
+            <div class="modal-actions" style="margin-top:8px">
+                <button class="btn" id="columnSettingsResetBtn">恢复默认</button>
+                <button class="btn" id="columnSettingsCancelBtn">取消</button>
+                <button class="btn btn-primary" id="columnSettingsSaveBtn">应用</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增列对话框 -->
+    <div class="modal-overlay hidden" id="addColumnModal">
+        <div class="modal">
+            <h3>新增列</h3>
+            <div class="modal-row"><label>列名</label><input type="text" id="newColumnName" placeholder="输入新列名"></div>
+            <div class="modal-row"><label>默认值</label><input type="text" id="newColumnDefault" placeholder="可选"></div>
+            <div class="modal-actions">
+                <button class="btn" id="addColumnCancelBtn">取消</button>
+                <button class="btn btn-primary" id="addColumnSaveBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重命名列对话框 -->
+    <div class="modal-overlay hidden" id="renameColumnModal">
+        <div class="modal">
+            <h3>重命名列</h3>
+            <div class="modal-row">
+                <label>目标列</label><select id="renameColumnFrom"></select>
+            </div>
+            <div class="modal-row"><label>新名称</label><input type="text" id="renameColumnTo" placeholder="输入新列名"></div>
+            <div class="modal-actions">
+                <button class="btn" id="renameColumnCancelBtn">取消</button>
+                <button class="btn btn-primary" id="renameColumnSaveBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回到顶部按钮 -->
+    <button class="scroll-top-btn" id="scrollTopBtn" title="回到顶部">↑</button>
+
+    <script src="/_shared/js/echarts.min.js"></script>
+    <script>
+        // 全局状态
+        const state = {
+            sessionId: null, fileName: null,
+            sheets: [], currentTable: "", headers: [],
+            page: 1, pageSize: 100,
+            sortColumn: null, sortOrder: "asc",
+            activeFilters: {},
+            searchText: "",
+            totalRows: 0, totalPages: 0,
+            loadedRows: 0, hasMore: true, isLoadingMore: false,
+            chart: null, chartVisible: false,
+            currentTab: "browse",
+            pivotData: null,
+            allRows: null,
+            performanceMode: localStorage.getItem("performanceMode") || "standard",
+            aiHistory: {},  // {sessionId: [{role: "user"/"assistant", content: "..."}]}
+            // 列设置
+            columnOrder: [],  // 列顺序（存储列名数组）
+            columnVisibility: {}  // 列可见性 {columnName: boolean}
+        };
+
+        const cache = {};
+        let currentDropdown = null;
+        let sessions = [];
+        let scrollObserver = null;
+        let compareSheetsA = [];
+        let compareSheetsB = [];
+
+        const els = {
+            uploadZone: document.getElementById("uploadZone"),
+            fileInput: document.getElementById("fileInput"),
+            newUploadBtn: document.getElementById("newUploadBtn"),
+            sessionList: document.getElementById("sessionList"),
+            dataSection: document.getElementById("dataSection"),
+            emptyState: document.getElementById("emptyState"),
+            loadingState: document.getElementById("loadingState"),
+            tableHead: document.getElementById("tableHead"),
+            tableBody: document.getElementById("tableBody"),
+            tableWrapper: document.getElementById("tableWrapper"),
+            sheetSelect: document.getElementById("sheetSelect"),
+            pageSizeSelect: document.getElementById("pageSizeSelect"),
+            activeFilters: document.getElementById("activeFilters"),
+            chartSection: document.getElementById("chartSection"),
+            settingsModal: document.getElementById("settingsModal"),
+            encryptModal: document.getElementById("encryptModal"),
+            aiChatMessages: document.getElementById("aiChatMessages"),
+            aiInput: document.getElementById("aiInput"),
+            scrollInfo: document.getElementById("scrollInfo"),
+            loadingMore: document.getElementById("loadingMore"),
+            scrollTopBtn: document.getElementById("scrollTopBtn"),
+            sidebar: document.getElementById("sidebar"),
+            mainContent: document.getElementById("mainContent")
+        };
+
+        // 点击其他地方关闭下拉
+        document.addEventListener("click", e => {
+            if (currentDropdown && !currentDropdown.contains(e.target) && !e.target.closest("th") && !e.target.closest(".filter-dropdown")) {
+                closeDropdown();
+            }
+            // 关闭性能模式下拉
+            const perfDropdown = document.getElementById("performanceDropdown");
+            if (!perfDropdown.classList.contains("hidden") && !perfDropdown.contains(e.target) && e.target.id !== "performanceBtn") {
+                perfDropdown.classList.add("hidden");
+            }
+        });
+
+        // ==================== 数据库配置 ====================
+        document.getElementById("dbConfigBtn").addEventListener("click", async () => {
+            await loadDbConfig();
+            document.getElementById("dbConfigModal").classList.remove("hidden");
+        });
+
+        document.getElementById("dbConfigCancelBtn").addEventListener("click", () => {
+            document.getElementById("dbConfigModal").classList.add("hidden");
+        });
+
+        document.getElementById("dbTypeSelect").addEventListener("change", () => {
+            const type = document.getElementById("dbTypeSelect").value;
+            document.getElementById("mysqlConfigFields").style.display = type === "mysql" ? "block" : "none";
+        });
+
+        async function loadDbConfig() {
+            try {
+                const res = await fetch("/api/db/config");
+                const config = await res.json();
+                document.getElementById("dbTypeSelect").value = config.db_type;
+                document.getElementById("mysqlHost").value = config.mysql_host;
+                document.getElementById("mysqlPort").value = config.mysql_port;
+                document.getElementById("mysqlUser").value = config.mysql_user;
+                document.getElementById("mysqlPassword").value = config.mysql_password;
+                document.getElementById("mysqlDatabase").value = config.mysql_database;
+                document.getElementById("mysqlConfigFields").style.display = config.db_type === "mysql" ? "block" : "none";
+            } catch (e) {
+                console.error("加载数据库配置失败:", e);
+            }
+        }
+
+        document.getElementById("dbTestBtn").addEventListener("click", async () => {
+            const btn = document.getElementById("dbTestBtn");
+            const originalText = btn.textContent;
+            btn.textContent = "测试中...";
+            btn.disabled = true;
+            try {
+                const config = {
+                    db_type: document.getElementById("dbTypeSelect").value,
+                    mysql_host: document.getElementById("mysqlHost").value,
+                    mysql_port: parseInt(document.getElementById("mysqlPort").value),
+                    mysql_user: document.getElementById("mysqlUser").value,
+                    mysql_password: document.getElementById("mysqlPassword").value,
+                    mysql_database: document.getElementById("mysqlDatabase").value
+                };
+                const res = await fetch("/api/db/test-mysql", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(config)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("✅ MySQL 连接成功！");
+                } else {
+                    const errorTypeMap = {
+                        "network": "🌐 网络连接错误",
+                        "auth": "🔐 认证失败",
+                        "database": "📂 数据库不存在",
+                        "timeout": "⏱️ 连接超时",
+                        "blocked": "🚫 主机被屏蔽",
+                        "missing_driver": "📦 缺少驱动",
+                        "mysql": "💾 MySQL 错误",
+                        "unknown": "❓ 未知错误"
+                    };
+                    const title = errorTypeMap[data.error_type] || "❌ 连接失败";
+                    alert(`${title}\n\n${data.message || "请检查配置"}`);
+                }
+            } catch (e) {
+                alert("测试失败: " + e.message);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById("dbConfigSaveBtn").addEventListener("click", async () => {
+            const btn = document.getElementById("dbConfigSaveBtn");
+            const originalText = btn.textContent;
+            btn.textContent = "保存中...";
+            btn.disabled = true;
+            try {
+                const config = {
+                    db_type: document.getElementById("dbTypeSelect").value,
+                    mysql_host: document.getElementById("mysqlHost").value,
+                    mysql_port: parseInt(document.getElementById("mysqlPort").value),
+                    mysql_user: document.getElementById("mysqlUser").value,
+                    mysql_password: document.getElementById("mysqlPassword").value,
+                    mysql_database: document.getElementById("mysqlDatabase").value
+                };
+                const res = await fetch("/api/db/config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(config)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("配置已保存！");
+                    document.getElementById("dbConfigModal").classList.add("hidden");
+                } else {
+                    alert("保存失败");
+                }
+            } catch (e) {
+                alert("保存失败: " + e.message);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        function closeDropdown() {
+            if (currentDropdown) { currentDropdown.remove(); currentDropdown = null; }
+        }
+
+        // ==================== 侧边栏折叠 ====================
+        document.getElementById("sidebarCollapseBtn").addEventListener("click", () => {
+            const sidebar = els.sidebar;
+            const btn = document.getElementById("sidebarCollapseBtn");
+            sidebar.classList.toggle("collapsed");
+            btn.textContent = sidebar.classList.contains("collapsed") ? "▶" : "◀";
+        });
+
+        // ==================== 工具箱模式 ====================
+        const toolboxOverlay = document.getElementById("toolboxOverlay");
+        const toolboxFrame = document.getElementById("toolboxFrame");
+        const toolboxBtn = document.getElementById("toolboxBtn");
+        const toolboxExitBtn = document.getElementById("toolboxExitBtn");
+
+        // 页面加载后延迟预加载工具箱 iframe，后台缓存
+        setTimeout(() => {
+            if (toolboxFrame.src === "about:blank" || toolboxFrame.src === "") {
+                toolboxFrame.src = "/toolbox/index.html";
+            }
+        }, 1500);
+
+        function enterToolbox() {
+            if (toolboxFrame.src === "about:blank" || toolboxFrame.src === "") {
+                toolboxFrame.src = "/toolbox/index.html";
+            }
+            toolboxOverlay.classList.add("active");
+        }
+
+        function exitToolbox() {
+            toolboxOverlay.classList.remove("active");
+        }
+
+        toolboxBtn.addEventListener("click", enterToolbox);
+        toolboxExitBtn.addEventListener("click", exitToolbox);
+
+        // 监听来自 toolbox iframe 的 postMessage
+        window.addEventListener("message", (e) => {
+            if (e.data && e.data.type === "exit-toolbox") {
+                exitToolbox();
+            }
+        });
+
+        // ==================== 顶部栏折叠 ====================
+        document.getElementById("headerToggleBtn").addEventListener("click", () => {
+            const header = document.querySelector(".header");
+            const btn = document.getElementById("headerToggleBtn");
+            header.classList.toggle("collapsed");
+            btn.textContent = header.classList.contains("collapsed") ? "▼ 展开" : "▲ 收起";
+            try { localStorage.setItem("headerCollapsed", header.classList.contains("collapsed") ? "1" : "0"); } catch (e) { }
+        });
+
+        // ==================== 性能模式 ====================
+        document.getElementById("performanceBtn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById("performanceDropdown");
+            const btn = document.getElementById("performanceBtn");
+            const rect = btn.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + 4) + "px";
+            dropdown.style.right = (window.innerWidth - rect.right) + "px";
+            dropdown.classList.toggle("hidden");
+        });
+
+        document.querySelectorAll("#performanceDropdown .mode-dropdown-item").forEach(item => {
+            item.addEventListener("click", () => {
+                const mode = item.dataset.mode;
+                state.performanceMode = mode;
+                localStorage.setItem("performanceMode", mode);
+                // 更新 UI
+                document.querySelectorAll("#performanceDropdown .mode-dropdown-item").forEach(i => {
+                    i.classList.toggle("active", i.dataset.mode === mode);
+                    i.querySelector(".check").textContent = i.dataset.mode === mode ? "✓" : "";
+                });
+                document.getElementById("performanceDropdown").classList.add("hidden");
+                applyPerformanceMode();
+            });
+        });
+
+        function applyPerformanceMode() {
+            const isPerf = state.performanceMode === "performance";
+            els.mainContent.classList.toggle("performance-mode", isPerf);
+            // 性能模式下隐藏图表，每次加载行数减半
+            if (isPerf) {
+                if (state.chartVisible) {
+                    state.chartVisible = false;
+                    els.chartSection.classList.add("hidden");
+                    document.getElementById("toggleChartBtn").textContent = "显示图表";
+                }
+            }
+        }
+
+        function getEffectivePageSize() {
+            let size = state.pageSize;
+            if (state.performanceMode === "performance") {
+                size = Math.max(50, Math.floor(size / 2));
+            }
+            return size;
+        }
+
+        // 初始化性能模式
+        applyPerformanceMode();
+        document.querySelectorAll("#performanceDropdown .mode-dropdown-item").forEach(i => {
+            i.classList.toggle("active", i.dataset.mode === state.performanceMode);
+            i.querySelector(".check").textContent = i.dataset.mode === state.performanceMode ? "✓" : "";
+        });
+
+        // 初始化顶部栏折叠状态
+        if (localStorage.getItem("headerCollapsed") === "1") {
+            const header = document.querySelector(".header");
+            const btn = document.getElementById("headerToggleBtn");
+            header.classList.add("collapsed");
+            btn.textContent = "▼ 展开";
+        }
+
+        // ==================== 回到顶部 ====================
+        els.tableWrapper.addEventListener("scroll", () => {
+            els.scrollTopBtn.classList.toggle("visible", els.tableWrapper.scrollTop > 300);
+        });
+        els.scrollTopBtn.addEventListener("click", () => {
+            els.tableWrapper.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        // ==================== 上传事件 ====================
+        els.uploadZone.addEventListener("click", () => els.fileInput.click());
+        els.newUploadBtn.addEventListener("click", () => els.fileInput.click());
+        els.uploadZone.addEventListener("dragover", e => { e.preventDefault(); document.getElementById("uploadSection").classList.add("dragover"); });
+        els.uploadZone.addEventListener("dragleave", () => document.getElementById("uploadSection").classList.remove("dragover"));
+        els.uploadZone.addEventListener("drop", e => { e.preventDefault(); document.getElementById("uploadSection").classList.remove("dragover"); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
+        els.fileInput.addEventListener("change", e => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
+
+        // 页大小切换 -> 重置滚动
+        els.pageSizeSelect.addEventListener("change", () => {
+            state.pageSize = parseInt(els.pageSizeSelect.value);
+            resetAndLoad();
+        });
+
+        // Tab 切换
+        document.querySelectorAll(".tab-item").forEach(tab => {
+            tab.addEventListener("click", () => {
+                const tabName = tab.dataset.tab;
+                document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+                ["browse", "pivot", "clean", "compare", "ai"].forEach(t => {
+                    document.getElementById("tab-" + t).classList.toggle("hidden", t !== tabName);
+                });
+                state.currentTab = tabName;
+                if (tabName === "pivot") initPivotFields();
+                if (tabName === "clean") initCleanFields();
+                if (tabName === "compare") initCompareForm();
+                if (tabName === "ai") initAiChat();
+            });
+        });
+
+        async function handleFile(file) {
+            const ext = file.name.split(".").pop().toLowerCase();
+            if (!["xlsx", "xls", "csv"].includes(ext)) { alert("不支持的文件格式"); return; }
+            showProgress(true);
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                const res = await fetch("/api/upload/", { method: "POST", body: formData });
+                if (!res.ok) throw new Error("上传失败");
+                const data = await res.json();
+                state.sessionId = data.sessionId;
+                state.fileName = data.fileName;
+                refreshSessionList();
+                pollProgress(data.sessionId);
+            } catch (e) { alert("上传失败: " + e.message); showProgress(false); }
+        }
+
+        async function switchSession(sessionId) {
+            state.sessionId = sessionId;
+            const session = sessions.find(s => s.sessionId === sessionId);
+            if (!session) return;
+            state.fileName = session.fileName;
+            state.sheets = session.sheets || [];
+            state.currentTable = session.sheets?.[0]?.name || "";
+            state.headers = session.sheets?.[0]?.headers || [];
+            state.activeFilters = {};
+            cache[sessionId] = {};
+            loadColumnSettings();  // 加载列设置
+
+            // 缓存到 localStorage
+            try {
+                localStorage.setItem("lastSessionId", sessionId);
+                localStorage.setItem("lastTable", state.currentTable);
+            } catch (e) { /* ignore */ }
+
+            initSheetSelect();
+            showData();
+            renderTableHeader();
+            resetAndLoad();
+            renderSessionList();
+            initPivotFields();
+            initCleanFields();
+            initCompareForm();
+        }
+
+        async function refreshSessionList() {
+            try {
+                const res = await fetch("/api/upload/sessions");
+                const data = await res.json();
+                sessions = data.sessions || [];
+                renderSessionList();
+                initCompareForm();
+            } catch (e) { console.error("获取会话列表失败:", e); }
+        }
+
+        function renderSessionList() {
+            els.sessionList.innerHTML = "";
+            sessions.forEach(s => {
+                const div = document.createElement("div");
+                div.className = "session-item" + (s.sessionId === state.sessionId ? " active" : "");
+                const total = s.sheets?.reduce((a, sh) => a + (sh.rowCount || 0), 0) || 0;
+                div.innerHTML = `
+                <div class="session-name">${s.fileName}</div>
+                <div class="session-meta">${s.sheets?.length || 0} 表 · ${total} 行 · ${s.parseTime ? (s.parseTime < 1 ? (s.parseTime * 1000).toFixed(0) + "ms" : s.parseTime.toFixed(1) + "s") : ""}</div>
+                <button class="session-delete" data-id="${s.sessionId}">×</button>
+            `;
+                div.addEventListener("click", e => {
+                    if (e.target.classList.contains("session-delete")) return;
+                    switchSession(s.sessionId);
+                });
+                div.querySelector(".session-delete").addEventListener("click", async e => {
+                    e.stopPropagation();
+                    if (!confirm("确定删除此会话？")) return;
+                    try {
+                        await fetch(`/api/upload/sessions/${s.sessionId}`, { method: "DELETE" });
+                        if (state.sessionId === s.sessionId) {
+                            state.sessionId = null;
+                            els.dataSection.classList.add("hidden");
+                            els.emptyState.classList.remove("hidden");
+                            document.getElementById("uploadSection").classList.remove("hidden");
+                            // 清除缓存
+                            try {
+                                localStorage.removeItem("lastSessionId");
+                                localStorage.removeItem("lastTable");
+                            } catch (e) { /* ignore */ }
+                        }
+                        refreshSessionList();
+                    } catch (e) { alert("删除失败"); }
+                });
+                els.sessionList.appendChild(div);
+            });
+        }
+
+        function pollProgress(sessionId) {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/upload/progress/${sessionId}`);
+                    const data = await res.json();
+                    updateProgressUI(data);
+                    if (data.status === "completed") {
+                        clearInterval(interval);
+                        state.sheets = data.sheets;
+                        state.currentTable = data.sheets[0]?.name || "";
+                        state.headers = data.sheets[0]?.headers || [];
+                        initSheetSelect();
+                        showData();
+                        showProgress(false);
+                        renderTableHeader();
+                        resetAndLoad();
+                        refreshSessionList();
+                        initPivotFields();
+                        initCleanFields();
+                        initCompareForm();
+                    } else if (data.status === "error") {
+                        clearInterval(interval);
+                        showProgress(false);
+                        if (data.isEncrypted) {
+                            showEncryptModal(sessionId);
+                        } else {
+                            alert("解析失败: " + (data.error || "未知错误"));
+                        }
+                    }
+                } catch (e) { console.error("进度查询失败:", e); }
+            }, 500);
+        }
+
+        let currentEncryptSessionId = null;
+
+        function showEncryptModal(sessionId) {
+            currentEncryptSessionId = sessionId;
+            document.getElementById("encryptPassword").value = "";
+            els.encryptModal.classList.remove("hidden");
+        }
+
+        function hideEncryptModal() {
+            currentEncryptSessionId = null;
+            els.encryptModal.classList.add("hidden");
+        }
+
+        document.getElementById("encryptCancelBtn")?.addEventListener("click", hideEncryptModal);
+        document.getElementById("encryptDecryptBtn")?.addEventListener("click", async () => {
+            const password = document.getElementById("encryptPassword").value;
+            if (!password) { alert("请输入密码"); return; }
+            if (!currentEncryptSessionId) return;
+
+            try {
+                const formData = new FormData();
+                formData.append("password", password);
+                const res = await fetch(`/api/upload/retry-password/${currentEncryptSessionId}`, {
+                    method: "POST",
+                    body: formData
+                });
+                if (!res.ok) throw new Error("重试失败");
+                hideEncryptModal();
+                showProgress(true);
+                pollProgress(currentEncryptSessionId);
+            } catch (e) {
+                alert("解密失败: " + e.message);
+            }
+        });
+
+        function updateProgressUI(data) {
+            const el = els.loadingState;
+            if (data.totalRows > 0) {
+                const pct = Math.round((data.processedRows / data.totalRows) * 100);
+                el.innerHTML = `正在解析: ${data.currentSheet || ""} ${data.processedRows}/${data.totalRows} 行 (${pct}%)`;
+            } else {
+                el.innerHTML = `正在解析: ${data.currentSheet || ""} ${data.processedRows} 行`;
+            }
+        }
+
+        function initSheetSelect() {
+            els.sheetSelect.innerHTML = '<option value="">选择工作表</option>';
+            state.sheets.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s.name; opt.textContent = `${s.name} (${s.rowCount}行)`;
+                els.sheetSelect.appendChild(opt);
+            });
+            if (state.sheets.length > 0) els.sheetSelect.value = state.sheets[0].name;
+        }
+
+        els.sheetSelect.addEventListener("change", () => {
+            state.currentTable = els.sheetSelect.value;
+            const sheet = state.sheets.find(s => s.name === state.currentTable);
+            state.headers = sheet?.headers || [];
+            state.activeFilters = {};
+            state.allRows = null;
+            loadColumnSettings();  // 加载列设置
+            renderActiveFilterTags();
+            renderTableHeader();
+            resetAndLoad();
+
+            // 缓存当前表选择
+            try {
+                localStorage.setItem("lastTable", state.currentTable);
+            } catch (e) { /* ignore */ }
+        });
+
+        document.getElementById("clearFilterBtn").addEventListener("click", () => {
+            state.activeFilters = {};
+            renderActiveFilterTags();
+            renderTableHeader();
+            resetAndLoad();
+        });
+
+        document.getElementById("toggleChartBtn").addEventListener("click", async () => {
+            if (state.performanceMode === "performance") {
+                alert("性能模式下无法显示图表");
+                return;
+            }
+            state.chartVisible = !state.chartVisible;
+            els.chartSection.classList.toggle("hidden", !state.chartVisible);
+            document.getElementById("toggleChartBtn").textContent = state.chartVisible ? "隐藏图表" : "显示图表";
+            if (state.chartVisible) {
+                if (!state.allRows) {
+                    try {
+                        const allUrl = `/api/data/${state.sessionId}/query?tableName=${encodeURIComponent(state.currentTable)}&page=1&pageSize=5000`;
+                        const allRes = await fetch(allUrl);
+                        const allData = await allRes.json();
+                        state.allRows = allData.rows;
+                    } catch (e) { console.error("加载图表数据失败:", e); }
+                }
+                initChartSelectors();
+                renderChart();
+                if (state.chart) state.chart.resize();
+            }
+        });
+
+        // 导出功能
+        document.getElementById("exportBtn").addEventListener("click", () => {
+            if (!state.sessionId) { alert("请先上传文件"); return; }
+            const format = prompt("导出格式：csv 或 xlsx", "csv");
+            if (!format || !["csv", "xlsx"].includes(format.toLowerCase())) return;
+            window.open(`/api/data/${state.sessionId}/export?tableName=${encodeURIComponent(state.currentTable)}&format=${format}`, "_blank");
+        });
+
+        // ==================== AI 设置 ====================
+        document.getElementById("settingsBtn").addEventListener("click", async () => {
+            try {
+                const res = await fetch("/api/ai/config");
+                const cfg = await res.json();
+                document.getElementById("settingsProvider").value = cfg.provider || "deepseek";
+                // 不回填脱敏的 apiKey，改为 placeholder 提示
+                const apiKeyInput = document.getElementById("settingsApiKey");
+                apiKeyInput.value = "";
+                apiKeyInput.placeholder = cfg.apiKey ? `已配置 (${cfg.apiKey})，留空保持不变` : "请输入 API Key（Ollama 不需要）";
+                document.getElementById("settingsBaseUrl").value = cfg.baseUrl || "";
+                document.getElementById("settingsModel").value = cfg.model || "";
+            } catch (e) { console.error("加载AI配置失败:", e); }
+            document.getElementById("settingsModal").classList.remove("hidden");
+        });
+        document.getElementById("settingsCancelBtn").addEventListener("click", () => {
+            document.getElementById("settingsModal").classList.add("hidden");
+        });
+        document.getElementById("settingsSaveBtn").addEventListener("click", async () => {
+            try {
+                const res = await fetch("/api/ai/config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        provider: document.getElementById("settingsProvider").value,
+                        apiKey: document.getElementById("settingsApiKey").value,
+                        baseUrl: document.getElementById("settingsBaseUrl").value,
+                        model: document.getElementById("settingsModel").value
+                    })
+                });
+                const data = await res.json();
+                document.getElementById("settingsModal").classList.add("hidden");
+            } catch (e) { alert("保存失败: " + e.message); }
+        });
+        document.getElementById("settingsTestBtn").addEventListener("click", async () => {
+            const btn = document.getElementById("settingsTestBtn");
+            btn.textContent = "测试中..."; btn.disabled = true;
+            try {
+                const saveRes = await fetch("/api/ai/config", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        provider: document.getElementById("settingsProvider").value,
+                        apiKey: document.getElementById("settingsApiKey").value,
+                        baseUrl: document.getElementById("settingsBaseUrl").value,
+                        model: document.getElementById("settingsModel").value
+                    })
+                });
+                await saveRes.json();
+                const res = await fetch("/api/ai/test", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                alert(data.success ? "连接成功" : "连接失败: " + (data.message || ""));
+            } catch (e) { alert("测试失败: " + e.message); }
+            finally { btn.textContent = "测试连接"; btn.disabled = false; }
+        });
+
+        // ==================== 核心数据加载 ====================
+        function showProgress(show) {
+            if (show) {
+                els.loadingState.classList.remove("hidden");
+                els.dataSection.classList.add("hidden");
+                els.emptyState.classList.add("hidden");
+                document.getElementById("uploadSection").classList.add("hidden");
+            } else {
+                els.loadingState.classList.add("hidden");
+            }
+        }
+
+        function showData() {
+            els.dataSection.classList.remove("hidden");
+            els.emptyState.classList.add("hidden");
+            document.getElementById("uploadSection").classList.add("hidden");
+        }
+
+        function resetAndLoad() {
+            state.page = 1;
+            state.loadedRows = 0;
+            state.hasMore = true;
+            state.allRows = null;
+            els.tableBody.innerHTML = "";
+            loadData();
+        }
+
+        async function loadData() {
+            if (!state.sessionId || !state.currentTable) return;
+            if (state.isLoadingMore) return;
+            state.isLoadingMore = true;
+            els.loadingMore.classList.remove("hidden");
+
+            try {
+                const pageSize = getEffectivePageSize();
+                let url = `/api/data/${state.sessionId}/query?tableName=${encodeURIComponent(state.currentTable)}&page=${state.page}&pageSize=${pageSize}`;
+                if (state.sortColumn) {
+                    url += `&sortColumn=${encodeURIComponent(state.sortColumn)}&sortOrder=${state.sortOrder}`;
+                }
+                if (state.searchText) {
+                    url += `&search=${encodeURIComponent(state.searchText)}`;
+                }
+                if (Object.keys(state.activeFilters).length > 0) {
+                    url += `&filters=${encodeURIComponent(JSON.stringify(state.activeFilters))}`;
+                }
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                state.totalRows = data.totalRows || 0;
+                state.totalPages = Math.ceil(state.totalRows / pageSize);
+
+                appendRows(data.rows, data.headers || state.headers);
+                state.loadedRows += data.rows.length;
+                state.hasMore = data.rows.length >= pageSize;
+
+                updateStats();
+                updateScrollInfo();
+                setupScrollObserver();
+
+                if (data.headers && data.headers.length > 0) {
+                    const headersChanged = state.headers.length !== data.headers.length ||
+                        state.headers.some((h, i) => h !== data.headers[i]);
+                    if (headersChanged) {
+                        state.headers = data.headers;
+                        // 合并列设置：保留已有顺序，补齐新列，移除已删列
+                        state.columnOrder = state.columnOrder.filter(c => data.headers.includes(c));
+                        for (const h of data.headers) {
+                            if (!state.columnOrder.includes(h)) state.columnOrder.push(h);
+                        }
+                        // 清理已删列的可见性，补齐新列
+                        for (const c of Object.keys(state.columnVisibility)) {
+                            if (!data.headers.includes(c)) delete state.columnVisibility[c];
+                        }
+                        for (const h of data.headers) {
+                            if (state.columnVisibility[h] === undefined) state.columnVisibility[h] = true;
+                        }
+                        renderTableHeader();
+                    }
+                }
+            } catch (e) {
+                console.error("加载数据失败:", e);
+                // 显示错误提示
+                const errorMsg = document.createElement("div");
+                errorMsg.style.cssText = "padding:20px;text-align:center;color:#e74c3c;background:#fdf0f0;border-radius:8px;margin:20px";
+                errorMsg.textContent = "加载数据失败：" + (e.message || "未知错误");
+                els.tableBody.innerHTML = "";
+                els.tableBody.appendChild(errorMsg);
+            } finally {
+                state.isLoadingMore = false;
+                els.loadingMore.classList.add("hidden");
+            }
+        }
+
+        function appendRows(rows, headers) {
+            // 获取显示列及其在 headers 中的索引
+            const displayCols = getDisplayColumns();
+            const colIndices = displayCols.map(col => headers.indexOf(col));
+
+            const frag = document.createDocumentFragment();
+            for (const row of rows) {
+                const tr = document.createElement("tr");
+                const rowId = row[0];
+                tr.dataset.rowId = rowId || "";
+                // 行选择 checkbox
+                const tdCheck = document.createElement("td");
+                tdCheck.innerHTML = `<input type="checkbox" class="row-checkbox" value="${rowId}">`;
+                tr.appendChild(tdCheck);
+                for (const idx of colIndices) {
+                    if (idx < 0) continue;
+                    const td = document.createElement("td");
+                    let cell = row[idx + 1];
+                    if (cell === null || cell === undefined) {
+                        cell = "";
+                    } else if (typeof cell === "number" && Number.isInteger(cell)) {
+                        cell = String(cell);
+                    } else if (typeof cell === "number") {
+                        cell = String(cell);
+                    } else {
+                        cell = String(cell);
+                    }
+                    td.textContent = cell;
+                    td.title = cell;
+                    td.dataset.column = headers[idx];
+                    td.addEventListener("dblclick", () => startEdit(td, headers[idx], tr.dataset.rowId));
+                    tr.appendChild(td);
+                }
+                frag.appendChild(tr);
+            }
+            els.tableBody.appendChild(frag);
+        }
+
+        function startEdit(td, column, rowId) {
+            if (td.classList.contains("editing")) return;
+            if (!rowId) return;
+
+            const originalValue = td.textContent;
+            td.classList.add("editing");
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = originalValue;
+            input.style.width = "100%";
+            input.style.height = "100%";
+            input.style.border = "1px solid #4a9eff";
+            input.style.outline = "none";
+            input.style.boxSizing = "border-box";
+            input.style.padding = "2px 4px";
+            input.style.fontSize = "12px";
+
+            td.textContent = "";
+            td.appendChild(input);
+            input.focus();
+            input.select();
+
+            const saveEdit = () => {
+                const newValue = input.value.trim();
+                if (newValue !== originalValue) {
+                    saveCell(rowId, column, newValue, td, originalValue);
+                } else {
+                    td.classList.remove("editing");
+                    td.textContent = originalValue;
+                    td.title = originalValue;
+                }
+            };
+
+            const cancelEdit = () => {
+                td.classList.remove("editing");
+                td.textContent = originalValue;
+                td.title = originalValue;
+            };
+
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    saveEdit();
+                } else if (e.key === "Escape") {
+                    cancelEdit();
+                }
+            });
+
+            input.addEventListener("blur", () => {
+                if (td.classList.contains("editing")) {
+                    saveEdit();
+                }
+            });
+        }
+
+        async function saveCell(rowId, column, value, td, originalValue) {
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/update`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        tableName: state.currentTable,
+                        rowId: parseInt(rowId),
+                        updates: { [column]: value }
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    td.classList.remove("editing");
+                    td.textContent = value;
+                    td.title = value;
+                    td.classList.add("updated");
+                    setTimeout(() => td.classList.remove("updated"), 1500);
+                } else {
+                    td.classList.remove("editing");
+                    td.textContent = originalValue;
+                    td.title = originalValue;
+                    alert("保存失败");
+                }
+            } catch (e) {
+                console.error("保存失败:", e);
+                td.classList.remove("editing");
+                td.textContent = originalValue;
+                td.title = originalValue;
+                alert("保存失败");
+            }
+        }
+
+        function updateStats() {
+            document.getElementById("totalRows").textContent = state.totalRows.toLocaleString();
+            const pageSize = getEffectivePageSize();
+            const filtered = state.page * pageSize;
+            document.getElementById("filteredRows").textContent = Math.min(filtered, state.totalRows).toLocaleString();
+            document.getElementById("loadedRowsDisplay").textContent = state.loadedRows.toLocaleString();
+        }
+
+        function updateScrollInfo() {
+            const info = els.scrollInfo;
+            if (state.hasMore) {
+                info.textContent = `已加载 ${state.loadedRows.toLocaleString()} / ${state.totalRows.toLocaleString()} 行，向下滚动加载更多`;
+            } else {
+                info.textContent = `共 ${state.loadedRows.toLocaleString()} 行，已全部加载`;
+            }
+        }
+
+        // ==================== 滚动懒加载 ====================
+        function setupScrollObserver() {
+            if (scrollObserver) scrollObserver.disconnect();
+
+            const sentinel = document.createElement("tr");
+            sentinel.id = "scrollSentinel";
+            sentinel.innerHTML = '<td colspan="100"></td>';
+            els.tableBody.appendChild(sentinel);
+
+            scrollObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && state.hasMore && !state.isLoadingMore) {
+                    state.page++;
+                    loadData();
+                }
+            }, { root: els.tableWrapper, rootMargin: "100px" });
+
+            scrollObserver.observe(sentinel);
+        }
+
+        // 滚动事件
+        els.tableWrapper.addEventListener("scroll", () => {
+            if (state.isLoadingMore || !state.hasMore) return;
+            const { scrollTop, scrollHeight, clientHeight } = els.tableWrapper;
+            if (scrollHeight - scrollTop - clientHeight < 200) {
+                state.page++;
+                loadData();
+            }
+        });
+
+        // ==================== 表头渲染 ====================
+        function renderTableHeader() {
+            const tr = document.createElement("tr");
+            // 全选 checkbox 列
+            const thCheck = document.createElement("th");
+            thCheck.style.width = "36px";
+            thCheck.innerHTML = '<input type="checkbox" id="selectAllRows" title="全选/取消全选">';
+            tr.appendChild(thCheck);
+            // 使用设置后的显示列（过滤+排序）
+            const displayCols = getDisplayColumns();
+            displayCols.forEach((h) => {
+                const th = document.createElement("th");
+                if (state.sortColumn === h) th.classList.add("sorted");
+                if (state.activeFilters[h]) th.classList.add("filtered");
+
+                const span = document.createElement("span");
+                span.textContent = h;
+                th.appendChild(span);
+
+                const sortIcon = document.createElement("span");
+                sortIcon.className = "sort-icon";
+                sortIcon.textContent = state.sortColumn === h ? (state.sortOrder === "asc" ? "▲" : "▼") : "↕";
+                th.appendChild(sortIcon);
+
+                th.addEventListener("click", (e) => {
+                    if (e.target.classList.contains("filter-btn")) return;
+                    if (state.sortColumn === h) {
+                        if (state.sortOrder === "asc") {
+                            state.sortOrder = "desc";
+                        } else {
+                            // 第三次点击清除排序
+                            state.sortColumn = null;
+                            state.sortOrder = "asc";
+                        }
+                    } else {
+                        state.sortColumn = h;
+                        state.sortOrder = "asc";
+                    }
+                    renderTableHeader();
+                    resetAndLoad();
+                });
+
+                const filterBtn = document.createElement("button");
+                filterBtn.className = "filter-btn";
+                if (state.activeFilters[h]) filterBtn.classList.add("active");
+                filterBtn.innerHTML = "▽";
+                filterBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    showFilterDropdown(th, h, e);
+                });
+                th.appendChild(filterBtn);
+
+                tr.appendChild(th);
+            });
+            els.tableHead.innerHTML = "";
+            els.tableHead.appendChild(tr);
+        }
+
+        // ==================== 筛选下拉 ====================
+        function showFilterDropdown(th, column, event) {
+            closeDropdown();
+            event.stopPropagation();
+
+            const dropdown = document.createElement("div");
+            dropdown.className = "filter-dropdown";
+            dropdown.style.position = "fixed";
+            const rect = th.getBoundingClientRect();
+            dropdown.style.left = rect.left + "px";
+            dropdown.style.top = rect.bottom + "px";
+
+            let searchVal = "";
+            let selectedValues = new Set();
+            if (state.activeFilters[column] && state.activeFilters[column].includes("|||")) {
+                state.activeFilters[column].split("|||").forEach(v => selectedValues.add(v));
+            }
+
+            dropdown.innerHTML = `
+            <div class="filter-dropdown-header">
+                <input type="text" placeholder="搜索..." id="filterSearch">
+            </div>
+            <div class="filter-dropdown-actions">
+                <button class="btn" id="filterSelectAll">全选</button>
+                <button class="btn" id="filterClear">清除</button>
+            </div>
+            <div class="filter-dropdown-list" id="filterList"></div>
+            <div class="filter-dropdown-footer">
+                <span class="selected-count">已选 0 项</span>
+                <button class="btn btn-primary" id="filterApply">应用</button>
+            </div>
+        `;
+            document.body.appendChild(dropdown);
+            currentDropdown = dropdown;
+
+            const loadFilterOptions = async (search) => {
+                try {
+                    const res = await fetch(`/api/data/${state.sessionId}/filters/${encodeURIComponent(column)}?tableName=${encodeURIComponent(state.currentTable)}`);
+                    const data = await res.json();
+                    const listEl = dropdown.querySelector("#filterList");
+                    listEl.innerHTML = "";
+                    const items = Array.isArray(data) ? data : [];
+                    const filtered = search ? items.filter(i => String(i.values?.[0] ?? "").toLowerCase().includes(search.toLowerCase())) : items;
+                    filtered.forEach(item => {
+                        const label = document.createElement("label");
+                        const val = String(item.values?.[0] ?? "");
+                        const count = item.count;
+                        const cb = document.createElement("input");
+                        cb.type = "checkbox";
+                        cb.checked = selectedValues.has(val);
+                        cb.addEventListener("change", () => {
+                            if (cb.checked) selectedValues.add(val);
+                            else selectedValues.delete(val);
+                            dropdown.querySelector(".selected-count").textContent = `已选 ${selectedValues.size} 项`;
+                        });
+                        const span = document.createElement("span");
+                        span.textContent = val;
+                        const cnt = document.createElement("span");
+                        cnt.className = "count";
+                        cnt.textContent = `(${count})`;
+                        label.appendChild(cb);
+                        label.appendChild(span);
+                        label.appendChild(cnt);
+                        listEl.appendChild(label);
+                    });
+                } catch (e) {
+                    console.error("加载筛选项失败:", e);
+                }
+            };
+
+            loadFilterOptions("");
+            dropdown.querySelector("#filterSearch").addEventListener("input", (e) => {
+                loadFilterOptions(e.target.value);
+            });
+            dropdown.querySelector("#filterSelectAll").addEventListener("click", () => {
+                dropdown.querySelectorAll("#filterList input[type=checkbox]").forEach(cb => {
+                    cb.checked = true;
+                    selectedValues.add(cb.parentElement.querySelector("span").textContent);
+                });
+                dropdown.querySelector(".selected-count").textContent = `已选 ${selectedValues.size} 项`;
+            });
+            dropdown.querySelector("#filterClear").addEventListener("click", () => {
+                dropdown.querySelectorAll("#filterList input[type=checkbox]").forEach(cb => {
+                    cb.checked = false;
+                });
+                selectedValues.clear();
+                dropdown.querySelector(".selected-count").textContent = `已选 0 项`;
+            });
+            dropdown.querySelector("#filterApply").addEventListener("click", () => {
+                if (selectedValues.size > 0) {
+                    state.activeFilters[column] = Array.from(selectedValues).join("|||");
+                } else {
+                    delete state.activeFilters[column];
+                }
+                renderActiveFilterTags();
+                renderTableHeader();
+                resetAndLoad();
+                closeDropdown();
+            });
+        }
+
+        function renderActiveFilterTags() {
+            els.activeFilters.innerHTML = "";
+            for (const [col, val] of Object.entries(state.activeFilters)) {
+                const tag = document.createElement("div");
+                tag.className = "filter-tag";
+                const display = val.includes("|||") ? `${val.split("|||").length} 项` : val;
+                tag.innerHTML = `<span>${col}: ${display}</span>`;
+                const btn = document.createElement("button");
+                btn.textContent = "×";
+                btn.addEventListener("click", () => {
+                    delete state.activeFilters[col];
+                    renderActiveFilterTags();
+                    renderTableHeader();
+                    resetAndLoad();
+                });
+                tag.appendChild(btn);
+                els.activeFilters.appendChild(tag);
+            }
+        }
+
+        // ==================== 搜索 ====================
+        let searchTimer = null;
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                state.searchText = e.target.value;
+                resetAndLoad();
+            }, 500);
+        });
+
+        // ==================== 图表 ====================
+        function initChartSelectors() {
+            const xAxisSel = document.getElementById("chartXAxis");
+            const yAxisSel = document.getElementById("chartYAxis");
+            xAxisSel.innerHTML = "";
+            yAxisSel.innerHTML = "";
+            state.headers.forEach(h => {
+                xAxisSel.appendChild(new Option(h, h));
+                yAxisSel.appendChild(new Option(h, h));
+            });
+            if (state.headers.length > 0) {
+                xAxisSel.value = state.headers[0];
+                yAxisSel.value = state.headers[state.headers.length - 1];
+            }
+        }
+
+        function renderChart() {
+            if (!state.allRows || state.allRows.length === 0) return;
+            const chartType = document.getElementById("chartType").value;
+            const xCol = document.getElementById("chartXAxis").value;
+            const yCol = document.getElementById("chartYAxis").value;
+
+            const xIdx = state.headers.indexOf(xCol);
+            const yIdx = state.headers.indexOf(yCol);
+            if (xIdx < 0 || yIdx < 0) return;
+
+            // 检测列类型
+            const yType = detectColumnType(yIdx);  // "numeric" | "date" | "text"
+            const xType = detectColumnType(xIdx);
+
+            // 散点图：保留逐行数据点
+            if (chartType === "scatter") {
+                renderScatterChart(xIdx, yIdx, xCol, yCol);
+                return;
+            }
+
+            // 柱状图 / 折线图 / 饼图：按 X 轴分组聚合
+            renderAggregatedChart(chartType, xIdx, yIdx, xCol, yCol, yType);
+        }
+
+        /** 检测列的数据类型（抽样 200 行） */
+        function detectColumnType(colIdx) {
+            let numericCount = 0, dateCount = 0, textCount = 0, nonNull = 0;
+            const uniqueValues = new Set();
+            const sample = state.allRows.slice(0, 200);
+            for (const row of sample) {
+                const raw = row[colIdx + 1];
+                if (raw === null || raw === undefined || raw === "") continue;
+                nonNull++;
+                const s = String(raw).trim();
+                uniqueValues.add(s);
+                if (!isNaN(parseFloat(s)) && isFinite(s)) { numericCount++; }
+                else if (/^\d{4}[-\/]\d{1,2}([-\/]\d{1,2})?/.test(s)) { dateCount++; }
+                else { textCount++; }
+            }
+            if (nonNull === 0) return "text";
+
+            // 唯一值比例 > 0.8 → ID/编号列（如提运单号、订单号），当作文本处理
+            const uniquenessRatio = uniqueValues.size / nonNull;
+            if (uniquenessRatio > 0.8 && numericCount / nonNull > 0.7) {
+                return "text";
+            }
+
+            if (numericCount / nonNull > 0.7) return "numeric";
+            if (dateCount / nonNull > 0.7) return "date";
+            return "text";
+        }
+
+        /** 柱状图 / 折线图 / 饼图：按 X 分组聚合 Y */
+        function renderAggregatedChart(chartType, xIdx, yIdx, xCol, yCol, yType) {
+            // 按 X 值分组
+            const grouped = Object.create(null);
+            for (const row of state.allRows) {
+                const xVal = row[xIdx + 1];
+                if (xVal === null || xVal === undefined || xVal === "") continue;
+                const key = String(xVal);
+                if (!(key in grouped)) grouped[key] = { sum: 0, count: 0 };
+                grouped[key].count++;
+                if (yType === "numeric") {
+                    const yVal = parseFloat(row[yIdx + 1]);
+                    if (!isNaN(yVal) && isFinite(yVal)) grouped[key].sum += yVal;
+                } else {
+                    // date / text：累加 count 作为聚合值
+                    grouped[key].sum++;
+                }
+            }
+
+            const entries = Object.entries(grouped);
+            if (entries.length === 0) {
+                if (state.chart) state.chart.dispose();
+                document.getElementById("chart").innerHTML =
+                    '<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#888">X 轴列「' + xCol + '」无有效数据</div>';
+                return;
+            }
+
+            // X 值过多时取 Top N（按聚合值降序）
+            const MAX_X = 50;
+            let topEntries = entries;
+            let omitted = 0;
+            if (entries.length > MAX_X) {
+                entries.sort((a, b) => b[1].sum - a[1].sum);
+                topEntries = entries.slice(0, MAX_X);
+                omitted = entries.length - MAX_X;
+            }
+
+            const xData = topEntries.map(e => e[0]);
+            const yData = topEntries.map(e => e[1].sum);
+
+            // Y 轴标签：日期/文本列聚合时显示"计数"
+            const yLabel = (yType !== "numeric") ? "计数" : yCol;
+            const seriesName = (yType !== "numeric") ? "记录数" : yCol;
+
+            if (state.chart) state.chart.dispose();
+            state.chart = echarts.init(document.getElementById("chart"));
+
+            const option = {
+                title: omitted > 0 ? { text: `仅显示 Top ${MAX_X}（共 ${entries.length} 组，省略 ${omitted}）`, textStyle: { fontSize: 11, color: "#999" }, left: "center", top: 2 } : undefined,
+                tooltip: { trigger: chartType === "pie" ? "item" : "axis" },
+                legend: { data: [seriesName], top: omitted > 0 ? 22 : 4 },
+                grid: { left: 60, right: 20, bottom: chartType === "pie" ? 10 : 80, top: omitted > 0 ? 44 : 30 },
+                xAxis: {
+                    type: "category", data: xData,
+                    axisLabel: {
+                        rotate: 45, interval: 0, fontSize: 10,
+                        formatter: v => v.length > 8 ? v.slice(0, 7) + "…" : v
+                    }
+                },
+                yAxis: { type: "value", name: yLabel, nameTextStyle: { fontSize: 11 } },
+                series: [{
+                    type: chartType, name: seriesName,
+                    data: chartType === "pie"
+                        ? xData.map((x, i) => ({ name: x, value: yData[i] }))
+                        : yData
+                }]
+            };
+
+            if (chartType === "pie") {
+                option.xAxis = undefined;
+                option.yAxis = undefined;
+                option.series[0].radius = "60%";
+                option.tooltip = { trigger: "item", formatter: "{b}: {c} ({d}%)" };
+            }
+
+            state.chart.setOption(option);
+        }
+
+        /** 散点图：逐行数据点 */
+        function renderScatterChart(xIdx, yIdx, xCol, yCol) {
+            const xType = detectColumnType(xIdx);
+            const yType = detectColumnType(yIdx);
+            const points = [];
+
+            if (xType === "numeric" && yType === "numeric") {
+                for (const row of state.allRows) {
+                    const xv = parseFloat(row[xIdx + 1]);
+                    const yv = parseFloat(row[yIdx + 1]);
+                    if (!isNaN(xv) && isFinite(xv) && !isNaN(yv) && isFinite(yv)) {
+                        points.push([xv, yv]);
+                    }
+                }
+            } else if (xType === "date" && yType === "numeric") {
+                for (const row of state.allRows) {
+                    const raw = String(row[xIdx + 1] || "").trim();
+                    const ts = parseDateToTimestamp(raw);
+                    const yv = parseFloat(row[yIdx + 1]);
+                    if (ts !== null && !isNaN(yv) && isFinite(yv)) {
+                        points.push([ts, yv]);
+                    }
+                }
+            } else {
+                // 无法绘制散点图
+                if (state.chart) state.chart.dispose();
+                document.getElementById("chart").innerHTML =
+                    '<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#888">散点图需要 X 和 Y 轴均为数值或日期列</div>';
+                return;
+            }
+
+            if (points.length === 0) {
+                if (state.chart) state.chart.dispose();
+                document.getElementById("chart").innerHTML =
+                    '<div style="display:flex;align-items:center;justify-content:center;height:280px;color:#888">无有效数据点</div>';
+                return;
+            }
+
+            // 散点数据过多时随机抽样
+            const MAX_POINTS = 2000;
+            let finalPoints = points;
+            if (points.length > MAX_POINTS) {
+                finalPoints = points.sort(() => Math.random() - 0.5).slice(0, MAX_POINTS);
+            }
+
+            if (state.chart) state.chart.dispose();
+            state.chart = echarts.init(document.getElementById("chart"));
+
+            const option = {
+                tooltip: { trigger: "item" },
+                grid: { left: 60, right: 20, bottom: 60, top: 30 },
+                xAxis: {
+                    type: xType === "date" ? "time" : "value",
+                    name: xCol,
+                    axisLabel: xType === "date" ? { formatter: "{yyyy}-{MM}-{dd}", rotate: 45 } : undefined
+                },
+                yAxis: { type: "value", name: yCol },
+                series: [{ type: "scatter", symbolSize: 6, data: finalPoints }]
+            };
+            state.chart.setOption(option);
+        }
+
+        /** 将日期字符串解析为时间戳（ms），失败返回 null */
+        function parseDateToTimestamp(s) {
+            if (!s) return null;
+            // 尝试常见格式
+            const m = /^\s*(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?\s*$/.exec(s);
+            if (m) {
+                const d = new Date(+m[1], +m[2] - 1, +m[3], +m[4] || 0, +m[5] || 0, +m[6] || 0);
+                return isNaN(d.getTime()) ? null : d.getTime();
+            }
+            const fallback = new Date(s);
+            return isNaN(fallback.getTime()) ? null : fallback.getTime();
+        }
+
+        document.getElementById("chartType").addEventListener("change", renderChart);
+        document.getElementById("chartXAxis").addEventListener("change", renderChart);
+        document.getElementById("chartYAxis").addEventListener("change", renderChart);
+
+        // 智能图表推荐
+        document.getElementById("smartChartBtn").addEventListener("click", () => {
+            if (!state.allRows) return;
+            const numericCols = [];
+            const categoryCols = [];
+            const dateCols = [];
+            state.headers.forEach((h, i) => {
+                const t = detectColumnType(i);
+                if (t === "numeric") numericCols.push(h);
+                else if (t === "date") dateCols.push(h);
+                else categoryCols.push(h);
+            });
+
+            // X 轴优先选类别/日期列（区分度高），Y 轴优先选纯数值列
+            const xCandidates = categoryCols.length > 0 ? categoryCols : dateCols;
+            if (xCandidates.length > 0) {
+                document.getElementById("chartXAxis").value = xCandidates[0];
+            }
+            if (numericCols.length > 0) {
+                document.getElementById("chartYAxis").value = numericCols[0];
+            } else if (dateCols.length > 0) {
+                // 无纯数值列时，用日期列做 Y 轴（聚合为计数）
+                document.getElementById("chartYAxis").value = dateCols[0];
+            }
+            renderChart();
+            document.getElementById("chartExplanation").textContent =
+                `智能推荐: X轴=${xCandidates[0] || "无"}, Y轴=${numericCols[0] || dateCols[0] || "无"}`;
+        });
+
+        // ==================== 透视表 ====================
+        function initPivotFields() {
+            const rowField = document.getElementById("pivotRowField");
+            const valField = document.getElementById("pivotValueField");
+            const colField = document.getElementById("pivotColField");
+            rowField.innerHTML = "";
+            valField.innerHTML = "";
+            colField.innerHTML = '<option value="">（无）</option>';
+            state.headers.forEach(h => {
+                rowField.appendChild(new Option(h, h));
+                valField.appendChild(new Option(h, h));
+                colField.appendChild(new Option(h, h));
+            });
+        }
+
+        document.getElementById("pivotRunBtn").addEventListener("click", async () => {
+            const rowField = document.getElementById("pivotRowField").value;
+            const valField = document.getElementById("pivotValueField").value;
+            const colField = document.getElementById("pivotColField").value;
+            const aggFunc = document.getElementById("pivotAggFunc").value;
+            if (!rowField || !valField) { alert("请选择行字段和值字段"); return; }
+
+            try {
+                let pivotUrl = `/api/data/${state.sessionId}/pivot?tableName=${encodeURIComponent(state.currentTable)}&rowField=${encodeURIComponent(rowField)}&valueField=${encodeURIComponent(valField)}&aggFunc=${encodeURIComponent(aggFunc)}`;
+                if (colField) pivotUrl += `&colField=${encodeURIComponent(colField)}`;
+                const res = await fetch(pivotUrl);
+                const data = await res.json();
+                if (data.columns && data.rows) {
+                    const head = document.getElementById("pivotHead");
+                    const body = document.getElementById("pivotBody");
+                    head.innerHTML = "<tr>" + data.columns.map(h => `<th>${h}</th>`).join("") + "</tr>";
+                    body.innerHTML = data.rows.map(row =>
+                        "<tr>" + row.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>"
+                    ).join("");
+                    document.getElementById("pivotResultSection").style.display = "flex";
+                }
+            } catch (e) { alert("生成透视表失败: " + e.message); }
+        });
+
+        document.getElementById("pivotExportBtn").addEventListener("click", () => {
+            const table = document.getElementById("pivotTable");
+            let csv = [];
+            for (const row of table.rows) {
+                const cells = [];
+                for (const cell of row.cells) cells.push(`"${cell.textContent}"`);
+                csv.push(cells.join(","));
+            }
+            const blob = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "pivot.csv";
+            a.click();
+        });
+
+        // ==================== 数据清洗 ====================
+        function initCleanFields() {
+            const dedupCol = document.getElementById("dedupColumn");
+            const fillCol = document.getElementById("fillColumn");
+            const regexCol = document.getElementById("regexColumn");
+            const splitCol = document.getElementById("splitSourceColumn");
+            const convertCol = document.getElementById("convertColumn");
+            dedupCol.innerHTML = '<option value="">所有列</option>';
+            fillCol.innerHTML = "";
+            if (regexCol) regexCol.innerHTML = "";
+            if (splitCol) splitCol.innerHTML = "";
+            if (convertCol) convertCol.innerHTML = "";
+            state.headers.forEach(h => {
+                dedupCol.appendChild(new Option(h, h));
+                fillCol.appendChild(new Option(h, h));
+                if (regexCol) regexCol.appendChild(new Option(h, h));
+                if (splitCol) splitCol.appendChild(new Option(h, h));
+                if (convertCol) convertCol.appendChild(new Option(h, h));
+            });
+        }
+
+        document.getElementById("dedupBtn").addEventListener("click", async () => {
+            const col = document.getElementById("dedupColumn").value;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/deduplicate?tableName=${encodeURIComponent(state.currentTable)}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(col ? [col] : null)
+                });
+                const data = await res.json();
+                alert(`去重完成，删除 ${data.removed || 0} 条重复记录，剩余 ${data.remaining || 0} 条`);
+                resetAndLoad();
+            } catch (e) { alert("去重失败: " + e.message); }
+        });
+
+        document.getElementById("fillBtn").addEventListener("click", async () => {
+            const col = document.getElementById("fillColumn").value;
+            const val = document.getElementById("fillValue").value;
+            if (!col) { alert("请选择列"); return; }
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/fill-empty?tableName=${encodeURIComponent(state.currentTable)}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fillColumn: col, fillValue: val })
+                });
+                const data = await res.json();
+                alert(`填充完成，更新 ${data.updated || 0} 条记录`);
+                resetAndLoad();
+            } catch (e) { alert("填充失败: " + e.message); }
+        });
+
+        // 正则替换
+        document.getElementById("regexReplaceBtn").addEventListener("click", async () => {
+            const col = document.getElementById("regexColumn").value;
+            const pattern = document.getElementById("regexPattern").value;
+            const replacement = document.getElementById("regexReplacement").value;
+            if (!col || !pattern) { alert("请选择列并输入匹配模式"); return; }
+            if (!confirm(`对列 "${col}" 执行正则替换？`)) return;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/regex-replace`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, column: col, pattern, replacement })
+                });
+                const data = await res.json();
+                if (data.success) { alert(`替换完成，更新 ${data.updated || 0} 条`); resetAndLoad(); }
+                else alert("替换失败: " + (data.detail || ""));
+            } catch (e) { alert("替换失败: " + e.message); }
+        });
+
+        // 列拆分
+        document.getElementById("splitColumnBtn").addEventListener("click", async () => {
+            const col = document.getElementById("splitSourceColumn").value;
+            const delimiter = document.getElementById("splitDelimiter").value;
+            if (!col || !delimiter) { alert("请选择列并输入分隔符"); return; }
+            if (!confirm(`对列 "${col}" 按 "${delimiter}" 拆分？`)) return;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/split-column`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, sourceColumn: col, delimiter })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`拆分完成，新增 ${data.newColumns?.length || 0} 列，处理 ${data.affectedRows || 0} 行`);
+                    resetAndLoad();
+                } else alert("拆分失败: " + (data.detail || ""));
+            } catch (e) { alert("拆分失败: " + e.message); }
+        });
+
+        // 数据类型转换
+        document.getElementById("convertTargetType").addEventListener("change", (e) => {
+            document.getElementById("dateFormatRow").style.display = e.target.value === "date" ? "" : "none";
+        });
+        document.getElementById("convertTypeBtn").addEventListener("click", async () => {
+            const col = document.getElementById("convertColumn").value;
+            const targetType = document.getElementById("convertTargetType").value;
+            const dateFormat = document.getElementById("convertDateFormat").value;
+            if (!col) { alert("请选择列"); return; }
+            if (!confirm(`将列 "${col}" 转换为 ${targetType}？`)) return;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/convert-type`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, column: col, targetType, dateFormat })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    let msg = `转换完成，成功 ${data.updated || 0} 条`;
+                    if (data.errors?.length) msg += `，失败 ${data.errors.length} 条`;
+                    alert(msg);
+                    resetAndLoad();
+                } else alert("转换失败: " + (data.detail || ""));
+            } catch (e) { alert("转换失败: " + e.message); }
+        });
+
+        // 数据校验
+        document.getElementById("addValidationRuleBtn").addEventListener("click", () => {
+            const container = document.getElementById("validationRules");
+            const idx = container.children.length;
+            const div = document.createElement("div");
+            div.className = "panel-row";
+            div.style.display = "flex";
+            div.style.gap = "8px";
+            div.style.alignItems = "center";
+            div.style.marginBottom = "6px";
+            div.innerHTML = `
+            <select class="vr-column" style="flex:2">${state.headers.map(h => `<option value="${h}">${h}</option>`).join("")}</select>
+            <select class="vr-type" style="flex:2">
+                <option value="not_empty">非空</option>
+                <option value="email">邮箱</option>
+                <option value="phone">手机号</option>
+                <option value="range">数值范围</option>
+                <option value="regex">正则匹配</option>
+            </select>
+            <input type="text" class="vr-params" placeholder='参数 (如 min:0,max:100 或 ^\d+$)' style="flex:3">
+            <button class="btn btn-danger" onclick="this.parentElement.remove()" style="padding:4px 8px">×</button>
+        `;
+            container.appendChild(div);
+        });
+        document.getElementById("validateBtn").addEventListener("click", async () => {
+            const ruleDivs = document.querySelectorAll("#validationRules > div");
+            if (ruleDivs.length === 0) { alert("请先添加校验规则"); return; }
+            const rules = Array.from(ruleDivs).map(div => {
+                const column = div.querySelector(".vr-column").value;
+                const ruleType = div.querySelector(".vr-type").value;
+                const paramsStr = div.querySelector(".vr-params").value.trim();
+                const params = {};
+                if (paramsStr) {
+                    if (ruleType === "range") {
+                        paramsStr.split(",").forEach(p => {
+                            const [k, v] = p.split(":").map(s => s.trim());
+                            if (k && v !== undefined) params[k] = parseFloat(v);
+                        });
+                    } else if (ruleType === "regex") {
+                        params.pattern = paramsStr;
+                    }
+                }
+                return { column, ruleType, params };
+            });
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, rules })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const resultsDiv = document.getElementById("validationResults");
+                    if (data.invalidCount === 0) {
+                        resultsDiv.innerHTML = '<div style="color:#27ae60;font-weight:bold">✅ 全部通过，无违规数据</div>';
+                    } else {
+                        let html = `<div style="color:#e74c3c;font-weight:bold;margin-bottom:8px">⚠️ 发现 ${data.invalidCount} 处违规</div>`;
+                        html += '<div style="max-height:300px;overflow:auto;font-size:12px">';
+                        html += '<table style="width:100%;border-collapse:collapse"><tr style="background:#f5f5f5"><th style="padding:4px;border:1px solid #ddd">行</th><th style="padding:4px;border:1px solid #ddd">列</th><th style="padding:4px;border:1px solid #ddd">值</th><th style="padding:4px;border:1px solid #ddd">原因</th></tr>';
+                        for (const row of data.invalidRows.slice(0, 100)) {
+                            html += `<tr><td style="padding:4px;border:1px solid #ddd">${row.rowId}</td><td style="padding:4px;border:1px solid #ddd">${row.column}</td><td style="padding:4px;border:1px solid #ddd">${row.value}</td><td style="padding:4px;border:1px solid #ddd;color:#e74c3c">${row.message}</td></tr>`;
+                        }
+                        html += '</table></div>';
+                        resultsDiv.innerHTML = html;
+                    }
+                } else alert("校验失败: " + (data.detail || ""));
+            } catch (e) { alert("校验失败: " + e.message); }
+        });
+
+        // ==================== CRUD：行/列操作 ====================
+
+        // 全选 checkbox
+        document.addEventListener("change", (e) => {
+            if (e.target.id === "selectAllRows") {
+                const checked = e.target.checked;
+                document.querySelectorAll(".row-checkbox").forEach(cb => cb.checked = checked);
+            }
+        });
+
+        // 插入行（已注释）
+        /*
+        document.getElementById("addRowBtn").addEventListener("click", async () => {
+            if (!state.sessionId || !state.currentTable) return;
+            const newRow = {};
+            state.headers.forEach(h => newRow[h] = "");
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/rows`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, rows: [newRow] })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    state.sortColumn = "row_id";
+                    state.sortOrder = "desc";
+                    state.page = 1;
+                    state.allRows = null;
+                    els.tableBody.innerHTML = "";
+                    loadData();
+                } else alert("插入失败: " + (data.detail || ""));
+            } catch (e) { alert("插入失败: " + e.message); }
+        });
+        */
+
+        // 删除行（已注释）
+        /*
+        document.getElementById("deleteRowBtn").addEventListener("click", async () => {
+            const checked = document.querySelectorAll('.row-checkbox:checked');
+            if (checked.length === 0) { alert("请先勾选要删除的行"); return; }
+            if (!confirm(`确定删除 ${checked.length} 行？`)) return;
+            const rowIds = Array.from(checked).map(cb => parseInt(cb.value));
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/rows`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, rowIds })
+                });
+                const data = await res.json();
+                if (data.success) resetAndLoad();
+                else alert("删除失败: " + (data.detail || ""));
+            } catch (e) { alert("删除失败: " + e.message); }
+        });
+        */
+
+        // ==================== 列设置 ====================
+
+        // 获取当前会话的列设置 key
+        function getColumnSettingsKey() {
+            return `colSettings_${state.sessionId}_${state.currentTable}`;
+        }
+
+        // 加载已保存的列设置
+        function loadColumnSettings() {
+            const key = getColumnSettingsKey();
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.columnOrder = parsed.order || [];
+                    state.columnVisibility = parsed.visibility || {};
+                } catch { state.columnOrder = []; state.columnVisibility = {}; }
+            } else {
+                state.columnOrder = [];
+                state.columnVisibility = {};
+            }
+            // 确保所有当前列都有可见性设置（默认显示）
+            for (const h of (state.headers || [])) {
+                if (state.columnVisibility[h] === undefined) state.columnVisibility[h] = true;
+            }
+            // 补齐新增的列到顺序末尾
+            for (const h of (state.headers || [])) {
+                if (!state.columnOrder.includes(h)) state.columnOrder.push(h);
+            }
+        }
+
+        // 保存列设置到 localStorage
+        function saveColumnSettings() {
+            const key = getColumnSettingsKey();
+            localStorage.setItem(key, JSON.stringify({
+                order: state.columnOrder,
+                visibility: state.columnVisibility
+            }));
+        }
+
+        // 获取实际显示列（按设置过滤和排序）
+        function getDisplayColumns() {
+            const headers = state.headers || [];
+            if (!state.columnOrder.length) return headers.slice();
+            // 按 columnOrder 排序，只返回可见列
+            return state.columnOrder
+                .filter(col => headers.includes(col))
+                .filter(col => state.columnVisibility[col] !== false);
+        }
+
+        document.getElementById("columnSettingsBtn").addEventListener("click", async () => {
+            if (!state.sessionId || !state.currentTable) { alert("请先选择表"); return; }
+            const headers = state.headers || [];
+            // 如果还没有设置，初始化为默认顺序
+            if (!state.columnOrder.length) {
+                state.columnOrder = headers.slice();
+            }
+            // 补齐新增的列
+            for (const h of headers) {
+                if (!state.columnOrder.includes(h)) state.columnOrder.push(h);
+                if (state.columnVisibility[h] === undefined) state.columnVisibility[h] = true;
+            }
+
+            const listEl = document.getElementById("columnSettingsList");
+            listEl.innerHTML = "";
+
+            // 按 columnOrder 顺序渲染
+            const orderedCols = state.columnOrder.filter(c => headers.includes(c));
+            orderedCols.forEach((col, idx) => {
+                const row = document.createElement("div");
+                row.className = "column-setting-item";
+                row.draggable = true;
+                row.dataset.col = col;
+                row.innerHTML = `
+                    <span class="drag-handle">⠿</span>
+                    <input type="checkbox" ${state.columnVisibility[col] !== false ? "checked" : ""} data-col="${col}">
+                    <span class="column-name">${col}</span>
+                    <span class="column-order">#${idx + 1}</span>
+                `;
+                listEl.appendChild(row);
+            });
+
+            // 绑定拖拽事件
+            setupColumnDrag(listEl);
+
+            document.getElementById("columnSettingsModal").classList.remove("hidden");
+        });
+
+        function setupColumnDrag(listEl) {
+            let draggedItem = null;
+            const items = listEl.querySelectorAll(".column-setting-item");
+
+            items.forEach(item => {
+                // 禁止从 checkbox 启动拖拽
+                item.addEventListener("dragstart", (e) => {
+                    if (e.target.tagName === "INPUT") {
+                        e.preventDefault();
+                        return;
+                    }
+                    draggedItem = item;
+                    item.classList.add("dragging");
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", item.dataset.col);
+                });
+
+                item.addEventListener("dragend", () => {
+                    item.classList.remove("dragging");
+                    draggedItem = null;
+                    // 更新序号
+                    listEl.querySelectorAll(".column-setting-item").forEach((el, i) => {
+                        el.querySelector(".column-order").textContent = `#${i + 1}`;
+                    });
+                });
+
+                item.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = "move";
+                    if (!draggedItem || draggedItem === item) return;
+                    const rect = item.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    if (e.clientY < midY) {
+                        listEl.insertBefore(draggedItem, item);
+                    } else {
+                        listEl.insertBefore(draggedItem, item.nextSibling);
+                    }
+                });
+
+                // checkbox 变化时实时更新可见性
+                const checkbox = item.querySelector("input[type=checkbox]");
+                if (checkbox) {
+                    checkbox.addEventListener("change", (e) => {
+                        const col = e.target.getAttribute("data-col");
+                        state.columnVisibility[col] = e.target.checked;
+                    });
+                }
+            });
+
+            // 列表级别的 dragover，允许拖到底部
+            listEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+            });
+        }
+
+        document.getElementById("columnSettingsCancelBtn").addEventListener("click", () => {
+            document.getElementById("columnSettingsModal").classList.add("hidden");
+        });
+        document.getElementById("columnSettingsSaveBtn").addEventListener("click", async () => {
+            const listEl = document.getElementById("columnSettingsList");
+            const newOrder = [];
+            listEl.querySelectorAll(".column-setting-item").forEach(el => {
+                newOrder.push(el.dataset.col);
+            });
+            state.columnOrder = newOrder;
+            saveColumnSettings();
+            document.getElementById("columnSettingsModal").classList.add("hidden");
+            // 重新渲染表格
+            renderTableHeader();
+            resetAndLoad();
+        });
+        document.getElementById("columnSettingsResetBtn").addEventListener("click", () => {
+            state.columnOrder = (state.headers || []).slice();
+            state.columnVisibility = {};
+            (state.headers || []).forEach(h => state.columnVisibility[h] = true);
+            localStorage.removeItem(getColumnSettingsKey());
+            // 重新渲染弹窗
+            document.getElementById("columnSettingsBtn").click();
+        });
+
+        // 新增列、改名、删除隐藏列（已注释）
+        /*
+        document.getElementById("colSettingsAddColBtn").addEventListener("click", () => {
+            document.getElementById("newColumnName").value = "";
+            document.getElementById("newColumnDefault").value = "";
+            document.getElementById("addColumnModal").classList.remove("hidden");
+        });
+        document.getElementById("addColumnCancelBtn").addEventListener("click", () => {
+            document.getElementById("addColumnModal").classList.add("hidden");
+        });
+        document.getElementById("addColumnSaveBtn").addEventListener("click", async () => {
+            const colName = document.getElementById("newColumnName").value.trim();
+            if (!colName) { alert("列名不能为空"); return; }
+            const defaultVal = document.getElementById("newColumnDefault").value;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/columns`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, columnName: colName, defaultValue: defaultVal })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById("addColumnModal").classList.add("hidden");
+                    document.getElementById("columnSettingsModal").classList.add("hidden");
+                    resetAndLoad();
+                    setTimeout(() => {
+                        document.getElementById("columnSettingsBtn").click();
+                    }, 500);
+                } else alert("新增列失败: " + (data.detail || ""));
+            } catch (e) { alert("新增列失败: " + e.message); }
+        });
+
+        document.getElementById("colSettingsRenameBtn").addEventListener("click", () => {
+            const sel = document.getElementById("renameColumnFrom");
+            sel.innerHTML = "";
+            state.headers.forEach(h => sel.appendChild(new Option(h, h)));
+            document.getElementById("renameColumnTo").value = "";
+            document.getElementById("renameColumnModal").classList.remove("hidden");
+        });
+        document.getElementById("renameColumnCancelBtn").addEventListener("click", () => {
+            document.getElementById("renameColumnModal").classList.add("hidden");
+        });
+        document.getElementById("renameColumnSaveBtn").addEventListener("click", async () => {
+            const oldName = document.getElementById("renameColumnFrom").value;
+            const newName = document.getElementById("renameColumnTo").value.trim();
+            if (!newName) { alert("新列名不能为空"); return; }
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/columns/${encodeURIComponent(oldName)}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tableName: state.currentTable, newName })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById("renameColumnModal").classList.add("hidden");
+                    document.getElementById("columnSettingsModal").classList.add("hidden");
+                    resetAndLoad();
+                    setTimeout(() => {
+                        document.getElementById("columnSettingsBtn").click();
+                    }, 500);
+                } else alert("重命名失败: " + (data.detail || ""));
+            } catch (e) { alert("重命名失败: " + e.message); }
+        });
+
+        document.getElementById("colSettingsDeleteHiddenBtn").addEventListener("click", async () => {
+            const hiddenCols = [];
+            document.querySelectorAll("#columnSettingsList .column-setting-item").forEach(el => {
+                const cb = el.querySelector("input[type=checkbox]");
+                if (cb && !cb.checked) hiddenCols.push(el.dataset.col);
+            });
+            if (hiddenCols.length === 0) {
+                alert("没有隐藏的列。取消勾选要删除的列后再点击此按钮。");
+                return;
+            }
+            if (!confirm(`确定要从数据库中永久删除以下 ${hiddenCols.length} 列？\n\n${hiddenCols.join("、")}\n\n此操作不可撤销！`)) return;
+
+            let failed = 0;
+            for (const col of hiddenCols) {
+                try {
+                    const res = await fetch(`/api/data/${state.sessionId}/columns/${encodeURIComponent(col)}?tableName=${encodeURIComponent(state.currentTable)}`, {
+                        method: "DELETE"
+                    });
+                    const data = await res.json();
+                    if (!data.success) failed++;
+                } catch { failed++; }
+            }
+            document.getElementById("columnSettingsModal").classList.add("hidden");
+            resetAndLoad();
+            if (failed > 0) {
+                alert(`删除完成，${failed} 列失败`);
+            }
+        });
+        */
+
+        // ==================== 对比分析 ====================
+        function initCompareForm() {
+            const fileA = document.getElementById("compareFileA");
+            const fileB = document.getElementById("compareFileB");
+            fileA.innerHTML = '<option value="">选择文件</option>';
+            fileB.innerHTML = '<option value="">选择文件</option>';
+            sessions.forEach(s => {
+                fileA.appendChild(new Option(s.fileName, s.sessionId));
+                fileB.appendChild(new Option(s.fileName, s.sessionId));
+            });
+        }
+
+        function updateCompareKeyCol() {
+            const sheetA = document.getElementById("compareSheetA").value;
+            const sheetB = document.getElementById("compareSheetB").value;
+            const keyColSel = document.getElementById("compareKeyCol");
+            keyColSel.innerHTML = '<option value="">选择用于对比的列</option>';
+            if (!sheetA || !sheetB) return;
+            const tableA = compareSheetsA.find(t => t.name === sheetA);
+            const tableB = compareSheetsB.find(t => t.name === sheetB);
+            console.log("updateCompareKeyCol debug:", { sheetA, sheetB, tableA: tableA ? tableA.name : null, tableB: tableB ? tableB.name : null, headersA: tableA?.headers, headersB: tableB?.headers });
+            if (!tableA || !tableB || !tableA.headers || !tableB.headers) return;
+            const headersA = tableA.headers;
+            const headersB = tableB.headers;
+            const intersection = headersA.filter(h => headersB.includes(h));
+            intersection.forEach(h => keyColSel.appendChild(new Option(h, h)));
+        }
+
+        document.getElementById("compareFileA").addEventListener("change", async () => {
+            const sid = document.getElementById("compareFileA").value;
+            const sheetSel = document.getElementById("compareSheetA");
+            sheetSel.innerHTML = '<option value="">选择工作表</option>';
+            compareSheetsA = [];
+            if (!sid) { updateCompareKeyCol(); return; }
+            const res = await fetch(`/api/data/${sid}/tables`);
+            const data = await res.json();
+            compareSheetsA = data.tables || [];
+            compareSheetsA.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
+            updateCompareKeyCol();
+        });
+
+        document.getElementById("compareFileB").addEventListener("change", async () => {
+            const sid = document.getElementById("compareFileB").value;
+            const sheetSel = document.getElementById("compareSheetB");
+            sheetSel.innerHTML = '<option value="">选择工作表</option>';
+            compareSheetsB = [];
+            if (!sid) { updateCompareKeyCol(); return; }
+            const res = await fetch(`/api/data/${sid}/tables`);
+            const data = await res.json();
+            compareSheetsB = data.tables || [];
+            compareSheetsB.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
+            updateCompareKeyCol();
+        });
+
+        document.getElementById("compareSheetA").addEventListener("change", updateCompareKeyCol);
+        document.getElementById("compareSheetB").addEventListener("change", updateCompareKeyCol);
+
+        document.getElementById("compareRunBtn").addEventListener("click", async () => {
+            const sidA = document.getElementById("compareFileA").value;
+            const sidB = document.getElementById("compareFileB").value;
+            const tableA = document.getElementById("compareSheetA").value;
+            const tableB = document.getElementById("compareSheetB").value;
+            const keyCol = document.getElementById("compareKeyCol").value;
+            if (!sidA || !sidB || !tableA || !tableB || !keyCol) {
+                alert("请完成所有选择"); return;
+            }
+            try {
+                const res = await fetch(`/api/data/compare`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sessionA: sidA, tableA, sessionB: sidB, tableB, keyColumn: keyCol })
+                });
+                const data = await res.json();
+                const stats = data.stats || {};
+                document.getElementById("compareOnlyA").textContent = stats.onlyA || 0;
+                document.getElementById("compareOnlyB").textContent = stats.onlyB || 0;
+                document.getElementById("compareBoth").textContent = stats.both || 0;
+                document.getElementById("compareRowsA").textContent = (stats.onlyA || 0) + (stats.both || 0);
+                document.getElementById("compareRowsB").textContent = (stats.onlyB || 0) + (stats.both || 0);
+                const head = document.getElementById("compareHead");
+                const body = document.getElementById("compareBody");
+                const sampleChanged = data.sampleChanged || [];
+                if (sampleChanged.length > 0) {
+                    head.innerHTML = "<tr><th>Key</th><th>变化列</th></tr>";
+                    body.innerHTML = sampleChanged.map(item =>
+                        `<tr><td>${item.key ?? ""}</td><td>${(item.changedColumns || []).join(", ")}</td></tr>`
+                    ).join("");
+                } else {
+                    head.innerHTML = "<tr><th>Key</th><th>变化列</th></tr>";
+                    body.innerHTML = "";
+                }
+                document.getElementById("compareResult").classList.remove("hidden");
+            } catch (e) { alert("对比失败: " + e.message); }
+        });
+
+        // ==================== AI 对话 ====================
+        async function initAiChat() {
+            // 检测 AI 是否已配置，动态更新欢迎消息
+            try {
+                const res = await fetch("/api/ai/config");
+                const cfg = await res.json();
+                const messagesEl = document.getElementById("aiChatMessages");
+                // 更新欢迎消息中的配置信息（仅在首条消息时）
+                if (messagesEl.children.length === 1) {
+                    const firstMsg = messagesEl.children[0].querySelector(".msg-content");
+                    if (firstMsg) {
+                        const text = firstMsg.textContent;
+                        if (text.includes("请先在右上角")) {
+                            // 未配置 API Key
+                            return;
+                        }
+                        // 已配置，更新配置显示
+                        firstMsg.innerHTML = ` 你好！我是 Excel AI 助手，当前配置：${cfg.provider} / ${cfg.model || "默认模型"}。<br>你可以用自然语言问我关于这个 Excel 的问题，比如：<br>• "统计每个部门的总金额"<br>• "找出金额大于10000的记录"<br>• "按日期分组统计数量"<br><br>支持多轮追问，我会记住上下文。`;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        document.getElementById("aiClearBtn").addEventListener("click", () => {
+            if (!state.sessionId) return;
+            state.aiHistory[state.sessionId] = [];
+            els.aiChatMessages.innerHTML = `
+            <div class="ai-message ai">
+                <div class="msg-content">
+                    👋 对话已清空。请继续提问。
+                </div>
+            </div>`;
+        });
+
+        document.getElementById("aiSendBtn").addEventListener("click", async () => {
+            const input = document.getElementById("aiInput");
+            const question = input.value.trim();
+            if (!question) return;
+            input.value = "";
+
+            // 初始化当前 session 的历史
+            if (!state.aiHistory[state.sessionId]) {
+                state.aiHistory[state.sessionId] = [];
+            }
+            // 添加用户消息到历史
+            state.aiHistory[state.sessionId].push({ role: "user", content: question });
+
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "ai-message user";
+            msgDiv.innerHTML = `<div class="msg-content">${question}</div>`;
+            els.aiChatMessages.appendChild(msgDiv);
+
+            // 显示 loading 指示器
+            const loadingDiv = document.createElement("div");
+            loadingDiv.className = "ai-message ai";
+            loadingDiv.id = "aiLoadingMsg";
+            loadingDiv.innerHTML = `<div class="msg-content" style="color:#888"><span style="display:inline-block;animation:aiPulse 1s infinite">AI 正在思考中</span><span style="display:inline-block;animation:aiDots 1.5s infinite">...</span></div>`;
+            els.aiChatMessages.appendChild(loadingDiv);
+            els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
+
+            // 禁用发送按钮
+            const sendBtn = document.getElementById("aiSendBtn");
+            sendBtn.disabled = true;
+            sendBtn.textContent = "等待中...";
+
+            try {
+                const res = await fetch(`/api/ai/nl2sql/${state.sessionId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question: question,
+                        history: state.aiHistory[state.sessionId].slice(0, -1)  // 不含当前消息
+                    })
+                });
+                const data = await res.json();
+
+                // 移除 loading 指示器
+                const loadingEl = document.getElementById("aiLoadingMsg");
+                if (loadingEl) loadingEl.remove();
+
+                const aiDiv = document.createElement("div");
+                aiDiv.className = "ai-message ai";
+                if (!data.success) {
+                    aiDiv.innerHTML = `<div class="msg-content"> ${data.error || "查询失败"}</div>`;
+                    els.aiChatMessages.appendChild(aiDiv);
+                    els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
+                    return;
+                }
+                // 添加 AI 回复到历史
+                state.aiHistory[state.sessionId].push({
+                    role: "assistant",
+                    content: data.explanation || "查询成功"
+                });
+                let html = `<div class="msg-content">${data.explanation || "查询成功"}</div>`;
+                if (data.sql) {
+                    html += `<div class="msg-content" style="font-size:11px;color:#888;margin-top:4px">SQL: ${data.sql}</div>`;
+                }
+                if (data.rows && data.rows.length > 0) {
+                    html += `<div class="msg-result">`;
+                    html += "<table><thead><tr>" + data.columns.map(h => `<th>${h}</th>`).join("") + "</tr></thead><tbody>";
+                    html += data.rows.slice(0, 50).map(row =>
+                        "<tr>" + row.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>"
+                    ).join("");
+                    html += "</tbody></table>";
+                    if (data.rows.length > 50) html += `<p>共 ${data.rows.length} 行，仅显示前 50 行</p>`;
+                    html += `</div>`;
+                }
+                aiDiv.innerHTML = html;
+                els.aiChatMessages.appendChild(aiDiv);
+                els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
+            } catch (e) {
+                const loadingEl = document.getElementById("aiLoadingMsg");
+                if (loadingEl) loadingEl.remove();
+                const errDiv = document.createElement("div");
+                errDiv.className = "ai-message ai";
+                errDiv.innerHTML = `<div class="msg-content">请求失败: ${e.message}</div>`;
+                els.aiChatMessages.appendChild(errDiv);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = "发送";
+            }
+        });
+
+        document.getElementById("aiInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") document.getElementById("aiSendBtn").click();
+        });
+
+        // ==================== 系统状态监控 ====================
+        function formatUptime(seconds) {
+            const s = Math.floor(seconds || 0);
+            if (s > 3600) {
+                const h = Math.floor(s / 3600);
+                const m = Math.floor((s % 3600) / 60);
+                return h + "小时" + m + "分";
+            } else if (s > 60) {
+                const m = Math.floor(s / 60);
+                const sec = s % 60;
+                return m + "分" + sec + "秒";
+            } else {
+                return s + "秒";
+            }
+        }
+
+        async function pollSystemStats() {
+            try {
+                const res = await fetch("/api/system/stats");
+                const data = await res.json();
+                document.getElementById("sysUptime").textContent = formatUptime(data.uptime);
+                document.getElementById("sysMem").textContent = (data.process?.memoryMB ?? 0) + "MB";
+                document.getElementById("sysCpu").textContent = (data.process?.cpuPercentNorm ?? 0) + "%";
+                document.getElementById("sysDisk").textContent = (data.disk?.readKBps ?? 0) + "K读/" + (data.disk?.writeKBps ?? 0) + "K写";
+
+                const memVal = parseFloat(data.process?.memoryMB ?? 0);
+                const cpuVal = parseFloat(data.process?.cpuPercentNorm ?? 0);
+                const diskVal = parseFloat((data.disk?.readKBps ?? 0) + (data.disk?.writeKBps ?? 0));
+                setDot("dotMem", memVal);
+                setDot("dotCpu", cpuVal);
+                setDot("dotDisk", diskVal, "disk");
+            } catch (e) { }
+        }
+
+        function setDot(dotId, val, type) {
+            const dot = document.getElementById(dotId);
+            if (!dot) return;
+            const num = parseFloat(val) || 0;
+            let colorClass = "green";
+            if (type === "disk") {
+                colorClass = num > 100000 ? "red" : num > 50000 ? "yellow" : "green";
+            } else {
+                colorClass = num > 90 ? "red" : num > 70 ? "yellow" : "green";
+            }
+            dot.className = "dot " + colorClass;
+        }
+
+        setInterval(pollSystemStats, 10000);
+        pollSystemStats();
+
+        // ==================== 初始化 ====================
+        refreshSessionList();
+
+        // 恢复上次活跃的会话（从 localStorage）
+        async function restoreLastSession() {
+            try {
+                const lastSessionId = localStorage.getItem("lastSessionId");
+                const lastTable = localStorage.getItem("lastTable");
+                if (!lastSessionId) return;
+
+                // 等待 session 列表加载完成
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // 检查 session 是否还存在
+                const session = sessions.find(s => s.sessionId === lastSessionId);
+                if (session) {
+                    switchSession(lastSessionId);
+                    // 恢复上次选择的表
+                    if (lastTable && session.sheets?.some(s => s.name === lastTable)) {
+                        document.getElementById("sheetSelect").value = lastTable;
+                        state.currentTable = lastTable;
+                        resetAndLoad();
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+        restoreLastSession();
+    </script>
+</body>
+
+</html>
