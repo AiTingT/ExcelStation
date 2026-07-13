@@ -114,6 +114,23 @@ class ConvertTypeRequest(BaseModel):
     dateFormat: str = ""
 
 
+class CleanPreviewRequest(BaseModel):
+    """清洗预览请求（dry-run，不修改数据）"""
+    operation: str  # deduplicate | fill-empty | regex-replace | split-column | convert-type
+    tableName: str
+    columns: Optional[List[str]] = None   # deduplicate
+    fillColumn: str = ""                  # fill-empty
+    fillValue: str = ""                   # fill-empty
+    column: str = ""                      # regex-replace / convert-type
+    pattern: str = ""                     # regex-replace
+    replacement: str = ""                 # regex-replace
+    sourceColumn: str = ""                # split-column
+    delimiter: str = ","                  # split-column
+    maxSplits: int = 0                    # split-column
+    targetType: str = ""                  # convert-type
+    dateFormat: str = ""                  # convert-type
+
+
 class ValidationRule(BaseModel):
     """单条校验规则"""
     column: str

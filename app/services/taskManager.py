@@ -156,6 +156,21 @@ class ParseTaskManager:
 
         return True
 
+    def register_merged_session(self, session_id: str, file_name: str, table_name: str, headers: List[str], row_count: int) -> None:
+        """注册一个合并产生的会话（不经过解析流程），使其出现在文件列表中"""
+        sheet_info = SheetInfo(name=table_name, headers=headers, rowCount=row_count)
+        progress = ParseProgress(
+            sessionId=session_id,
+            fileName=file_name,
+            status="completed",
+            sheets=[sheet_info],
+            totalRows=row_count,
+            processedRows=row_count,
+            parseTime=0.0
+        )
+        with self._lock:
+            self._tasks[session_id] = progress
+
     def _update_progress(self, session_id: str, **kwargs):
         """更新进度"""
         with self._lock:

@@ -5,14 +5,19 @@ import math
 import json
 import csv
 import io
+import uuid
+from datetime import datetime
 
 from app.config import config
 from app.models.schemas import (
     TableData, StatsResponse, FilterOption, UpdateDataRequest,
     InsertRowsRequest, DeleteRowsRequest, AddColumnRequest, RenameColumnRequest,
-    RegexReplaceRequest, SplitColumnRequest, ConvertTypeRequest, ValidateRequest
+    RegexReplaceRequest, SplitColumnRequest, ConvertTypeRequest, ValidateRequest,
+    CleanPreviewRequest
 )
+from pydantic import BaseModel
 from app.services.database import DatabaseService
+from app.services.taskManager import taskManager
 
 router = APIRouter(prefix="/api/data", tags=["数据查询"])
 
@@ -37,6 +42,72 @@ def sanitize_table_name(name: str) -> str:
     return name.replace(" ", "_").replace("-", "_")
 
 
+def _is_number(v) -> bool:
+    try:
+        float(str(v).strip())
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def _is_date(v) -> bool:
+    import re
+    s = str(v).strip()
+    if not s:
+        return False
+    patterns = [
+        r'^\d{4}[-/年]\d{1,2}[-/月]\d{1,2}日?$',
+        r'^\d{1,2}[-/]\d{1,2}[-/]\d{4}$',
+        r'^\d{8}$',
+    ]
+    return any(re.match(p, s) for p in patterns)
+
+
+def _parse_date_val(v):
+    """尝试解析日期值，返回 datetime.date 或 None"""
+    import re
+    from datetime import datetime
+    s = str(v).strip()
+    if not s:
+        return None
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d", "%Y年%m月%d日"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    m = re.match(r'^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$', s)
+    if m:
+        try:
+            return datetime(int(m[1]), int(m[2]), int(m[3])).date()
+        except ValueError:
+            pass
+    return None
+
+
+class ReconcileRequest(BaseModel):
+    sessionA: str
+    tableA: str
+    sessionB: str
+    tableB: str
+    keyColumns: List[str]
+    amountColumn: Optional[str] = None
+    amountTolerance: float = 0.01
+    dateColumn: Optional[str] = None
+    dateToleranceDays: int = 0
+
+
+class MergeSource(BaseModel):
+    sessionId: str
+    tableName: str
+
+
+class MergeRequest(BaseModel):
+    sources: List[MergeSource]
+    targetTableName: str = "合并数据"
+    mergeMode: str = "union"  # union(并集) | intersect(交集)
+    addSource: bool = True
+
+
 @router.get("/{session_id}/tables")
 async def list_tables(session_id: str):
     """列出所有可用的表（sheet）"""
@@ -47,6 +118,8 @@ async def list_tables(session_id: str):
     tables = DatabaseService.list_tables(db_path)
     result = []
     for t in tables:
+        if t.startswith("_snapshot_"):
+            continue  # 隐藏清洗快照表
         headers = DatabaseService.get_headers(db_path, t)
         result.append({"name": t, "headers": headers})
 
@@ -590,7 +663,7 @@ async def compare_files(
         "sampleOnlyA": sample_rows(only_a_keys, map_a),
         "sampleOnlyB": sample_rows(only_b_keys, map_b),
         "sampleBoth": sample_rows(both_keys, map_a),
-        "sampleChanged": diff_details[:100]
+        "changedRows": diff_details
     }
 
 
@@ -761,6 +834,178 @@ async def convert_type(session_id: str, request: ConvertTypeRequest):
     return {"success": True, **result}
 
 
+@router.post("/{session_id}/clean/preview")
+async def clean_preview(session_id: str, request: CleanPreviewRequest):
+    """清洗预览（dry-run）：返回将影响的行数与样本，不修改数据"""
+    db_path = get_db_path(session_id)
+    if not db_path:
+        raise HTTPException(status_code=404, detail="会话不存在或已过期")
+    table_name = sanitize_table_name(request.tableName)
+    headers = DatabaseService.get_headers(db_path, table_name)
+    op = request.operation
+
+    def q(ident):
+        return f'`{ident}`' if config.DB_TYPE == 'mysql' else f'"{ident}"'
+
+    def fetch_count(sql, params=None):
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(sql, params or [])
+            row = cur.fetchone()
+            if config.DB_TYPE == 'mysql':
+                return list(row.values())[0]
+            return row[0]
+
+    # 总行数
+    total = fetch_count(f'SELECT COUNT(*) FROM {q(table_name)}')
+
+    samples = []
+    affected = 0
+    note = ""
+
+    if op == "deduplicate":
+        cols = request.columns or headers
+        col_list = ", ".join(q(c) for c in cols if c in headers)
+        if not col_list:
+            raise HTTPException(status_code=400, detail="指定的列不存在")
+        affected = fetch_count(
+            f'SELECT COUNT(*) FROM {q(table_name)} WHERE row_id NOT IN '
+            f'(SELECT MIN(row_id) FROM {q(table_name)} GROUP BY {col_list})'
+        )
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                f'SELECT {col_list} FROM {q(table_name)} WHERE row_id NOT IN '
+                f'(SELECT MIN(row_id) FROM {q(table_name)} GROUP BY {col_list}) LIMIT 5'
+            )
+            for r in cur.fetchall():
+                samples.append({"before": " | ".join("" if x is None else str(x) for x in r), "after": "（删除）"})
+        note = "保留每组重复行的第一条，删除其余重复行"
+
+    elif op == "fill-empty":
+        col = request.fillColumn
+        if col not in headers:
+            raise HTTPException(status_code=400, detail="指定的列不存在")
+        affected = fetch_count(
+            f'SELECT COUNT(*) FROM {q(table_name)} WHERE {q(col)} IS NULL OR {q(col)} = ""'
+        )
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                f'SELECT {q(col)} FROM {q(table_name)} WHERE {q(col)} IS NULL OR {q(col)} = "" LIMIT 5'
+            )
+            for r in cur.fetchall():
+                samples.append({"before": "(空)" if r[0] is None or r[0] == "" else str(r[0]), "after": request.fillValue})
+        note = f"将列「{col}」中的空值填充为「{request.fillValue or '(空)'}」"
+
+    elif op == "regex-replace":
+        import re as _re
+        col = request.column
+        if col not in headers:
+            raise HTTPException(status_code=400, detail=f"列 '{col}' 不存在")
+        try:
+            compiled = _re.compile(request.pattern)
+        except _re.error as e:
+            raise HTTPException(status_code=400, detail=f"正则表达式语法错误: {e}")
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(f'SELECT {q(col)} FROM {q(table_name)}')
+            for r in cur.fetchall():
+                val = r[0]
+                if val is None:
+                    continue
+                str_val = str(val)
+                new_val = compiled.sub(request.replacement, str_val)
+                if new_val != str_val:
+                    affected += 1
+                    if len(samples) < 5:
+                        samples.append({"before": str_val, "after": new_val})
+        note = f"将列「{col}」中匹配 /{request.pattern}/ 的内容替换为「{request.replacement}」"
+
+    elif op == "split-column":
+        col = request.sourceColumn
+        if col not in headers:
+            raise HTTPException(status_code=400, detail=f"列 '{col}' 不存在")
+        delim = request.delimiter
+        if not delim:
+            raise HTTPException(status_code=400, detail="分隔符不能为空")
+        max_parts = 0
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(f'SELECT {q(col)} FROM {q(table_name)}')
+            for r in cur.fetchall():
+                val = r[0]
+                if not val:
+                    continue
+                parts = str(val).split(delim, request.maxSplits) if request.maxSplits > 0 else str(val).split(delim)
+                max_parts = max(max_parts, len(parts))
+                if len(parts) > 1:
+                    affected += 1
+                    if len(samples) < 5:
+                        samples.append({"before": str(val), "after": " | ".join(p.strip() for p in parts)})
+        if max_parts > 1:
+            new_cols = ", ".join(f"{col}_{i}" for i in range(1, max_parts + 1))
+            note = f"将列「{col}」按「{delim}」拆分，新增 {max_parts} 列（{new_cols}）"
+        else:
+            note = f"未发现包含分隔符「{delim}」的值，不会新增列"
+
+    elif op == "convert-type":
+        col = request.column
+        if col not in headers:
+            raise HTTPException(status_code=400, detail=f"列 '{col}' 不存在")
+        tt = request.targetType
+        if tt not in ("string", "number", "date"):
+            raise HTTPException(status_code=400, detail="targetType 必须是 string/number/date")
+        from datetime import datetime as _dt
+        with DatabaseService.get_connection(db_path) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                f'SELECT row_id, {q(col)} FROM {q(table_name)} '
+                f'WHERE {q(col)} IS NOT NULL AND {q(col)} != ""'
+            )
+            rows = cur.fetchall()
+        fail = 0
+        for row in rows:
+            rid, val = row[0], row[1]
+            try:
+                if tt == "number":
+                    new_val = str(float(val))
+                elif tt == "date":
+                    parsed = None
+                    for fmt in ["%Y-%m-%d", "%Y/%m/%d", "%d/%m/%Y", "%m/%d/%Y", "%Y%m%d",
+                                "%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S"]:
+                        try:
+                            parsed = _dt.strptime(str(val).strip(), fmt)
+                            break
+                        except ValueError:
+                            continue
+                    if not parsed:
+                        fail += 1
+                        if len(samples) < 5:
+                            samples.append({"before": str(val), "after": "❌ 无法解析"})
+                        continue
+                    out_fmt = request.dateFormat or "%Y-%m-%d"
+                    new_val = parsed.strftime(out_fmt)
+                else:
+                    new_val = str(val)
+                affected += 1
+                if len(samples) < 5:
+                    samples.append({"before": str(val), "after": new_val})
+            except (ValueError, TypeError):
+                fail += 1
+                if len(samples) < 5:
+                    samples.append({"before": str(val), "after": "❌ 转换失败"})
+        type_name = {"string": "文本", "number": "数字", "date": "日期"}[tt]
+        note = f"将列「{col}」转为{type_name}"
+        if fail:
+            note += f"，其中 {fail} 条无法转换将保持原值"
+
+    else:
+        raise HTTPException(status_code=400, detail=f"不支持的操作: {op}")
+
+    return {"success": True, "affectedCount": affected, "totalRows": total, "samples": samples, "note": note}
+
+
 @router.post("/{session_id}/clean/validate")
 async def validate_data(session_id: str, request: ValidateRequest):
     """数据校验"""
@@ -846,5 +1091,292 @@ def _check_rule(val, rule) -> tuple:
         if val_str and not re.match(pattern, val_str):
             return (False, f"不匹配规则: {pattern}")
         return (True, "")
+
+
+@router.post("/merge")
+async def merge_tables(request: MergeRequest):
+    """合并多个会话的表为一张新表，可选追加「来源文件名」「导入时间」列"""
+    if not request.sources or len(request.sources) < 2:
+        raise HTTPException(status_code=400, detail="至少选择 2 个表进行合并")
+
+    # 1. 收集每个源的列结构和全量数据
+    sources_data = []
+    for src in request.sources:
+        db_path = get_db_path(src.sessionId)
+        if not db_path:
+            raise HTTPException(status_code=404, detail=f"会话 {src.sessionId} 不存在或已过期")
+        try:
+            headers = DatabaseService.get_headers(db_path, src.tableName)
+        except Exception:
+            raise HTTPException(status_code=400, detail=f"表 {src.tableName} 不存在")
+        if not headers:
+            continue
+        cols_sql = ', '.join([f'"{h}"' for h in headers])
+        _, rows = DatabaseService.execute_sql(db_path, f'SELECT {cols_sql} FROM "{src.tableName}"')
+        progress = taskManager.get_progress(src.sessionId)
+        file_name = progress.fileName if progress else src.tableName
+        sources_data.append({"headers": headers, "rows": rows, "fileName": file_name})
+
+    if not sources_data:
+        raise HTTPException(status_code=400, detail="没有可合并的数据")
+
+    # 2. 确定合并后的列
+    if request.mergeMode == "intersect":
+        common = set(sources_data[0]["headers"])
+        for s in sources_data[1:]:
+            common &= set(s["headers"])
+        merged_headers = [h for h in sources_data[0]["headers"] if h in common]
+    else:  # union
+        merged_headers = []
+        for s in sources_data:
+            for h in s["headers"]:
+                if h not in merged_headers:
+                    merged_headers.append(h)
+
+    if not merged_headers:
+        raise HTTPException(status_code=400, detail="合并后没有有效列")
+
+    if request.addSource:
+        if "来源文件名" not in merged_headers:
+            merged_headers.append("来源文件名")
+        if "导入时间" not in merged_headers:
+            merged_headers.append("导入时间")
+
+    # 3. 创建新会话并写入合并数据
+    new_session_id = str(uuid.uuid4())[:8]
+    new_db_path = config.get_db_path(new_session_id)
+    new_db_path.parent.mkdir(parents=True, exist_ok=True)
+    target_table = sanitize_table_name(request.targetTableName) or "合并数据"
+    import_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    total_rows = 0
+    with DatabaseService.get_connection(new_db_path) as conn:
+        DatabaseService.optimize_for_insert(conn)
+        DatabaseService.init_table(conn, target_table, merged_headers, new_db_path)
+        for s in sources_data:
+            insert_rows = []
+            for row in s["rows"]:
+                row_dict = dict(zip(s["headers"], row))
+                new_row = []
+                for h in merged_headers:
+                    if h == "来源文件名":
+                        new_row.append(s["fileName"])
+                    elif h == "导入时间":
+                        new_row.append(import_time)
+                    else:
+                        v = row_dict.get(h, "")
+                        new_row.append("" if v is None else str(v))
+                insert_rows.append(tuple(new_row))
+            if insert_rows:
+                DatabaseService.bulk_insert(conn, target_table, merged_headers, insert_rows, new_db_path)
+                total_rows += len(insert_rows)
+        conn.commit()
+
+    # 4. 注册到 taskManager 使其出现在文件列表
+    taskManager.register_merged_session(
+        new_session_id,
+        f"合并({len(sources_data)}表)",
+        target_table,
+        merged_headers,
+        total_rows
+    )
+
+    return {
+        "sessionId": new_session_id,
+        "tableName": target_table,
+        "rowCount": total_rows,
+        "headers": merged_headers
+    }
+
+
+@router.post("/{session_id}/snapshot/{table_name}")
+async def create_snapshot(session_id: str, table_name: str):
+    """保存当前表快照，供清洗操作撤销使用"""
+    db_path = get_db_path(session_id)
+    if not db_path:
+        raise HTTPException(status_code=404, detail="会话不存在或已过期")
+    snap = f"_snapshot_{table_name}"
+    try:
+        with DatabaseService.get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'DROP TABLE IF EXISTS "{snap}"')
+            cursor.execute(f'CREATE TABLE "{snap}" AS SELECT * FROM "{table_name}"')
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"快照失败: {e}")
+    return {"success": True, "message": "已保存快照"}
+
+
+@router.post("/{session_id}/undo/{table_name}")
+async def undo_table(session_id: str, table_name: str):
+    """撤销到上次快照（回退最近一次清洗操作）"""
+    db_path = get_db_path(session_id)
+    if not db_path:
+        raise HTTPException(status_code=404, detail="会话不存在或已过期")
+    snap = f"_snapshot_{table_name}"
+    tables = DatabaseService.list_tables(db_path)
+    if snap not in tables:
+        raise HTTPException(status_code=404, detail="没有可撤销的操作")
+    headers = DatabaseService.get_headers(db_path, table_name)
+    cols = ', '.join([f'"{h}"' for h in headers])
+    try:
+        with DatabaseService.get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'DELETE FROM "{table_name}"')
+            cursor.execute(f'INSERT INTO "{table_name}" ({cols}) SELECT {cols} FROM "{snap}"')
+            conn.commit()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"撤销失败: {e}")
+    return {"success": True, "message": "已撤销上一步"}
+
+
+@router.get("/{session_id}/quality-check/{table_name}")
+async def quality_check(session_id: str, table_name: str):
+    """一键数据质量体检：扫描空值、重复值、负数、日期格式错误等"""
+    from collections import Counter
+    db_path = get_db_path(session_id)
+    if not db_path:
+        raise HTTPException(status_code=404, detail="会话不存在或已过期")
+    headers = DatabaseService.get_headers(db_path, table_name)
+    cols_sql = ', '.join([f'"{h}"' for h in headers])
+    _, rows = DatabaseService.execute_sql(db_path, f'SELECT {cols_sql} FROM "{table_name}"')
+    total = len(rows)
+
+    columns_report = []
+    total_issues = 0
+    for i, h in enumerate(headers):
+        col_vals = [str(row[i]).strip() if row[i] is not None else "" for row in rows]
+        empty_count = sum(1 for v in col_vals if v == "")
+        non_empty = [v for v in col_vals if v != ""]
+
+        is_number = bool(non_empty) and sum(1 for v in non_empty if _is_number(v)) / len(non_empty) >= 0.7
+        is_date = (not is_number) and bool(non_empty) and sum(1 for v in non_empty if _is_date(v)) / len(non_empty) >= 0.7
+
+        counter = Counter(non_empty)
+        duplicates = {k: c for k, c in counter.items() if c > 1}
+        dup_count = sum(c - 1 for c in duplicates.values())
+        top_dups = sorted(duplicates.items(), key=lambda x: -x[1])[:3]
+
+        issues = []
+        if empty_count > 0:
+            issues.append({"type": "empty", "count": empty_count, "detail": f"{empty_count} 个空值"})
+        if dup_count > 0:
+            detail = "、".join([f"「{k}」{c}次" for k, c in top_dups])
+            issues.append({"type": "duplicate", "count": dup_count, "detail": f"{dup_count} 行重复，如 {detail}"})
+        if is_number:
+            neg_count = sum(1 for v in non_empty if _is_number(v) and float(v) < 0)
+            if neg_count > 0:
+                issues.append({"type": "negative", "count": neg_count, "detail": f"{neg_count} 个负数"})
+        if is_date:
+            bad_date = sum(1 for v in non_empty if not _is_date(v))
+            if bad_date > 0:
+                issues.append({"type": "bad_date", "count": bad_date, "detail": f"{bad_date} 个日期格式错误"})
+
+        col_type = "number" if is_number else ("date" if is_date else "text")
+        level = "ok"
+        if any(it["type"] in ("negative", "bad_date") for it in issues):
+            level = "error"
+        elif issues:
+            level = "warning"
+
+        total_issues += len(issues)
+        columns_report.append({
+            "name": h,
+            "type": col_type,
+            "emptyCount": empty_count,
+            "emptyRate": round(empty_count / total, 2) if total else 0,
+            "duplicateCount": dup_count,
+            "issues": issues,
+            "level": level
+        })
+
+    return {
+        "totalRows": total,
+        "columns": columns_report,
+        "summary": {
+            "totalColumns": len(headers),
+            "healthyColumns": sum(1 for c in columns_report if c["level"] == "ok"),
+            "warningColumns": sum(1 for c in columns_report if c["level"] == "warning"),
+            "errorColumns": sum(1 for c in columns_report if c["level"] == "error"),
+            "totalIssues": total_issues
+        }
+    }
+
+
+@router.post("/reconcile")
+async def reconcile_tables(request: ReconcileRequest):
+    """增强对账：多列匹配 + 金额/日期容差，分类差异（仅A有/仅B有/金额不符/日期不符）"""
+    dbA = get_db_path(request.sessionA)
+    dbB = get_db_path(request.sessionB)
+    if not dbA or not dbB:
+        raise HTTPException(status_code=404, detail="会话不存在或已过期")
+    try:
+        headersA = DatabaseService.get_headers(dbA, request.tableA)
+        headersB = DatabaseService.get_headers(dbB, request.tableB)
+    except Exception:
+        raise HTTPException(status_code=400, detail="表不存在")
+    for k in request.keyColumns:
+        if k not in headersA or k not in headersB:
+            raise HTTPException(status_code=400, detail=f"匹配列 {k} 在两表中不存在")
+    colsA = ', '.join([f'"{h}"' for h in headersA])
+    colsB = ', '.join([f'"{h}"' for h in headersB])
+    _, rowsA = DatabaseService.execute_sql(dbA, f'SELECT {colsA} FROM "{request.tableA}"')
+    _, rowsB = DatabaseService.execute_sql(dbB, f'SELECT {colsB} FROM "{request.tableB}"')
+
+    idxA = [headersA.index(k) for k in request.keyColumns]
+    idxB = [headersB.index(k) for k in request.keyColumns]
+
+    def make_key(row, idx):
+        return "|".join(str(row[i]).strip() if row[i] is not None else "" for i in idx)
+
+    dictA = {make_key(r, idxA): r for r in rowsA}
+    dictB = {make_key(r, idxB): r for r in rowsB}
+
+    onlyA, onlyB, matched = [], [], []
+    amountMismatch, dateMismatch = [], []
+    for k, ra in dictA.items():
+        if k in dictB:
+            rb = dictB[k]
+            matched.append(k)
+            if request.amountColumn and request.amountColumn in headersA and request.amountColumn in headersB:
+                ai = headersA.index(request.amountColumn)
+                bi = headersB.index(request.amountColumn)
+                try:
+                    aAmt = float(str(ra[ai]).strip() or 0)
+                    bAmt = float(str(rb[bi]).strip() or 0)
+                    if abs(aAmt - bAmt) > request.amountTolerance:
+                        amountMismatch.append({"key": k, "a": str(ra[ai]), "b": str(rb[bi]), "diff": round(aAmt - bAmt, 2)})
+                except (ValueError, TypeError):
+                    pass
+            if request.dateColumn and request.dateColumn in headersA and request.dateColumn in headersB:
+                ai = headersA.index(request.dateColumn)
+                bi = headersB.index(request.dateColumn)
+                da = _parse_date_val(ra[ai])
+                db_ = _parse_date_val(rb[bi])
+                if da and db_:
+                    diff_days = abs((da - db_).days)
+                    if diff_days > request.dateToleranceDays:
+                        dateMismatch.append({"key": k, "a": str(ra[ai]), "b": str(rb[bi]), "diffDays": diff_days})
+        else:
+            onlyA.append(k)
+    for k in dictB:
+        if k not in dictA:
+            onlyB.append(k)
+
+    return {
+        "stats": {
+            "onlyA": len(onlyA),
+            "onlyB": len(onlyB),
+            "matched": len(matched),
+            "amountMismatch": len(amountMismatch),
+            "dateMismatch": len(dateMismatch),
+        },
+        "samples": {
+            "onlyA": onlyA[:50],
+            "onlyB": onlyB[:50],
+            "amountMismatch": amountMismatch[:50],
+            "dateMismatch": dateMismatch[:50],
+        }
+    }
 
     return (True, "")

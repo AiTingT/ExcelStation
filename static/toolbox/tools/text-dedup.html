@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文本去重去空行</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  textarea { font-family: var(--font-mono); }
+  .opts { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-3); }
+  .opt { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); cursor: pointer; color: var(--fg-base); }
+  .opt input { width: 16px; height: 16px; }
+  .stats { font-size: var(--text-sm); color: var(--fg-muted); margin-bottom: var(--space-2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_filter_line"></i> 文本去重去空行</h2>
+      <p>粘贴一列文本，勾选要执行的处理</p>
+    </div>
+    <div class="opts">
+      <label class="opt"><input type="checkbox" id="optTrim" checked>去首尾空格</label>
+      <label class="opt"><input type="checkbox" id="optEmpty" checked>去空行</label>
+      <label class="opt"><input type="checkbox" id="optDedup" checked>去重（保留首次）</label>
+      <label class="opt"><input type="checkbox" id="optInner">去行内所有空格</label>
+      <label class="opt"><input type="checkbox" id="optCase">去重忽略大小写</label>
+    </div>
+    <textarea id="input" placeholder="每行一条文本…"></textarea>
+    <div class="actions">
+      <button class="btn" id="runBtn"><i class="mgc_play_line"></i> 执行</button>
+      <button class="btn secondary" id="copyBtn"><i class="mgc_copy_line"></i> 复制结果</button>
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_list_check_line"></i> 结果</h2></div>
+    <div class="stats" id="stats"></div>
+    <textarea id="output" placeholder="处理后结果…" readonly></textarea>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+  var input = document.getElementById('input');
+  var output = document.getElementById('output');
+  var stats = document.getElementById('stats');
+
+  document.getElementById('runBtn').addEventListener('click', function() {
+    var trim = document.getElementById('optTrim').checked;
+    var empty = document.getElementById('optEmpty').checked;
+    var dedup = document.getElementById('optDedup').checked;
+    var inner = document.getElementById('optInner').checked;
+    var ignoreCase = document.getElementById('optCase').checked;
+    var lines = input.value.split(/\r?\n/);
+    var origCount = lines.length;
+    if (trim) lines = lines.map(function(s){return s.trim();});
+    if (inner) lines = lines.map(function(s){return s.replace(/\s+/g,'');});
+    if (empty) lines = lines.filter(function(s){return s.length > 0;});
+    var result;
+    if (dedup) {
+      var seen = {};
+      result = [];
+      lines.forEach(function(s){
+        var key = ignoreCase ? s.toLowerCase() : s;
+        if (!seen[key]) { seen[key] = true; result.push(s); }
+      });
+    } else {
+      result = lines;
+    }
+    output.value = result.join('\n');
+    stats.textContent = '原有 ' + origCount + ' 行 → 剩余 ' + result.length + ' 行（去除 ' + (origCount - result.length) + ' 行）';
+  });
+  document.getElementById('copyBtn').addEventListener('click', function() {
+    if (!output.value) { Toolbox.showToast('没有可复制的内容'); return; }
+    Toolbox.copyText(output.value, '已复制');
+  });
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; output.value = ''; stats.textContent = ''; Toolbox.showToast('已清空');
+  });
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,44 @@ def strip_markdown_code_block(content: str) -> str:
     return content.strip()
 
 
+def humanize_ai_error(e: Exception) -> str:
+    """把 AI 调用相关的异常翻译成普通办公人员能看懂的中文提示"""
+    import urllib.error
+    import socket
+    import json as _json
+
+    # HTTP 错误（带状态码，最常见）
+    if isinstance(e, urllib.error.HTTPError):
+        code = e.code
+        if code == 401:
+            return "API Key 无效或已过期，请到右上角设置中重新填写"
+        if code == 403:
+            return "API Key 没有访问权限，请检查账号或更换 Key"
+        if code == 404:
+            return "请求的模型或地址不存在，请检查模型名称和 Base URL"
+        if code == 429:
+            return "请求过于频繁或额度已用完，请稍后再试"
+        if code >= 500:
+            return f"AI 服务暂时不可用（{code}），请稍后重试"
+        return f"AI 服务返回错误（{code}），请检查配置"
+    # 连接错误（含超时）
+    if isinstance(e, urllib.error.URLError):
+        reason = e.reason
+        if isinstance(reason, socket.timeout) or "timed out" in str(reason).lower():
+            return "连接 AI 服务超时，请检查网络后重试"
+        return "无法连接到 AI 服务，请检查网络或 Base URL 是否正确"
+    if isinstance(e, (socket.timeout, TimeoutError)):
+        return "连接 AI 服务超时，请检查网络后重试"
+    # AI 返回内容不是合法 JSON
+    if isinstance(e, _json.JSONDecodeError):
+        return "AI 返回内容格式异常，请重新提问或换个问法"
+    # 兜底：返回原始信息，但去掉可能包含的 Key 等敏感前缀
+    msg = str(e).strip()
+    if not msg:
+        return "AI 处理失败，请重试"
+    return msg
+
+
 @dataclass
 class AIConfig:
     """AI 配置"""
@@ -213,7 +251,7 @@ class NL2SQLService:
             }
         except Exception as e:
             logger.error(f"NL2SQL 生成失败: {e}")
-            return {"success": False, "error": str(e), "sql": ""}
+            return {"success": False, "error": humanize_ai_error(e), "sql": ""}
 
 
 class SmartChartService:
@@ -265,4 +303,4 @@ class SmartChartService:
             return {"success": True, **result}
         except Exception as e:
             logger.error(f"智能图表推荐失败: {e}")
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": humanize_ai_error(e)}

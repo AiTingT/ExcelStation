@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from app.config import config
-from app.services.aiService import AIConfig, create_provider, NL2SQLService, SmartChartService
+from app.services.aiService import AIConfig, create_provider, NL2SQLService, SmartChartService, humanize_ai_error
 from app.models.schemas import NL2SQLRequest
 
 router = APIRouter(prefix="/api/ai", tags=["AI 功能"])
@@ -91,7 +91,7 @@ async def test_ai_connection():
         result = provider.chat([{"role": "user", "content": "你好，请回复'连接成功'"}])
         return {"success": True, "message": "连接成功", "reply": result}
     except Exception as e:
-        return {"success": False, "message": f"连接失败: {str(e)}"}
+        return {"success": False, "message": "连接失败：" + humanize_ai_error(e)}
 
 
 @router.post("/nl2sql/{session_id}")
@@ -167,7 +167,14 @@ async def nl2sql_query(
         }
 
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        # 区分 AI 调用错误与 SQL 执行错误
+        try:
+            import sqlite3
+            if isinstance(e, sqlite3.Error):
+                return {"success": False, "error": "AI 生成的查询执行失败，请换个问法重试，或把问题拆分得更具体"}
+        except Exception:
+            pass
+        return {"success": False, "error": humanize_ai_error(e)}
 
 
 def validate_sql(sql: str) -> tuple:
@@ -229,4 +236,4 @@ async def smart_chart_suggest(
         result = SmartChartService.suggest_chart(provider, headers, sample_data, userRequest)
         return result
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": humanize_ai_error(e)}

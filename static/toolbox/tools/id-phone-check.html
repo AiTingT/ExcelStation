@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>身份证/手机号校验</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  textarea { font-family: var(--font-mono); }
+  .check-list { display: flex; flex-direction: column; gap: 6px; }
+  .check-row {
+    display: grid; grid-template-columns: 1fr auto; gap: var(--space-3);
+    align-items: center; padding: 8px 14px; border-radius: var(--radius-sm);
+    background: var(--bg-page); border: 1px solid var(--border-base);
+    font-family: var(--font-mono); font-size: var(--text-sm);
+  }
+  .check-row.bad { border-color: #e53935; background: #fef5f5; }
+  .check-row.ok { border-color: #66bb6a; }
+  .check-num { color: var(--fg-strong); word-break: break-all; }
+  .check-meta { font-size: var(--text-xs); color: var(--fg-muted); margin-top: 2px; font-family: var(--font-sans); }
+  .check-tag { font-size: var(--text-xs); font-weight: 600; padding: 3px 10px; border-radius: var(--radius-pill); white-space: nowrap; }
+  .tag-ok { background: #e8f5e9; color: #2e7d32; }
+  .tag-bad { background: #ffebee; color: #c62828; }
+  .stats { font-size: var(--text-sm); color: var(--fg-muted); margin-bottom: var(--space-3); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_shield_check_line"></i> 身份证 / 手机号校验</h2>
+      <p>每行输入一个号码，自动识别类型并校验合法性</p>
+    </div>
+    <textarea id="input" placeholder="每行一个号码，例如：&#10;13812345678&#10;110101199003077334"></textarea>
+    <div class="actions">
+      <button class="btn" id="checkBtn"><i class="mgc_check_line"></i> 开始校验</button>
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_list_check_line"></i> 校验结果</h2></div>
+    <div class="stats" id="stats"></div>
+    <div class="check-list" id="list"></div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+  var input = document.getElementById('input');
+  var list = document.getElementById('list');
+  var stats = document.getElementById('stats');
+  var ID_WEIGHTS = [7,9,10,5,8,4,2,1,6,3,7,9,10,5,8,4,2];
+  var ID_CHECK = ['1','0','X','9','8','7','6','5','4','3','2'];
+
+  function checkId(val) {
+    val = val.trim().toUpperCase();
+    if (!/^\d{17}[\dX]$/.test(val)) return { ok: false, reason: '格式不符（需18位，最后一位可为X）' };
+    var sum = 0;
+    for (var i = 0; i < 17; i++) sum += +val[i] * ID_WEIGHTS[i];
+    if (val[17] !== ID_CHECK[sum % 11]) return { ok: false, reason: '校验码错误' };
+    var y = +val.substr(6,4), m = +val.substr(10,2), d = +val.substr(12,2);
+    var dt = new Date(y, m-1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m-1 || dt.getDate() !== d) {
+      return { ok: false, reason: '出生日期无效' };
+    }
+    return { ok: true, reason: '身份证 · ' + (val[16] % 2 === 0 ? '女' : '男') + ' · ' + y + '-' + (m<10?'0'+m:m) + '-' + (d<10?'0'+d:d) };
+  }
+
+  function checkPhone(val) {
+    val = val.trim();
+    if (!/^1\d{10}$/.test(val)) return { ok: false, reason: '格式不符（需11位、1开头）' };
+    if (!/^1[3-9]\d{9}$/.test(val)) return { ok: false, reason: '号段不正确' };
+    return { ok: true, reason: '手机号' };
+  }
+
+  function check(val) {
+    val = val.trim();
+    if (!val) return null;
+    if (val.length === 18) return checkId(val);
+    if (val.length === 11) return checkPhone(val);
+    return { ok: false, reason: '无法识别（手机号11位 / 身份证18位）' };
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  document.getElementById('checkBtn').addEventListener('click', function() {
+    var lines = input.value.split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);
+    if (!lines.length) { Toolbox.showToast('请先输入号码'); return; }
+    var okCount = 0, badCount = 0;
+    list.innerHTML = lines.map(function(line) {
+      var r = check(line);
+      if (!r) return '';
+      if (r.ok) okCount++; else badCount++;
+      return '<div class="check-row ' + (r.ok ? 'ok' : 'bad') + '">' +
+        '<div><div class="check-num">' + escapeHtml(line) + '</div>' +
+        '<div class="check-meta">' + escapeHtml(r.reason) + '</div></div>' +
+        '<span class="check-tag ' + (r.ok ? 'tag-ok' : 'tag-bad') + '">' + (r.ok ? '合法' : '非法') + '</span>' +
+        '</div>';
+    }).join('');
+    stats.textContent = '共 ' + lines.length + ' 条：合法 ' + okCount + '，非法 ' + badCount;
+  });
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; list.innerHTML = ''; stats.textContent = ''; Toolbox.showToast('已清空');
+  });
+})();
+</script>
+</body>
+</html>

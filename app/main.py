@@ -15,7 +15,7 @@ logging.basicConfig(
 
 # 创建 FastAPI 应用
 app = FastAPI(
-    title="表格工作台",
+    title="Excel 智能助手",
     description="本地表格数据处理、清洗、对比与 AI 问数工具",
     version="1.0.0"
 )
@@ -44,13 +44,13 @@ async def root():
     index_path = config.STATIC_DIR / "index.html"
     if index_path.exists():
         return FileResponse(str(index_path))
-    return {"message": "表格工作台 API", "docs": "/docs"}
+    return {"message": "Excel 智能助手 API", "docs": "/docs"}
 
 
 @app.get("/health")
 async def health_check():
     """健康检查"""
-    return {"status": "ok", "message": "表格工作台运行中"}
+    return {"status": "ok", "message": "Excel 智能助手运行中"}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金额大写转换</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  .money-input { font-size: var(--text-xl); font-weight: 600; }
+  .result-box {
+    font-family: var(--font-mono); font-size: var(--text-lg);
+    color: var(--fg-strong); background: var(--bg-page);
+    border: 1px solid var(--border-base); border-radius: var(--radius-md);
+    padding: 16px; min-height: 56px; word-break: break-all; margin-top: var(--space-2);
+  }
+  .result-box.empty { color: var(--fg-subtle); font-family: var(--font-sans); font-size: var(--text-sm); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_currency_cny_line"></i> 金额大写转换</h2>
+      <p>输入数字金额，自动转为中文大写（报销单、发票、合同常用）</p>
+    </div>
+    <input type="text" class="money-input" id="input" placeholder="如 12345.67" autocomplete="off">
+    <div class="actions">
+      <button class="btn secondary" id="copyBtn"><i class="mgc_copy_line"></i> 复制大写</button>
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_list_check_line"></i> 大写结果</h2></div>
+    <div class="result-box empty" id="result">在上方输入数字金额</div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+  var DIGI = ['零','壹','贰','叁','肆','伍','陆','柒','捌','玖'];
+  var UNIT = ['', '拾', '佰', '仟'];
+  var input = document.getElementById('input');
+  var result = document.getElementById('result');
+
+  function convertGroup(g) {
+    g = g.replace(/^0+/, '');
+    if (!g) return '';
+    var res = '', prevZero = false;
+    for (var i = 0; i < g.length; i++) {
+      var d = +g[i];
+      var pos = g.length - 1 - i;
+      if (d === 0) { prevZero = true; }
+      else {
+        if (prevZero) { res += '零'; prevZero = false; }
+        res += DIGI[d] + UNIT[pos];
+      }
+    }
+    return res;
+  }
+
+  function convertInt(s) {
+    s = s.replace(/^0+/, '') || '0';
+    if (s === '0') return '零';
+    var groups = [];
+    while (s.length > 0) { groups.unshift(s.slice(-4)); s = s.slice(0, -4); }
+    var bigUnit = ['', '万', '亿', '万亿'];
+    var res = '';
+    for (var i = 0; i < groups.length; i++) {
+      var gu = convertGroup(groups[i]);
+      if (gu) res += gu + bigUnit[groups.length - 1 - i];
+      else if (res && !res.endsWith('零')) res += '零';
+    }
+    return res.replace(/零+$/, '') || '零';
+  }
+
+  function toUpper(numStr) {
+    numStr = (numStr || '').trim();
+    if (!/^\d+(\.\d+)?$/.test(numStr)) return '';
+    var parts = numStr.split('.');
+    var intPart = parts[0];
+    var decPart = parts[1] || '';
+    var intStr = convertInt(intPart);
+    var decStr = '';
+    if (decPart) {
+      if (decPart[0] && decPart[0] !== '0') decStr += DIGI[+decPart[0]] + '角';
+      if (decPart[1] && decPart[1] !== '0') decStr += DIGI[+decPart[1]] + '分';
+    }
+    var res = intStr + '元' + decStr;
+    if (!decStr) res += '整';
+    return res;
+  }
+
+  var lastResult = '';
+  function render() {
+    var val = input.value.trim();
+    if (!val) {
+      result.textContent = '在上方输入数字金额';
+      result.className = 'result-box empty';
+      lastResult = '';
+      return;
+    }
+    var upper = toUpper(val);
+    if (!upper) {
+      result.textContent = '请输入有效数字（如 12345.67）';
+      result.className = 'result-box empty';
+      lastResult = '';
+      return;
+    }
+    result.textContent = upper;
+    result.className = 'result-box';
+    lastResult = upper;
+  }
+  input.addEventListener('input', render);
+  document.getElementById('copyBtn').addEventListener('click', function() {
+    if (!lastResult) { Toolbox.showToast('没有可复制的内容'); return; }
+    Toolbox.copyText(lastResult, '已复制大写金额');
+  });
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; render(); Toolbox.showToast('已清空');
+  });
+  input.value = '12345.67';
+  render();
+})();
+</script>
+</body>
+</html>

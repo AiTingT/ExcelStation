@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日期格式转换</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  .date-input { font-size: var(--text-lg); }
+  .fmt-list { display: flex; flex-direction: column; gap: var(--space-2); }
+  .fmt-row {
+    display: grid; grid-template-columns: 110px 1fr 36px; align-items: center; gap: var(--space-3);
+    background: var(--bg-page); border: 1px solid var(--border-base); border-radius: var(--radius-md); padding: 10px 14px;
+  }
+  .fmt-label { font-size: var(--text-sm); font-weight: 600; color: var(--fg-base); }
+  .fmt-value {
+    font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg-strong);
+    background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+    padding: 8px 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .copy-btn { background: none; border: none; cursor: pointer; color: var(--fg-muted); font-size: 18px; padding: 4px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center; }
+  .copy-btn:hover { background: var(--bg-surface); color: var(--color-brand); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_calendar_2_line"></i> 日期格式转换</h2>
+      <p>输入日期，自动识别多种写法并转换成常用格式</p>
+    </div>
+    <input type="text" class="date-input" id="input" placeholder="如 2024-01-15 / 2024/1/15 / 2024年1月15日 / 时间戳">
+    <div class="actions">
+      <button class="btn secondary" id="nowBtn"><i class="mgc_time_line"></i> 使用当前时间</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_list_check_line"></i> 转换结果</h2></div>
+    <div class="fmt-list" id="list"></div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+  var input = document.getElementById('input');
+  var list = document.getElementById('list');
+  var WEEK = ['日','一','二','三','四','五','六'];
+
+  function parseDate(s) {
+    s = (s || '').trim();
+    if (!s) return null;
+    if (/^\d{10}$/.test(s)) return new Date(+s * 1000);
+    if (/^\d{13}$/.test(s)) return new Date(+s);
+    var m = s.match(/^(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日?(?:\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+    if (m) return new Date(+m[1], +m[2]-1, +m[3], m[4]?+m[4]:0, m[5]?+m[5]:0, m[6]?+m[6]:0);
+    m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+    if (m) return new Date(+m[1], +m[2]-1, +m[3], m[4]?+m[4]:0, m[5]?+m[5]:0, m[6]?+m[6]:0);
+    var d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function render() {
+    var d = parseDate(input.value);
+    if (!d) {
+      list.innerHTML = '<div class="fmt-row"><div class="fmt-label">无法识别</div><div class="fmt-value">请输入有效日期</div></div>';
+      return;
+    }
+    var y = d.getFullYear(), mo = d.getMonth()+1, da = d.getDate();
+    var h = d.getHours(), mi = d.getMinutes(), se = d.getSeconds();
+    var ts = Math.floor(d.getTime()/1000);
+    var formats = [
+      { label: '短横线', val: y + '-' + pad(mo) + '-' + pad(da) },
+      { label: '斜杠', val: y + '/' + mo + '/' + da },
+      { label: '中文', val: y + '年' + mo + '月' + da + '日' },
+      { label: '中文补零', val: y + '年' + pad(mo) + '月' + pad(da) + '日' },
+      { label: '时分秒', val: pad(h) + ':' + pad(mi) + ':' + pad(se) },
+      { label: '完整时间', val: y + '-' + pad(mo) + '-' + pad(da) + ' ' + pad(h) + ':' + pad(mi) + ':' + pad(se) },
+      { label: '星期', val: '星期' + WEEK[d.getDay()] },
+      { label: '时间戳(秒)', val: '' + ts },
+      { label: '时间戳(毫秒)', val: '' + (ts*1000) }
+    ];
+    list.innerHTML = formats.map(function(f) {
+      return '<div class="fmt-row"><div class="fmt-label">' + f.label + '</div>' +
+        '<div class="fmt-value" title="' + f.val.replace(/"/g,'&quot;') + '">' + f.val + '</div>' +
+        '<button class="copy-btn" data-val="' + f.val.replace(/"/g,'&quot;') + '"><i class="mgc_copy_line"></i></button></div>';
+    }).join('');
+    list.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { Toolbox.copyText(btn.dataset.val, '已复制'); });
+    });
+  }
+  input.addEventListener('input', render);
+  document.getElementById('nowBtn').addEventListener('click', function() {
+    input.value = Math.floor(Date.now()/1000) + '';
+    render();
+  });
+  input.value = '2024-01-15';
+  render();
+})();
+</script>
+</body>
+</html>

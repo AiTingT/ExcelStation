@@ -4,9 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>表格工作台</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235ba3e6'/><stop offset='1' stop-color='%233a7bc8'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><rect x='7' y='8' width='18' height='3' rx='1' fill='white' opacity='0.95'/><rect x='7' y='14' width='18' height='10' rx='1.5' fill='white' opacity='0.25'/><line x1='7' y1='18' x2='25' y2='18' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='13' y1='14' x2='13' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='19' y1='14' x2='19' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/></svg>">
+    <title>Excel 智能助手</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235ba3e6'/><stop offset='1' stop-color='%233a7bc8'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><rect x='7' y='8' width='18' height='3' rx='1' fill='white' opacity='0.95'/><rect x='7' y='14' width='18' height='10' rx='1.5' fill='white' opacity='0.25'/><line x1='7' y1='18' x2='25' y2='18' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='13' y1='14' x2='13' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='19' y1='14' x2='19' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/></svg>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
     <style>
+        /* MingCute 图标继承父元素颜色 */
+        [class^="mgc_"]::before,
+        [class*=" mgc_"]::before {
+            color: inherit;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -779,12 +787,6 @@
             display: flex;
         }
 
-        #scrollSentinel td {
-            padding: 0;
-            height: 1px;
-            border: none;
-        }
-
         /* 折叠 / 性能模式 */
         .performance-mode .chart-container {
             display: none;
@@ -1332,6 +1334,8 @@
             color: #888;
             margin-left: 12px;
         }
+
+        <<<<<<< HEAD
 
         /* ==================== 现代数据工作台主题 ==================== */
         :root {
@@ -1943,6 +1947,48 @@
                 flex: 0 0 auto;
             }
         }
+
+        =======
+
+        /* Toast 提示组件（替代 alert） */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast-item {
+            padding: 10px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            max-width: 360px;
+            transition: opacity .3s, transform .3s;
+        }
+
+        .toast-success {
+            background: #2e7d32;
+        }
+
+        .toast-error {
+            background: #c62828;
+        }
+
+        .toast-info {
+            background: #424242;
+        }
+
+        .toast-hide {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        >>>>>>>11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
     </style>
 </head>
 
@@ -1952,13 +1998,24 @@
         <div class="sidebar" id="sidebar">
             <div class="collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</div>
             <div class="sidebar-header">
-                <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
-                <p>会话列表</p>
+                <<<<<<< HEAD <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
+                    <p>会话列表</p>
+                    =======
+                    <h2 class="sidebar-title"><i class="mgc_file_ai_line"
+                            style="font-size:20px;vertical-align:middle;margin-right:6px;"></i> <span>Excel 智能助手</span>
+                    </h2>
+                    <p>最近文件</p>
+                    >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
             </div>
             <div class="session-list" id="sessionList"></div>
             <div class="sidebar-footer">
                 <button class="btn" id="toolboxBtn" style="width:100%;margin-bottom:6px;text-align:center;">
-                    <span>工具箱</span>
+                    <<<<<<< HEAD <span>工具箱</span>
+                        =======
+                        <span><i class="mgc_magic_1_line"
+                                style="font-size:16px;vertical-align:middle;margin-right:4px;"></i></span>
+                        <span>工具箱</span>
+                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
                 </button>
                 <button class="btn btn-primary" id="newUploadBtn"><span>+</span> <span>上传新文件</span></button>
             </div>
@@ -1968,11 +2025,15 @@
         <div class="main">
             <div class="header">
                 <div class="header-left">
-                    <h1 id="mainTitle">表格工作台</h1>
-                    <p id="mainSubtitle">超大 Excel 文件本地化 AI 处理平台</p>
+                    <<<<<<< HEAD <h1 id="mainTitle">表格工作台</h1>
+                        <p id="mainSubtitle">超大 Excel 文件本地化 AI 处理平台</p>
+                        =======
+                        <h1 id="mainTitle">Excel 智能助手</h1>
+                        <p id="mainSubtitle">打开 Excel，问什么答什么</p>
+                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
                 </div>
                 <div class="header-right">
-                    <div class="sys-stats" id="sysStats">
+                    <div class="sys-stats hidden" id="sysStats">
                         <div class="sys-stat">
                             <div class="dot green" id="dotUptime"></div>运行 <span class="val" id="sysUptime">0s</span>
                         </div>
@@ -1986,335 +2047,380 @@
                             <div class="dot green" id="dotDisk"></div>磁盘 <span class="val" id="sysDisk">0K/0K</span>
                         </div>
                     </div>
-                    <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
-                    <button class="btn" id="performanceBtn" title="性能模式" style="position:relative">性能</button>
-                    <button class="btn" id="exportBtn">导出</button>
-                    <button class="btn" id="settingsBtn">AI 设置</button>
+                    <<<<<<< HEAD <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
+                        <button class="btn" id="performanceBtn" title="性能模式" style="position:relative">性能</button>
+                        <button class="btn" id="exportBtn">导出</button>
+                        <button class="btn" id="settingsBtn">AI 设置</button>
+                        =======
+                        <button class="btn" id="mergeBtn">🔀 合并文件</button>
+                        <button class="btn" id="exportBtn">📥 导出</button>
+                        <button class="btn" id="settingsBtn">⚙️ AI 设置</button>
+                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
                 </div>
             </div>
             <div class="content" id="mainContent">
                 <div class="header-toggle-btn" id="headerToggleBtn" title="折叠顶部栏">▲ 收起</div>
                 <div class="upload-section" id="uploadSection">
                     <div class="upload-zone" id="uploadZone">
-                        <div class="upload-icon">▦</div>
-                        <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
-                        <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
+                        <<<<<<< HEAD <div class="upload-icon">▦
                     </div>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+                    =======
+                    <div class="upload-icon"><i class="mgc_file_upload_line" style="font-size:56px;"></i></div>
+                    >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
+                    <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
+                    <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
+                </div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
+            </div>
+
+            <div id="loadingState" class="loading hidden">准备解析...</div>
+
+            <div id="dataSection" class="hidden">
+                <div class="tab-bar">
+                    <div class="tab-item active" data-tab="browse">数据浏览</div>
+                    <div class="tab-item" data-tab="pivot">透视表</div>
+                    <div class="tab-item" data-tab="clean">数据清洗</div>
+                    <div class="tab-item" data-tab="compare">对比分析</div>
+                    <div class="tab-item" data-tab="ai">AI 对话</div>
                 </div>
 
-                <div id="loadingState" class="loading hidden">准备解析...</div>
-
-                <div id="dataSection" class="hidden">
-                    <div class="tab-bar">
-                        <div class="tab-item active" data-tab="browse">数据浏览</div>
-                        <div class="tab-item" data-tab="pivot">透视表</div>
-                        <div class="tab-item" data-tab="clean">数据清洗</div>
-                        <div class="tab-item" data-tab="compare">对比分析</div>
-                        <div class="tab-item" data-tab="ai">AI 对话</div>
-                    </div>
-
-                    <!-- 数据浏览 -->
-                    <div id="tab-browse">
-                        <div class="toolbar">
-                            <select id="sheetSelect">
-                                <option value="">选择工作表</option>
-                            </select>
-                            <select id="pageSizeSelect">
-                                <option value="100" selected>100条/次</option>
-                                <option value="500">500条/次</option>
-                                <option value="1000">1000条/次</option>
-                                <option value="2000">2000条/次</option>
-                            </select>
-                            <input type="text" id="searchInput" placeholder="全局搜索...">
-                            <button class="btn" id="clearFilterBtn">清除筛选</button>
-                            <button class="btn" id="toggleChartBtn">显示图表</button>
-                            <button class="btn" id="columnSettingsBtn">列设置</button>
+                <!-- 数据浏览 -->
+                <div id="tab-browse">
+                    <div class="toolbar">
+                        <select id="sheetSelect">
+                            <option value="">选择工作表</option>
+                        </select>
+                        <select id="pageSizeSelect">
+                            <option value="100" selected>100条/次</option>
+                            <option value="500">500条/次</option>
+                            <option value="1000">1000条/次</option>
+                            <option value="2000">2000条/次</option>
+                        </select>
+                        <input type="text" id="searchInput" placeholder="全局搜索...">
+                        <button class="btn" id="clearFilterBtn">清除筛选</button>
+                        <button class="btn" id="toggleChartBtn">显示图表</button>
+                        <<<<<<< HEAD <button class="btn" id="columnSettingsBtn">列设置</button>
+                            =======
+                            <button class="btn" id="columnSettingsBtn">️ 列设置</button>
+                            <button class="btn" id="qualityCheckBtn">🔍 数据体检</button>
+                            >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
                             <span style="border-left:1px solid #ddd;margin:0 6px"></span>
                             <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
                             <button class="btn btn-danger" id="deleteRowBtn">- 行</button> -->
+                    </div>
+                    <div id="activeFilters" class="active-filters"></div>
+                    <div class="stats-bar" id="statsBar">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalRows">0</div>
+                            <div class="stat-label">总行数</div>
                         </div>
-                        <div id="activeFilters" class="active-filters"></div>
-                        <div class="stats-bar" id="statsBar">
-                            <div class="stat-item">
-                                <div class="stat-value" id="totalRows">0</div>
-                                <div class="stat-label">总行数</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="filteredRows">0</div>
-                                <div class="stat-label">当前显示</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="loadedRowsDisplay">0</div>
-                                <div class="stat-label">已加载</div>
-                            </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="filteredRows">0</div>
+                            <div class="stat-label">当前显示</div>
                         </div>
-                        <div class="table-container">
-                            <div class="table-wrapper" id="tableWrapper">
-                                <table id="dataTable">
-                                    <thead id="tableHead"></thead>
-                                    <tbody id="tableBody"></tbody>
-                                </table>
-                            </div>
-                            <div id="loadingMore" class="loading-more hidden">加载中...</div>
-                            <div id="scrollInfo" style="text-align:center;padding:8px;font-size:12px;color:#888;"></div>
-                        </div>
-                        <div id="chartSection" class="chart-container hidden chart-section-wrap">
-                            <div
-                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                                <h3 style="margin:0">数据图表</h3>
-                                <div style="display:flex;gap:6px;align-items:center">
-                                    <select id="chartType"
-                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px">
-                                        <option value="bar">柱状图</option>
-                                        <option value="line">折线图</option>
-                                        <option value="pie">饼图</option>
-                                        <option value="scatter">散点图</option>
-                                    </select>
-                                    <select id="chartXAxis"
-                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
-                                    <select id="chartYAxis"
-                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
-                                    <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">
-                                        AI 推荐</button>
-                                </div>
-                            </div>
-                            <div id="chart"></div>
-                            <div id="chartExplanation" style="margin-top:8px;font-size:11px;color:#888"></div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="loadedRowsDisplay">0</div>
+                            <div class="stat-label">已加载</div>
                         </div>
                     </div>
-
-                    <!-- 透视表 -->
-                    <div id="tab-pivot" class="hidden">
-                        <div class="panel">
-                            <h3>透视表</h3>
-                            <div class="panel-row">
-                                <label>行字段</label>
-                                <select id="pivotRowField"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>值字段</label>
-                                <select id="pivotValueField"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>列字段</label>
-                                <select id="pivotColField">
-                                    <option value="">（无）</option>
+                    <div class="table-container">
+                        <div class="table-wrapper" id="tableWrapper">
+                            <table id="dataTable">
+                                <thead id="tableHead"></thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="loadingMore" class="loading-more hidden">加载中...</div>
+                        <div id="scrollInfo" style="text-align:center;padding:8px;font-size:12px;color:#888;"></div>
+                    </div>
+                    <div id="chartSection" class="chart-container hidden chart-section-wrap">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                            <h3 style="margin:0">数据图表</h3>
+                            <div style="display:flex;gap:6px;align-items:center">
+                                <select id="chartType"
+                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px">
+                                    <option value="bar">柱状图</option>
+                                    <option value="line">折线图</option>
+                                    <option value="pie">饼图</option>
+                                    <option value="scatter">散点图</option>
                                 </select>
-                            </div>
-                            <div class="panel-row">
-                                <label>聚合方式</label>
-                                <select id="pivotAggFunc">
-                                    <option value="sum">求和</option>
-                                    <option value="count">计数</option>
-                                    <option value="avg">平均值</option>
-                                    <option value="min">最小值</option>
-                                    <option value="max">最大值</option>
-                                </select>
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="pivotRunBtn">生成透视表</button>
-                                <button class="btn" id="pivotExportBtn">导出 CSV</button>
+                                <select id="chartXAxis"
+                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                <select id="chartYAxis"
+                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">
+                                    AI 推荐</button>
                             </div>
                         </div>
-                        <div class="table-container" id="pivotResultSection" style="display:none">
-                            <div class="table-wrapper">
-                                <table id="pivotTable">
-                                    <thead id="pivotHead"></thead>
-                                    <tbody id="pivotBody"></tbody>
-                                </table>
-                            </div>
+                        <div id="chart"></div>
+                        <div id="chartExplanation" style="margin-top:8px;font-size:11px;color:#888"></div>
+                    </div>
+                </div>
+
+                <!-- 透视表 -->
+                <div id="tab-pivot" class="hidden">
+                    <div class="panel">
+                        <h3>透视表</h3>
+                        <div class="panel-row">
+                            <label>行字段</label>
+                            <select id="pivotRowField"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>值字段</label>
+                            <select id="pivotValueField"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>列字段</label>
+                            <select id="pivotColField">
+                                <option value="">（无）</option>
+                            </select>
+                        </div>
+                        <div class="panel-row">
+                            <label>聚合方式</label>
+                            <select id="pivotAggFunc">
+                                <option value="sum">求和</option>
+                                <option value="count">计数</option>
+                                <option value="avg">平均值</option>
+                                <option value="min">最小值</option>
+                                <option value="max">最大值</option>
+                            </select>
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="pivotRunBtn">生成透视表</button>
+                            <button class="btn" id="pivotExportBtn">导出 CSV</button>
                         </div>
                     </div>
-
-                    <!-- 数据清洗 -->
-                    <div id="tab-clean" class="hidden" style="overflow: auto;">
-                        <div class="panel">
-                            <h3>数据去重</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">删除重复行，保留第一条记录</p>
-                            <div class="panel-row">
-                                <label>去重列</label>
-                                <select id="dedupColumn">
-                                    <option value="">所有列</option>
-                                </select>
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="dedupBtn">执行去重</button>
-                            </div>
-                        </div>
-                        <div class="panel">
-                            <h3>📝 填充空值</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">将指定列的空值替换为指定内容</p>
-                            <div class="panel-row">
-                                <label>选择列</label>
-                                <select id="fillColumn"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>填充值</label>
-                                <input type="text" id="fillValue" placeholder="请输入填充内容">
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="fillBtn">执行填充</button>
-                            </div>
-                        </div>
-                        <div class="panel">
-                            <h3>🔤 正则替换</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">用正则表达式批量替换列中的内容</p>
-                            <div class="panel-row">
-                                <label>选择列</label><select id="regexColumn"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>匹配模式</label><input type="text" id="regexPattern" placeholder="正则表达式或文本">
-                            </div>
-                            <div class="panel-row">
-                                <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容">
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="regexReplaceBtn">执行替换</button>
-                            </div>
-                        </div>
-                        <div class="panel">
-                            <h3>✂️ 列拆分</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">按分隔符将一列拆分为多列</p>
-                            <div class="panel-row">
-                                <label>源列</label><select id="splitSourceColumn"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>分隔符</label><input type="text" id="splitDelimiter" value=","
-                                    placeholder="如 , ; | 等">
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="splitColumnBtn">执行拆分</button>
-                            </div>
-                        </div>
-                        <div class="panel">
-                            <h3>🔄 数据类型转换</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">批量转换列的数据类型</p>
-                            <div class="panel-row">
-                                <label>选择列</label><select id="convertColumn"></select>
-                            </div>
-                            <div class="panel-row">
-                                <label>目标类型</label>
-                                <select id="convertTargetType">
-                                    <option value="string">字符串</option>
-                                    <option value="number">数值</option>
-                                    <option value="date">日期</option>
-                                </select>
-                            </div>
-                            <div class="panel-row" id="dateFormatRow" style="display:none">
-                                <label>日期格式</label><input type="text" id="convertDateFormat" value="%Y-%m-%d">
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="convertTypeBtn">执行转换</button>
-                            </div>
-                        </div>
-                        <div class="panel">
-                            <h3>✅ 数据校验</h3>
-                            <p style="font-size:12px;color:#888;margin-bottom:10px">检查列数据是否符合规则</p>
-                            <div id="validationRules"></div>
-                            <button class="btn" id="addValidationRuleBtn" style="margin-bottom:10px">+ 添加规则</button>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="validateBtn">执行校验</button>
-                            </div>
-                            <div id="validationResults" style="margin-top:10px"></div>
-                        </div>
-                    </div>
-
-                    <!-- 对比分析 -->
-                    <div id="tab-compare" class="hidden">
-                        <div class="panel">
-                            <h3>多文件对比分析</h3>
-                            <div class="compare-grid">
-                                <div class="compare-item">
-                                    <h4>文件 A</h4>
-                                    <select id="compareFileA">
-                                        <option value="">选择文件</option>
-                                    </select>
-                                    <select id="compareSheetA">
-                                        <option value="">选择工作表</option>
-                                    </select>
-                                    <div class="compare-stat">行数: <span id="compareRowsA">-</span></div>
-                                </div>
-                                <div class="compare-item">
-                                    <h4>文件 B</h4>
-                                    <select id="compareFileB">
-                                        <option value="">选择文件</option>
-                                    </select>
-                                    <select id="compareSheetB">
-                                        <option value="">选择工作表</option>
-                                    </select>
-                                    <div class="compare-stat">行数: <span id="compareRowsB">-</span></div>
-                                </div>
-                            </div>
-                            <div class="panel-row" style="margin-top:14px">
-                                <label>对比列</label>
-                                <select id="compareKeyCol">
-                                    <option value="">选择用于对比的列</option>
-                                </select>
-                            </div>
-                            <div class="panel-actions">
-                                <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
-                            </div>
-                        </div>
-                        <div id="compareResult" class="table-container hidden">
-                            <div class="stats-bar" style="margin:12px">
-                                <div class="stat-item">
-                                    <div class="stat-value" id="compareOnlyA">0</div>
-                                    <div class="stat-label">仅在A中</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="compareOnlyB">0</div>
-                                    <div class="stat-label">仅在B中</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="compareBoth">0</div>
-                                    <div class="stat-label">两者共有</div>
-                                </div>
-                            </div>
-                            <div class="table-wrapper">
-                                <table id="compareTable">
-                                    <thead id="compareHead"></thead>
-                                    <tbody id="compareBody"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- AI 对话 -->
-                    <div id="tab-ai" class="hidden">
-                        <div class="ai-chat">
-                            <div
-                                style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee">
-                                <span style="font-size:13px;color:#888">💬 支持多轮追问，AI 会记住上下文</span>
-                                <button class="btn" id="aiClearBtn"
-                                    style="padding:4px 10px;font-size:12px">清空对话</button>
-                            </div>
-                            <div class="ai-chat-messages" id="aiChatMessages">
-                                <div class="ai-message ai">
-                                    <div class="msg-content">
-                                        👋 你好！我是 Excel AI 助手。<br>
-                                        你可以用自然语言问我关于这个 Excel 的问题，比如：<br>
-                                        • "统计每个部门的总金额"<br>
-                                        • "找出金额大于10000的记录"<br>
-                                        • "按日期分组统计数量"<br><br>
-                                        请先在右上角 AI 设置中配置 API Key。
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ai-chat-input">
-                                <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
-                                <button class="btn btn-primary" id="aiSendBtn">发送</button>
-                            </div>
+                    <div class="table-container" id="pivotResultSection" style="display:none">
+                        <div class="table-wrapper">
+                            <table id="pivotTable">
+                                <thead id="pivotHead"></thead>
+                                <tbody id="pivotBody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <div id="emptyState" class="empty-state">
-                    <h3>暂无数据</h3>
-                    <p>请上传 Excel 文件开始分析</p>
+                <!-- 数据清洗 -->
+                <div id="tab-clean" class="hidden" style="overflow: auto;">
+                    <div
+                        style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:12px;padding:0 4px">
+                        <span style="font-size:12px;color:#888;margin-right:auto">清洗前自动保存快照，可一键撤销上一步</span>
+                        <button class="btn" id="undoBtn">↩️ 撤销上一步</button>
+                        <button class="btn" id="cleanPlanBtn">🧹 清洗方案</button>
+                    </div>
+                    <div class="panel">
+                        <h3>数据去重</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">删除重复行，保留第一条记录</p>
+                        <div class="panel-row">
+                            <label>去重列</label>
+                            <select id="dedupColumn">
+                                <option value="">所有列</option>
+                            </select>
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="dedupBtn">执行去重</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>📝 填充空值</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">将指定列的空值替换为指定内容</p>
+                        <div class="panel-row">
+                            <label>选择列</label>
+                            <select id="fillColumn"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>填充值</label>
+                            <input type="text" id="fillValue" placeholder="请输入填充内容">
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="fillBtn">执行填充</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>🔤 按规则替换</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">批量替换列中的内容，可选常用规则或自定义</p>
+                        <div class="panel-row">
+                            <label>选择列</label><select id="regexColumn"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>常用规则</label>
+                            <select id="regexPreset">
+                                <option value="">自定义（手填匹配模式）</option>
+                                <option value="trim">去除首尾空格</option>
+                                <option value="innerSpace">去除所有空格</option>
+                                <option value="keepDigit">只保留数字</option>
+                                <option value="keepChinese">只保留中文</option>
+                                <option value="keepLetter">只保留字母</option>
+                                <option value="removeLetter">去除所有字母</option>
+                                <option value="removeSymbol">去除特殊符号</option>
+                            </select>
+                        </div>
+                        <div class="panel-row">
+                            <label>匹配模式</label><input type="text" id="regexPattern" placeholder="选常用规则可留空；自定义则填正则（高级）">
+                        </div>
+                        <div class="panel-row">
+                            <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容（删除则留空）">
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="regexReplaceBtn">执行替换</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>✂️ 列拆分</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">按分隔符将一列拆分为多列</p>
+                        <div class="panel-row">
+                            <label>源列</label><select id="splitSourceColumn"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>分隔符</label><input type="text" id="splitDelimiter" value="," placeholder="如 , ; | 等">
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="splitColumnBtn">执行拆分</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>🔄 数据类型转换</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">批量转换列的数据类型</p>
+                        <div class="panel-row">
+                            <label>选择列</label><select id="convertColumn"></select>
+                        </div>
+                        <div class="panel-row">
+                            <label>目标类型</label>
+                            <select id="convertTargetType">
+                                <option value="string">字符串</option>
+                                <option value="number">数值</option>
+                                <option value="date">日期</option>
+                            </select>
+                        </div>
+                        <div class="panel-row" id="dateFormatRow" style="display:none">
+                            <label>日期格式</label>
+                            <select id="convertDateFormat">
+                                <option value="%Y-%m-%d">2024-01-15</option>
+                                <option value="%Y/%m/%d">2024/01/15</option>
+                                <option value="%Y年%m月%d日">2024年01月15日</option>
+                                <option value="%Y%m%d">20240115</option>
+                                <option value="%d/%m/%Y">15/01/2024</option>
+                            </select>
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="convertTypeBtn">执行转换</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3>✅ 数据校验</h3>
+                        <p style="font-size:12px;color:#888;margin-bottom:10px">检查列数据是否符合规则</p>
+                        <div id="validationRules"></div>
+                        <button class="btn" id="addValidationRuleBtn" style="margin-bottom:10px">+ 添加规则</button>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="validateBtn">执行校验</button>
+                        </div>
+                        <div id="validationResults" style="margin-top:10px"></div>
+                    </div>
+                </div>
+
+                <!-- 对比分析 -->
+                <div id="tab-compare" class="hidden">
+                    <div class="panel">
+                        <h3>多文件对比分析</h3>
+                        <div class="compare-grid">
+                            <div class="compare-item">
+                                <h4>文件 A</h4>
+                                <select id="compareFileA">
+                                    <option value="">选择文件</option>
+                                </select>
+                                <select id="compareSheetA">
+                                    <option value="">选择工作表</option>
+                                </select>
+                                <div class="compare-stat">行数: <span id="compareRowsA">-</span></div>
+                            </div>
+                            <div class="compare-item">
+                                <h4>文件 B</h4>
+                                <select id="compareFileB">
+                                    <option value="">选择文件</option>
+                                </select>
+                                <select id="compareSheetB">
+                                    <option value="">选择工作表</option>
+                                </select>
+                                <div class="compare-stat">行数: <span id="compareRowsB">-</span></div>
+                            </div>
+                        </div>
+                        <div class="panel-row" style="margin-top:14px">
+                            <label>对比列</label>
+                            <select id="compareKeyCol">
+                                <option value="">选择用于对比的列</option>
+                            </select>
+                        </div>
+                        <div class="panel-actions">
+                            <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
+                            <button class="btn" id="reconcileBtn">📋 增强对账</button>
+                        </div>
+                    </div>
+                    <div id="compareResult" class="table-container hidden">
+                        <div class="stats-bar" style="margin:12px">
+                            <div class="stat-item">
+                                <div class="stat-value" id="compareOnlyA">0</div>
+                                <div class="stat-label">仅在A中</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="compareOnlyB">0</div>
+                                <div class="stat-label">仅在B中</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="compareBoth">0</div>
+                                <div class="stat-label">两者共有</div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="compareTable">
+                                <thead id="compareHead"></thead>
+                                <tbody id="compareBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none">
+                        </div>
+                        <div id="comparePager"
+                            style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
+                            <button class="btn" id="comparePrevBtn" style="padding:4px 14px">上一页</button>
+                            <span id="comparePageInfo" style="font-size:13px;color:#666"></span>
+                            <button class="btn" id="compareNextBtn" style="padding:4px 14px">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI 对话 -->
+                <div id="tab-ai" class="hidden">
+                    <div class="ai-chat">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee">
+                            <span style="font-size:13px;color:#888">💬 支持多轮追问，AI 会记住上下文</span>
+                            <button class="btn" id="aiClearBtn" style="padding:4px 10px;font-size:12px">清空对话</button>
+                        </div>
+                        <div class="ai-chat-messages" id="aiChatMessages">
+                            <div class="ai-message ai">
+                                <div class="msg-content">
+                                    👋 你好！我是 Excel AI 助手。<br>
+                                    你可以用自然语言问我关于这个 Excel 的问题，比如：<br>
+                                    • "统计每个部门的总金额"<br>
+                                    • "找出金额大于10000的记录"<br>
+                                    • "按日期分组统计数量"<br><br>
+                                    请先在右上角 AI 设置中配置 API Key。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-chat-input">
+                            <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
+                            <button class="btn btn-primary" id="aiSendBtn">发送</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div id="emptyState" class="empty-state">
+                <h3>暂无数据</h3>
+                <p>请上传 Excel 文件开始分析</p>
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- 工具箱覆盖层 -->
@@ -2406,6 +2512,102 @@
                 <button class="btn" id="settingsTestBtn">测试连接</button>
                 <button class="btn" id="settingsCancelBtn">取消</button>
                 <button class="btn btn-primary" id="settingsSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 合并文件模态框 -->
+    <div class="modal-overlay hidden" id="mergeModal">
+        <div class="modal">
+            <h3>🔀 合并文件</h3>
+            <p style="color:#888;margin-bottom:12px;font-size:13px">
+                勾选要合并的表，合并后生成新文件，并自动追加「来源文件名」「导入时间」两列。适合月报、日报、订单等结构相同的文件汇总。</p>
+            <div id="mergeSourceList"
+                style="max-height:300px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;background:#fafafa">
+            </div>
+            <div class="modal-row">
+                <label>列对齐方式</label>
+                <select id="mergeMode">
+                    <option value="union">并集（保留所有列，缺列填空）</option>
+                    <option value="intersect">交集（仅保留共有列）</option>
+                </select>
+            </div>
+            <div class="modal-row">
+                <label>新表名称</label>
+                <input type="text" id="mergeTargetName" value="合并数据">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="mergeCancelBtn">取消</button>
+                <button class="btn btn-primary" id="mergeConfirmBtn">开始合并</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据体检报告 -->
+    <div class="modal-overlay hidden" id="qualityModal">
+        <div class="modal" style="max-width:680px">
+            <h3>🔍 数据体检报告</h3>
+            <div id="qualitySummary" style="margin-bottom:12px;font-size:14px"></div>
+            <div id="qualityReport" style="max-height:420px;overflow:auto"></div>
+            <div class="modal-actions">
+                <button class="btn" id="qualityCloseBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 增强对账 -->
+    <div class="modal-overlay hidden" id="reconcileModal">
+        <div class="modal" style="max-width:720px">
+            <h3>📋 增强对账</h3>
+            <p style="color:#888;font-size:13px;margin-bottom:12px">按多个匹配列核对两份数据，支持金额容差、日期容差，自动分类差异</p>
+            <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple
+                    style="height:90px"></select></div>
+            <div class="modal-row"><label>金额列（可选）</label><select id="reconcileAmountCol">
+                    <option value="">不比较</option>
+                </select></div>
+            <div class="modal-row"><label>金额容差</label><input type="number" id="reconcileAmountTol" value="0.01"
+                    step="0.01"></div>
+            <div class="modal-row"><label>日期列（可选）</label><select id="reconcileDateCol">
+                    <option value="">不比较</option>
+                </select></div>
+            <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0">
+            </div>
+            <div id="reconcileResult" style="margin-top:12px"></div>
+            <div class="modal-actions">
+                <button class="btn" id="reconcileCloseBtn">关闭</button>
+                <button class="btn btn-primary" id="reconcileRunBtn">开始对账</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 清洗方案 -->
+    <div class="modal-overlay hidden" id="planModal">
+        <div class="modal">
+            <h3>🧹 清洗方案</h3>
+            <p style="color:#888;font-size:13px;margin-bottom:12px">保存当前各清洗面板的配置，下次一键执行。按 去重→填充→替换→拆分→转换 顺序执行。</p>
+            <div class="modal-row"><label>方案名称</label><input type="text" id="planName" placeholder="如 月报标准清洗"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="planSaveBtn">💾 保存当前配置</button>
+                <button class="btn" id="planCloseBtn">关闭</button>
+            </div>
+            <h4 style="margin-top:16px;margin-bottom:6px">已保存方案</h4>
+            <div id="planList" style="max-height:220px;overflow:auto"></div>
+        </div>
+    </div>
+
+    <!-- 清洗预览 -->
+    <div class="modal-overlay hidden" id="cleanPreviewModal">
+        <div class="modal">
+            <h3>👀 清洗预览</h3>
+            <p id="cleanPreviewNote" style="color:#555;font-size:13px;margin-bottom:10px"></p>
+            <div id="cleanPreviewSummary"
+                style="padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#f6f8fa"></div>
+            <div style="font-size:12px;color:#888;margin-bottom:6px">前 5 条变更样本（修改前 → 修改后）：</div>
+            <div id="cleanPreviewSamples"
+                style="max-height:280px;overflow:auto;border:1px solid #eee;border-radius:6px"></div>
+            <div class="modal-actions">
+                <button class="btn" id="cleanPreviewCancelBtn">取消</button>
+                <button class="btn btn-primary" id="cleanPreviewConfirmBtn">确认执行</button>
             </div>
         </div>
     </div>
@@ -2507,6 +2709,10 @@
             searchText: "",
             totalRows: 0, totalPages: 0,
             loadedRows: 0, hasMore: true, isLoadingMore: false,
+            browseRows: [],          // 浏览表已加载行（内存），供虚拟滚动按需渲染
+            rowHeight: 0,            // 实测行高(px)
+            visStart: -1, visEnd: -1, renderedCount: 0,  // 当前可视窗口
+            selectedRowIds: new Set(),  // 选中行(虚拟重渲染后保留)
             chart: null, chartVisible: false,
             currentTab: "browse",
             pivotData: null,
@@ -2521,7 +2727,6 @@
         const cache = {};
         let currentDropdown = null;
         let sessions = [];
-        let scrollObserver = null;
         let compareSheetsA = [];
         let compareSheetsB = [];
 
@@ -2564,7 +2769,7 @@
         });
 
         // ==================== 数据库配置 ====================
-        document.getElementById("dbConfigBtn").addEventListener("click", async () => {
+        document.getElementById("dbConfigBtn")?.addEventListener("click", async () => {
             await loadDbConfig();
             document.getElementById("dbConfigModal").classList.remove("hidden");
         });
@@ -2615,7 +2820,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert("✅ MySQL 连接成功！");
+                    showToast("✅ MySQL 连接成功！");
                 } else {
                     const errorTypeMap = {
                         "network": "🌐 网络连接错误",
@@ -2628,10 +2833,10 @@
                         "unknown": "❓ 未知错误"
                     };
                     const title = errorTypeMap[data.error_type] || "❌ 连接失败";
-                    alert(`${title}\n\n${data.message || "请检查配置"}`);
+                    showToast(`${title}\n\n${data.message || "请检查配置"}`);
                 }
             } catch (e) {
-                alert("测试失败: " + e.message);
+                showToast("测试失败: " + e.message);
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
@@ -2659,13 +2864,13 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert("配置已保存！");
+                    showToast("配置已保存！");
                     document.getElementById("dbConfigModal").classList.add("hidden");
                 } else {
-                    alert("保存失败");
+                    showToast("保存失败");
                 }
             } catch (e) {
-                alert("保存失败: " + e.message);
+                showToast("保存失败: " + e.message);
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
@@ -2690,17 +2895,17 @@
         const toolboxBtn = document.getElementById("toolboxBtn");
         const toolboxExitBtn = document.getElementById("toolboxExitBtn");
 
-        // 页面加载后延迟预加载工具箱 iframe，后台缓存
+        // 页面加载后延迟预加载工具箱 iframe，后台缓存（带版本号破浏览器缓存）
+        const TOOLBOX_VER = "20260713";
         setTimeout(() => {
             if (toolboxFrame.src === "about:blank" || toolboxFrame.src === "") {
-                toolboxFrame.src = "/toolbox/index.html";
+                toolboxFrame.src = "/toolbox/index.html?v=" + TOOLBOX_VER;
             }
         }, 1500);
 
         function enterToolbox() {
-            if (toolboxFrame.src === "about:blank" || toolboxFrame.src === "") {
-                toolboxFrame.src = "/toolbox/index.html";
-            }
+            // 每次进入强制刷新工具箱，避免浏览器缓存旧版本
+            toolboxFrame.src = "/toolbox/index.html?v=" + TOOLBOX_VER;
             toolboxOverlay.classList.add("active");
         }
 
@@ -2728,7 +2933,7 @@
         });
 
         // ==================== 性能模式 ====================
-        document.getElementById("performanceBtn").addEventListener("click", (e) => {
+        document.getElementById("performanceBtn")?.addEventListener("click", (e) => {
             e.stopPropagation();
             const dropdown = document.getElementById("performanceDropdown");
             const btn = document.getElementById("performanceBtn");
@@ -2802,8 +3007,8 @@
         els.newUploadBtn.addEventListener("click", () => els.fileInput.click());
         els.uploadZone.addEventListener("dragover", e => { e.preventDefault(); document.getElementById("uploadSection").classList.add("dragover"); });
         els.uploadZone.addEventListener("dragleave", () => document.getElementById("uploadSection").classList.remove("dragover"));
-        els.uploadZone.addEventListener("drop", e => { e.preventDefault(); document.getElementById("uploadSection").classList.remove("dragover"); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
-        els.fileInput.addEventListener("change", e => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
+        els.uploadZone.addEventListener("drop", e => { e.preventDefault(); document.getElementById("uploadSection").classList.remove("dragover"); if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files); });
+        els.fileInput.addEventListener("change", e => { if (e.target.files.length > 0) handleFiles(e.target.files); e.target.value = ""; });
 
         // 页大小切换 -> 重置滚动
         els.pageSizeSelect.addEventListener("change", () => {
@@ -2830,7 +3035,7 @@
 
         async function handleFile(file) {
             const ext = file.name.split(".").pop().toLowerCase();
-            if (!["xlsx", "xls", "csv"].includes(ext)) { alert("不支持的文件格式"); return; }
+            if (!["xlsx", "xls", "csv"].includes(ext)) { showToast("不支持的文件格式"); return; }
             showProgress(true);
             const formData = new FormData();
             formData.append("file", file);
@@ -2842,7 +3047,69 @@
                 state.fileName = data.fileName;
                 refreshSessionList();
                 pollProgress(data.sessionId);
-            } catch (e) { alert("上传失败: " + e.message); showProgress(false); }
+            } catch (e) { showToast("上传失败: " + e.message); showProgress(false); }
+        }
+
+        async function uploadOneFile(file) {
+            const ext = file.name.split(".").pop().toLowerCase();
+            if (!["xlsx", "xls", "csv"].includes(ext)) { showToast(`跳过不支持的文件：${file.name}`); return null; }
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                const res = await fetch("/api/upload/", { method: "POST", body: formData });
+                if (!res.ok) throw new Error("上传失败");
+                return await res.json();
+            } catch (e) { showToast(`上传失败 ${file.name}: ${e.message}`); return null; }
+        }
+
+        async function handleFiles(fileList) {
+            const files = Array.from(fileList);
+            if (files.length === 0) return;
+            if (files.length === 1) { handleFile(files[0]); return; }
+            showProgress(true);
+            const uploaded = [];
+            for (let i = 0; i < files.length; i++) {
+                const data = await uploadOneFile(files[i]);
+                if (data) uploaded.push(data);
+            }
+            if (!uploaded.length) { showProgress(false); return; }
+            // 轮询所有文件直到全部解析完成，期间持续刷新侧边栏（大文件解析完会立即显示）
+            const pending = new Set(uploaded.map(u => u.sessionId));
+            const completed = [];
+            els.loadingState.innerHTML = `正在解析 ${uploaded.length} 个文件…`;
+            const interval = setInterval(async () => {
+                for (const u of uploaded) {
+                    if (!pending.has(u.sessionId)) continue;
+                    try {
+                        const res = await fetch(`/api/upload/progress/${u.sessionId}`);
+                        const data = await res.json();
+                        if (data.status === "completed") {
+                            pending.delete(u.sessionId);
+                            completed.push(u);
+                            if (pending.size > 0) els.loadingState.innerHTML = `${u.fileName} 解析完成，还在解析其余 ${pending.size} 个…`;
+                        } else if (data.status === "error") {
+                            pending.delete(u.sessionId);
+                            if (data.isEncrypted) showEncryptModal(u.sessionId);
+                            else showToast(`${u.fileName} 解析失败: ${data.error || "未知错误"}`);
+                        } else {
+                            const pct = data.totalRows > 0 ? Math.round((data.processedRows / data.totalRows) * 100) : 0;
+                            els.loadingState.innerHTML = `正在解析 ${u.fileName}：${data.currentSheet || ""} ${data.processedRows}/${data.totalRows || "?"} 行 (${pct}%)`;
+                        }
+                    } catch (e) { console.error("进度查询失败:", e); }
+                    break;
+                }
+                refreshSessionList();
+                if (pending.size === 0) {
+                    clearInterval(interval);
+                    showProgress(false);
+                    if (completed.length === 0) return;
+                    const first = completed[0];
+                    state.sessionId = first.sessionId;
+                    state.fileName = first.fileName;
+                    switchSession(first.sessionId);
+                    showToast(`已上传 ${completed.length} 个文件，可用「🔀 合并文件」汇总`);
+                }
+            }, 600);
         }
 
         async function switchSession(sessionId) {
@@ -2900,7 +3167,7 @@
                 });
                 div.querySelector(".session-delete").addEventListener("click", async e => {
                     e.stopPropagation();
-                    if (!confirm("确定删除此会话？")) return;
+                    if (!confirm("确定删除此文件？")) return;
                     try {
                         await fetch(`/api/upload/sessions/${s.sessionId}`, { method: "DELETE" });
                         if (state.sessionId === s.sessionId) {
@@ -2915,7 +3182,7 @@
                             } catch (e) { /* ignore */ }
                         }
                         refreshSessionList();
-                    } catch (e) { alert("删除失败"); }
+                    } catch (e) { showToast("删除失败"); }
                 });
                 els.sessionList.appendChild(div);
             });
@@ -2947,7 +3214,7 @@
                         if (data.isEncrypted) {
                             showEncryptModal(sessionId);
                         } else {
-                            alert("解析失败: " + (data.error || "未知错误"));
+                            showToast("解析失败: " + (data.error || "未知错误"));
                         }
                     }
                 } catch (e) { console.error("进度查询失败:", e); }
@@ -2970,7 +3237,7 @@
         document.getElementById("encryptCancelBtn")?.addEventListener("click", hideEncryptModal);
         document.getElementById("encryptDecryptBtn")?.addEventListener("click", async () => {
             const password = document.getElementById("encryptPassword").value;
-            if (!password) { alert("请输入密码"); return; }
+            if (!password) { showToast("请输入密码"); return; }
             if (!currentEncryptSessionId) return;
 
             try {
@@ -2985,7 +3252,7 @@
                 showProgress(true);
                 pollProgress(currentEncryptSessionId);
             } catch (e) {
-                alert("解密失败: " + e.message);
+                showToast("解密失败: " + e.message);
             }
         });
 
@@ -3035,7 +3302,7 @@
 
         document.getElementById("toggleChartBtn").addEventListener("click", async () => {
             if (state.performanceMode === "performance") {
-                alert("性能模式下无法显示图表");
+                showToast("性能模式下无法显示图表");
                 return;
             }
             state.chartVisible = !state.chartVisible;
@@ -3058,10 +3325,267 @@
 
         // 导出功能
         document.getElementById("exportBtn").addEventListener("click", () => {
-            if (!state.sessionId) { alert("请先上传文件"); return; }
+            if (!state.sessionId) { showToast("请先上传文件"); return; }
             const format = prompt("导出格式：csv 或 xlsx", "csv");
             if (!format || !["csv", "xlsx"].includes(format.toLowerCase())) return;
             window.open(`/api/data/${state.sessionId}/export?tableName=${encodeURIComponent(state.currentTable)}&format=${format}`, "_blank");
+        });
+
+        // ==================== 合并文件 ====================
+        document.getElementById("mergeBtn").addEventListener("click", async () => {
+            await refreshSessionList();
+            const list = document.getElementById("mergeSourceList");
+            if (!sessions.length) { showToast("请先上传文件"); return; }
+            let html = "";
+            for (const s of sessions) {
+                if (!s.sheets || !s.sheets.length) continue;
+                s.sheets.forEach(sh => {
+                    html += `<label style="display:block;padding:5px 0;cursor:pointer"><input type="checkbox" class="merge-src" data-session="${s.sessionId}" data-table="${sh.name}" data-file="${s.fileName}" style="margin-right:6px">${s.fileName} <span style="color:#999">/</span> ${sh.name} <span style="color:#aaa;font-size:11px">(${sh.rowCount}行)</span></label>`;
+                });
+            }
+            list.innerHTML = html || '<p style="color:#999;padding:8px">没有可合并的表</p>';
+            document.getElementById("mergeModal").classList.remove("hidden");
+        });
+        document.getElementById("mergeCancelBtn").addEventListener("click", () => {
+            document.getElementById("mergeModal").classList.add("hidden");
+        });
+        document.getElementById("mergeConfirmBtn").addEventListener("click", async () => {
+            const checked = document.querySelectorAll(".merge-src:checked");
+            if (checked.length < 2) { showToast("至少选择 2 个表进行合并"); return; }
+            const sources = Array.from(checked).map(c => ({ sessionId: c.dataset.session, tableName: c.dataset.table }));
+            const body = {
+                sources,
+                targetTableName: document.getElementById("mergeTargetName").value.trim() || "合并数据",
+                mergeMode: document.getElementById("mergeMode").value,
+                addSource: true
+            };
+            const btn = document.getElementById("mergeConfirmBtn");
+            btn.disabled = true; btn.textContent = "合并中...";
+            try {
+                const res = await fetch("/api/data/merge", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (!res.ok) { showToast("合并失败: " + (data.detail || "未知错误")); return; }
+                showToast(`合并完成，共 ${data.rowCount} 行`);
+                document.getElementById("mergeModal").classList.add("hidden");
+                await refreshSessionList();
+                switchSession(data.sessionId);
+            } catch (e) { showToast("合并失败: " + e.message); }
+            finally { btn.disabled = false; btn.textContent = "开始合并"; }
+        });
+
+        // ==================== 数据体检 ====================
+        document.getElementById("qualityCheckBtn").addEventListener("click", async () => {
+            if (!state.sessionId || !state.currentTable) { showToast("请先选择表"); return; }
+            const btn = document.getElementById("qualityCheckBtn");
+            btn.disabled = true; btn.textContent = "🔍 体检中...";
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/quality-check/${encodeURIComponent(state.currentTable)}`);
+                const data = await res.json();
+                if (!res.ok) { showToast("体检失败: " + (data.detail || "")); return; }
+                renderQualityReport(data);
+                document.getElementById("qualityModal").classList.remove("hidden");
+            } catch (e) { showToast("体检失败: " + e.message); }
+            finally { btn.disabled = false; btn.textContent = "🔍 数据体检"; }
+        });
+        document.getElementById("qualityCloseBtn").addEventListener("click", () => {
+            document.getElementById("qualityModal").classList.add("hidden");
+        });
+        function renderQualityReport(data) {
+            const s = data.summary || {};
+            document.getElementById("qualitySummary").innerHTML =
+                `共 <b>${data.totalRows}</b> 行 · <b>${s.totalColumns}</b> 列 · ` +
+                `<span style="color:#2e7d32">健康 ${s.healthyColumns}</span> · ` +
+                `<span style="color:#f57c00">警告 ${s.warningColumns}</span> · ` +
+                `<span style="color:#c62828">异常 ${s.errorColumns}</span> · ` +
+                `共发现 ${s.totalIssues} 个问题`;
+            const typeLabel = { number: "数值", date: "日期", text: "文本" };
+            const levelColor = { ok: "#2e7d32", warning: "#f57c00", error: "#c62828" };
+            const levelText = { ok: "健康", warning: "警告", error: "异常" };
+            document.getElementById("qualityReport").innerHTML = (data.columns || []).map(c => {
+                const issues = (c.issues || []).map(it =>
+                    `<div style="font-size:12px;color:#666;margin-top:3px;padding-left:12px">• ${it.detail}</div>`
+                ).join("");
+                return `<div style="padding:10px 12px;border-left:3px solid ${levelColor[c.level]};background:#f9f9f9;border-radius:4px;margin-bottom:8px">` +
+                    `<div style="display:flex;justify-content:space-between;align-items:center">` +
+                    `<b>${c.name}</b> <span style="font-size:11px;color:#999">${typeLabel[c.type] || c.type}</span>` +
+                    `<span style="font-size:12px;color:${levelColor[c.level]};font-weight:600">${levelText[c.level]}</span></div>` +
+                    (issues || '<div style="font-size:12px;color:#999;margin-top:3px">无问题</div>') +
+                    `</div>`;
+            }).join("");
+        }
+
+        // ==================== 增强对账 ====================
+        document.getElementById("reconcileBtn").addEventListener("click", async () => {
+            const sidA = document.getElementById("compareFileA").value;
+            const sidB = document.getElementById("compareFileB").value;
+            const tA = document.getElementById("compareSheetA").value;
+            const tB = document.getElementById("compareSheetB").value;
+            if (!sidA || !sidB || !tA || !tB) { showToast("请先在上方选择文件 A/B 和工作表"); return; }
+            try {
+                const res = await fetch(`/api/data/${sidA}/tables`);
+                const data = await res.json();
+                const tbl = (data.tables || []).find(t => t.name === tA);
+                const headers = tbl ? tbl.headers : [];
+                const keysSel = document.getElementById("reconcileKeys");
+                const amtSel = document.getElementById("reconcileAmountCol");
+                const dateSel = document.getElementById("reconcileDateCol");
+                keysSel.innerHTML = headers.map(h => `<option value="${h}">${h}</option>`).join("");
+                amtSel.innerHTML = '<option value="">不比较</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join("");
+                dateSel.innerHTML = '<option value="">不比较</option>' + headers.map(h => `<option value="${h}">${h}</option>`).join("");
+                document.getElementById("reconcileResult").innerHTML = "";
+                document.getElementById("reconcileModal").classList.remove("hidden");
+            } catch (e) { showToast("加载列失败: " + e.message); }
+        });
+        document.getElementById("reconcileCloseBtn").addEventListener("click", () => {
+            document.getElementById("reconcileModal").classList.add("hidden");
+        });
+        document.getElementById("reconcileRunBtn").addEventListener("click", async () => {
+            const sidA = document.getElementById("compareFileA").value;
+            const sidB = document.getElementById("compareFileB").value;
+            const tA = document.getElementById("compareSheetA").value;
+            const tB = document.getElementById("compareSheetB").value;
+            const keys = Array.from(document.getElementById("reconcileKeys").selectedOptions).map(o => o.value);
+            if (keys.length === 0) { showToast("请至少选择一个匹配列"); return; }
+            const body = {
+                sessionA: sidA, tableA: tA, sessionB: sidB, tableB: tB, keyColumns: keys,
+                amountColumn: document.getElementById("reconcileAmountCol").value || null,
+                amountTolerance: parseFloat(document.getElementById("reconcileAmountTol").value) || 0,
+                dateColumn: document.getElementById("reconcileDateCol").value || null,
+                dateToleranceDays: parseInt(document.getElementById("reconcileDateTol").value) || 0
+            };
+            const btn = document.getElementById("reconcileRunBtn");
+            btn.disabled = true; btn.textContent = "对账中...";
+            try {
+                const res = await fetch("/api/data/reconcile", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (!res.ok) { showToast("对账失败: " + (data.detail || "")); return; }
+                renderReconcileResult(data);
+            } catch (e) { showToast("对账失败: " + e.message); }
+            finally { btn.disabled = false; btn.textContent = "开始对账"; }
+        });
+        function renderReconcileResult(data) {
+            const s = data.stats;
+            const samples = data.samples || {};
+            const stat = (n, label, color) => `<div style="flex:1;text-align:center;padding:10px;background:#f5f5f5;border-radius:6px"><div style="font-size:20px;font-weight:700;color:${color}">${n}</div><div style="font-size:12px;color:#666">${label}</div></div>`;
+            let html = `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">`;
+            html += stat(s.matched, "匹配", "#2e7d32");
+            html += stat(s.onlyA, "仅A有", "#f57c00");
+            html += stat(s.onlyB, "仅B有", "#f57c00");
+            html += stat(s.amountMismatch, "金额不符", "#c62828");
+            html += stat(s.dateMismatch, "日期不符", "#c62828");
+            html += `</div>`;
+            const sampleTable = (title, items, color) => {
+                if (!items || !items.length) return "";
+                const rows = items.slice(0, 10).map(it => {
+                    if (typeof it === "string") return `<tr><td>${it}</td></tr>`;
+                    return `<tr><td>${it.key}</td><td>${it.a ?? ""}</td><td>${it.b ?? ""}</td>${it.diff !== undefined ? `<td>${it.diff}</td>` : ""}${it.diffDays !== undefined ? `<td>${it.diffDays}天</td>` : ""}</tr>`;
+                }).join("");
+                return `<h4 style="color:${color};margin:10px 0 4px">${title}（${items.length}条）</h4><table style="width:100%;font-size:12px;border-collapse:collapse;border:1px solid #ddd"><tbody>${rows}</tbody></table>`;
+            };
+            html += sampleTable("仅 A 有", samples.onlyA, "#f57c00");
+            html += sampleTable("仅 B 有", samples.onlyB, "#f57c00");
+            html += sampleTable("金额不符", samples.amountMismatch, "#c62828");
+            html += sampleTable("日期不符", samples.dateMismatch, "#c62828");
+            document.getElementById("reconcileResult").innerHTML = html;
+        }
+
+        // ==================== 清洗方案（保存/一键回放）====================
+        function getCleanPlans() {
+            try { return JSON.parse(localStorage.getItem("cleanPlans") || "{}"); }
+            catch (e) { return {}; }
+        }
+        function collectCleanPlan() {
+            return {
+                dedup: { column: document.getElementById("dedupColumn").value },
+                fill: { column: document.getElementById("fillColumn").value, value: document.getElementById("fillValue").value },
+                regex: { column: document.getElementById("regexColumn").value, pattern: document.getElementById("regexPattern").value, replacement: document.getElementById("regexReplacement").value },
+                split: { column: document.getElementById("splitSourceColumn").value, delimiter: document.getElementById("splitDelimiter").value },
+                convert: { column: document.getElementById("convertColumn").value, targetType: document.getElementById("convertTargetType").value, dateFormat: document.getElementById("convertDateFormat").value }
+            };
+        }
+        function renderPlanList() {
+            const plans = getCleanPlans();
+            const list = document.getElementById("planList");
+            const names = Object.keys(plans);
+            if (!names.length) { list.innerHTML = '<p style="color:#999;font-size:13px;padding:8px">暂无保存的方案</p>'; return; }
+            list.innerHTML = names.map(name => {
+                const cfg = plans[name].config || {};
+                const steps = [];
+                if (cfg.dedup?.column) steps.push("去重");
+                if (cfg.fill?.column && cfg.fill.value) steps.push("填充");
+                if (cfg.regex?.column && cfg.regex.pattern) steps.push("替换");
+                if (cfg.split?.column && cfg.split.delimiter) steps.push("拆分");
+                if (cfg.convert?.column && cfg.convert.targetType) steps.push("转换");
+                const safe = name.replace(/'/g, "\\'");
+                return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid #eee;border-radius:6px;margin-bottom:6px">
+                    <div style="flex:1"><b>${name}</b><div style="font-size:11px;color:#999">${steps.length ? steps.join("→") : "无有效步骤"}</div></div>
+                    <button class="btn btn-primary" onclick="applyCleanPlan('${safe}')">应用</button>
+                    <button class="btn btn-danger" onclick="deleteCleanPlan('${safe}')" style="padding:4px 10px">×</button>
+                </div>`;
+            }).join("");
+        }
+        window.applyCleanPlan = async function (name) {
+            const plans = getCleanPlans();
+            const plan = plans[name];
+            if (!plan) { showToast("方案不存在"); return; }
+            const cfg = plan.config || {};
+            const sid = state.sessionId, tbl = state.currentTable;
+            if (!sid || !tbl) { showToast("请先选择表"); return; }
+            if (!confirm(`应用方案「${name}」？将自动执行清洗步骤（可撤销）`)) return;
+            await snapshotBeforeClean();
+            let steps = 0;
+            const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            try {
+                if (cfg.dedup?.column) {
+                    await post(`/api/data/${sid}/clean/deduplicate?tableName=${encodeURIComponent(tbl)}`, [cfg.dedup.column]);
+                    steps++;
+                }
+                if (cfg.fill?.column && cfg.fill.value) {
+                    await post(`/api/data/${sid}/clean/fill-empty?tableName=${encodeURIComponent(tbl)}`, { fillColumn: cfg.fill.column, fillValue: cfg.fill.value });
+                    steps++;
+                }
+                if (cfg.regex?.column && cfg.regex.pattern) {
+                    await post(`/api/data/${sid}/clean/regex-replace`, { tableName: tbl, column: cfg.regex.column, pattern: cfg.regex.pattern, replacement: cfg.regex.replacement || "" });
+                    steps++;
+                }
+                if (cfg.split?.column && cfg.split.delimiter) {
+                    await post(`/api/data/${sid}/clean/split-column`, { tableName: tbl, sourceColumn: cfg.split.column, delimiter: cfg.split.delimiter });
+                    steps++;
+                }
+                if (cfg.convert?.column && cfg.convert.targetType) {
+                    await post(`/api/data/${sid}/clean/convert-type`, { tableName: tbl, column: cfg.convert.column, targetType: cfg.convert.targetType, dateFormat: cfg.convert.dateFormat || "" });
+                    steps++;
+                }
+                showToast(`方案「${name}」执行完成，共 ${steps} 步`);
+                document.getElementById("planModal").classList.add("hidden");
+                resetAndLoad();
+            } catch (e) { showToast("执行失败: " + e.message); }
+        };
+        window.deleteCleanPlan = function (name) {
+            if (!confirm(`删除方案「${name}」？`)) return;
+            const plans = getCleanPlans();
+            delete plans[name];
+            localStorage.setItem("cleanPlans", JSON.stringify(plans));
+            renderPlanList();
+            showToast("已删除");
+        };
+        document.getElementById("cleanPlanBtn").addEventListener("click", () => {
+            document.getElementById("planName").value = "";
+            renderPlanList();
+            document.getElementById("planModal").classList.remove("hidden");
+        });
+        document.getElementById("planCloseBtn").addEventListener("click", () => {
+            document.getElementById("planModal").classList.add("hidden");
+        });
+        document.getElementById("planSaveBtn").addEventListener("click", () => {
+            const name = document.getElementById("planName").value.trim();
+            if (!name) { showToast("请输入方案名称"); return; }
+            const plans = getCleanPlans();
+            plans[name] = { config: collectCleanPlan() };
+            localStorage.setItem("cleanPlans", JSON.stringify(plans));
+            showToast(`方案「${name}」已保存`);
+            document.getElementById("planName").value = "";
+            renderPlanList();
         });
 
         // ==================== AI 设置 ====================
@@ -3096,7 +3620,10 @@
                 });
                 const data = await res.json();
                 document.getElementById("settingsModal").classList.add("hidden");
-            } catch (e) { alert("保存失败: " + e.message); }
+                // 若 AI 对话页当前可见，刷新欢迎语中的配置状态
+                const aiTab = document.getElementById("tab-ai");
+                if (aiTab && !aiTab.classList.contains("hidden")) initAiChat();
+            } catch (e) { showToast("保存失败: " + e.message); }
         });
         document.getElementById("settingsTestBtn").addEventListener("click", async () => {
             const btn = document.getElementById("settingsTestBtn");
@@ -3118,8 +3645,8 @@
                     headers: { "Content-Type": "application/json" }
                 });
                 const data = await res.json();
-                alert(data.success ? "连接成功" : "连接失败: " + (data.message || ""));
-            } catch (e) { alert("测试失败: " + e.message); }
+                showToast(data.success ? "连接成功" : "连接失败: " + (data.message || ""));
+            } catch (e) { showToast("测试失败: " + e.message); }
             finally { btn.textContent = "测试连接"; btn.disabled = false; }
         });
 
@@ -3146,6 +3673,9 @@
             state.loadedRows = 0;
             state.hasMore = true;
             state.allRows = null;
+            state.browseRows = [];
+            state.selectedRowIds.clear();
+            state.visStart = -1; state.visEnd = -1; state.renderedCount = 0;
             els.tableBody.innerHTML = "";
             loadData();
         }
@@ -3175,13 +3705,10 @@
                 state.totalRows = data.totalRows || 0;
                 state.totalPages = Math.ceil(state.totalRows / pageSize);
 
-                appendRows(data.rows, data.headers || state.headers);
-                state.loadedRows += data.rows.length;
+                // 累积到内存数组，虚拟滚动按需渲染（DOM 节点恒定，不随数据量增长）
+                state.browseRows.push(...data.rows);
+                state.loadedRows = state.browseRows.length;
                 state.hasMore = data.rows.length >= pageSize;
-
-                updateStats();
-                updateScrollInfo();
-                setupScrollObserver();
 
                 if (data.headers && data.headers.length > 0) {
                     const headersChanged = state.headers.length !== data.headers.length ||
@@ -3203,6 +3730,10 @@
                         renderTableHeader();
                     }
                 }
+
+                updateStats();
+                updateScrollInfo();
+                renderVirtual();
             } catch (e) {
                 console.error("加载数据失败:", e);
                 // 显示错误提示
@@ -3217,42 +3748,88 @@
             }
         }
 
-        function appendRows(rows, headers) {
-            // 获取显示列及其在 headers 中的索引
+        // ==================== 虚拟滚动 ====================
+        // 仅渲染可视窗口内的行 + 上下占位 spacer，DOM 节点数恒定，不随数据量增长
+        function renderVirtual() {
+            const rows = state.browseRows;
+            const tb = els.tableBody;
+            if (!rows.length) { tb.innerHTML = ""; state.visStart = -1; state.visEnd = -1; return; }
+
+            if (!state.rowHeight) measureRowHeight();
+            const rh = state.rowHeight || 28;
+
+            const wrapper = els.tableWrapper;
+            const viewportH = wrapper.clientHeight || 400;
+            const buffer = 8;
+            const visibleCount = Math.ceil(viewportH / rh) + buffer * 2;
+            let start = Math.max(0, Math.floor(wrapper.scrollTop / rh) - buffer);
+            let end = Math.min(rows.length, start + visibleCount);
+            if (end - start < visibleCount && start > 0) start = Math.max(0, end - visibleCount);
+
+            // 数据量变化（加载更多）或位移超过 buffer 才重渲染，避免逐像素抖动
+            if (state.visStart >= 0 && state.renderedCount === rows.length && Math.abs(start - state.visStart) < buffer) return;
+            state.visStart = start; state.visEnd = end; state.renderedCount = rows.length;
+
+            const headers = state.headers;
             const displayCols = getDisplayColumns();
-            const colIndices = displayCols.map(col => headers.indexOf(col));
+            const colIndices = displayCols.map(c => headers.indexOf(c));
+            const totalCols = displayCols.length + 1; // +1 勾选列
 
             const frag = document.createDocumentFragment();
-            for (const row of rows) {
-                const tr = document.createElement("tr");
-                const rowId = row[0];
-                tr.dataset.rowId = rowId || "";
-                // 行选择 checkbox
-                const tdCheck = document.createElement("td");
-                tdCheck.innerHTML = `<input type="checkbox" class="row-checkbox" value="${rowId}">`;
-                tr.appendChild(tdCheck);
-                for (const idx of colIndices) {
-                    if (idx < 0) continue;
-                    const td = document.createElement("td");
-                    let cell = row[idx + 1];
-                    if (cell === null || cell === undefined) {
-                        cell = "";
-                    } else if (typeof cell === "number" && Number.isInteger(cell)) {
-                        cell = String(cell);
-                    } else if (typeof cell === "number") {
-                        cell = String(cell);
-                    } else {
-                        cell = String(cell);
-                    }
-                    td.textContent = cell;
-                    td.title = cell;
-                    td.dataset.column = headers[idx];
-                    td.addEventListener("dblclick", () => startEdit(td, headers[idx], tr.dataset.rowId));
-                    tr.appendChild(td);
-                }
-                frag.appendChild(tr);
+            if (start > 0) {
+                const spacer = document.createElement("tr");
+                spacer.style.height = (start * rh) + "px";
+                spacer.innerHTML = `<td colspan="${totalCols}"></td>`;
+                frag.appendChild(spacer);
             }
-            els.tableBody.appendChild(frag);
+            for (let i = start; i < end; i++) {
+                frag.appendChild(buildRow(rows[i], headers, displayCols, colIndices));
+            }
+            if (end < rows.length) {
+                const spacer = document.createElement("tr");
+                spacer.style.height = ((rows.length - end) * rh) + "px";
+                spacer.innerHTML = `<td colspan="${totalCols}"></td>`;
+                frag.appendChild(spacer);
+            }
+            tb.innerHTML = "";
+            tb.appendChild(frag);
+        }
+
+        // 首次渲染前实测一行高度（CSS 决定），失败回退 28px
+        function measureRowHeight() {
+            try {
+                const headers = state.headers;
+                const displayCols = getDisplayColumns();
+                const colIndices = displayCols.map(c => headers.indexOf(c));
+                const tr = buildRow(state.browseRows[0], headers, displayCols, colIndices);
+                els.tableBody.innerHTML = "";
+                els.tableBody.appendChild(tr);
+                state.rowHeight = tr.getBoundingClientRect().height || 28;
+            } catch (e) { state.rowHeight = 28; }
+        }
+
+        // 构造单行 <tr>（勾选框 + 各显示列，双击可编辑）
+        function buildRow(row, headers, displayCols, colIndices) {
+            const tr = document.createElement("tr");
+            const rowId = row[0];
+            tr.dataset.rowId = rowId || "";
+            const tdCheck = document.createElement("td");
+            const checked = state.selectedRowIds.has(rowId) ? " checked" : "";
+            tdCheck.innerHTML = `<input type="checkbox" class="row-checkbox" value="${rowId}"${checked}>`;
+            tr.appendChild(tdCheck);
+            for (const idx of colIndices) {
+                if (idx < 0) continue;
+                const td = document.createElement("td");
+                let cell = row[idx + 1];
+                if (cell === null || cell === undefined) cell = "";
+                else cell = String(cell);
+                td.textContent = cell;
+                td.title = cell;
+                td.dataset.column = headers[idx];
+                td.addEventListener("dblclick", () => startEdit(td, headers[idx], tr.dataset.rowId));
+                tr.appendChild(td);
+            }
+            return tr;
         }
 
         function startEdit(td, column, rowId) {
@@ -3326,6 +3903,10 @@
 
                 const data = await res.json();
                 if (data.success) {
+                    // 同步内存数据，避免虚拟滚动重渲染时回退到旧值
+                    const colIdx = state.headers.indexOf(column);
+                    const row = state.browseRows.find(r => String(r[0]) === String(rowId));
+                    if (row && colIdx >= 0) row[colIdx + 1] = value;
                     td.classList.remove("editing");
                     td.textContent = value;
                     td.title = value;
@@ -3335,14 +3916,14 @@
                     td.classList.remove("editing");
                     td.textContent = originalValue;
                     td.title = originalValue;
-                    alert("保存失败");
+                    showToast("保存失败");
                 }
             } catch (e) {
                 console.error("保存失败:", e);
                 td.classList.remove("editing");
                 td.textContent = originalValue;
                 td.title = originalValue;
-                alert("保存失败");
+                showToast("保存失败");
             }
         }
 
@@ -3363,34 +3944,19 @@
             }
         }
 
-        // ==================== 滚动懒加载 ====================
-        function setupScrollObserver() {
-            if (scrollObserver) scrollObserver.disconnect();
-
-            const sentinel = document.createElement("tr");
-            sentinel.id = "scrollSentinel";
-            sentinel.innerHTML = '<td colspan="100"></td>';
-            els.tableBody.appendChild(sentinel);
-
-            scrollObserver = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && state.hasMore && !state.isLoadingMore) {
-                    state.page++;
-                    loadData();
-                }
-            }, { root: els.tableWrapper, rootMargin: "100px" });
-
-            scrollObserver.observe(sentinel);
-        }
-
-        // 滚动事件
+        // 滚动：更新虚拟窗口 + 触底加载更多
         els.tableWrapper.addEventListener("scroll", () => {
+            renderVirtual();
             if (state.isLoadingMore || !state.hasMore) return;
             const { scrollTop, scrollHeight, clientHeight } = els.tableWrapper;
-            if (scrollHeight - scrollTop - clientHeight < 200) {
+            if (scrollHeight - scrollTop - clientHeight < 400) {
                 state.page++;
                 loadData();
             }
         });
+
+        // 窗口尺寸变化（如折叠侧栏）后重算可视窗口
+        window.addEventListener("resize", () => { state.visStart = -1; renderVirtual(); });
 
         // ==================== 表头渲染 ====================
         function renderTableHeader() {
@@ -3855,7 +4421,7 @@
             const valField = document.getElementById("pivotValueField").value;
             const colField = document.getElementById("pivotColField").value;
             const aggFunc = document.getElementById("pivotAggFunc").value;
-            if (!rowField || !valField) { alert("请选择行字段和值字段"); return; }
+            if (!rowField || !valField) { showToast("请选择行字段和值字段"); return; }
 
             try {
                 let pivotUrl = `/api/data/${state.sessionId}/pivot?tableName=${encodeURIComponent(state.currentTable)}&rowField=${encodeURIComponent(rowField)}&valueField=${encodeURIComponent(valField)}&aggFunc=${encodeURIComponent(aggFunc)}`;
@@ -3871,7 +4437,7 @@
                     ).join("");
                     document.getElementById("pivotResultSection").style.display = "flex";
                 }
-            } catch (e) { alert("生成透视表失败: " + e.message); }
+            } catch (e) { showToast("生成透视表失败: " + e.message); }
         });
 
         document.getElementById("pivotExportBtn").addEventListener("click", () => {
@@ -3910,34 +4476,140 @@
             });
         }
 
-        document.getElementById("dedupBtn").addEventListener("click", async () => {
-            const col = document.getElementById("dedupColumn").value;
+        // 清洗预设规则：选中后自动填入匹配模式
+        const REGEX_PRESETS = {
+            trim: { pattern: "^\\s+|\\s+$", replacement: "" },
+            innerSpace: { pattern: "\\s", replacement: "" },
+            keepDigit: { pattern: "[^0-9]", replacement: "" },
+            keepChinese: { pattern: "[^一-龥]", replacement: "" },
+            keepLetter: { pattern: "[^a-zA-Z]", replacement: "" },
+            removeLetter: { pattern: "[a-zA-Z]", replacement: "" },
+            removeSymbol: { pattern: "[^0-9a-zA-Z一-龥\\s]", replacement: "" }
+        };
+        document.getElementById("regexPreset").addEventListener("change", e => {
+            const preset = REGEX_PRESETS[e.target.value];
+            if (preset) {
+                document.getElementById("regexPattern").value = preset.pattern;
+                document.getElementById("regexReplacement").value = preset.replacement;
+            } else {
+                document.getElementById("regexPattern").value = "";
+                document.getElementById("regexReplacement").value = "";
+            }
+        });
+
+        // 清洗前自动快照，支持撤销
+        async function snapshotBeforeClean() {
+            if (!state.sessionId || !state.currentTable) return;
             try {
-                const res = await fetch(`/api/data/${state.sessionId}/clean/deduplicate?tableName=${encodeURIComponent(state.currentTable)}`, {
+                await fetch(`/api/data/${state.sessionId}/snapshot/${encodeURIComponent(state.currentTable)}`, { method: "POST" });
+            } catch (e) { console.error("快照失败:", e); }
+        }
+
+        // ==================== 清洗预览（执行前先看影响范围）====================
+        let pendingCleanAction = null;
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+        }
+        async function showCleanPreview(previewBody, onConfirm) {
+            if (!state.sessionId || !state.currentTable) { showToast("请先选择表"); return; }
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/clean/preview`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(col ? [col] : null)
+                    body: JSON.stringify(previewBody)
                 });
                 const data = await res.json();
-                alert(`去重完成，删除 ${data.removed || 0} 条重复记录，剩余 ${data.remaining || 0} 条`);
+                if (!res.ok) { showToast("预览失败: " + (data.detail || "")); return; }
+                document.getElementById("cleanPreviewNote").textContent = data.note || "";
+                const affected = data.affectedCount || 0;
+                const total = data.totalRows || 0;
+                const summary = document.getElementById("cleanPreviewSummary");
+                if (affected === 0) {
+                    summary.style.background = "#f6f8fa";
+                    summary.innerHTML = `📋 共 ${total} 行，<b>没有需要处理的行</b>。`;
+                } else {
+                    summary.style.background = "#fff4e6";
+                    summary.innerHTML = `📋 共 ${total} 行，本次将影响 <b style="color:#e8590c">${affected}</b> 行。`;
+                }
+                const samplesEl = document.getElementById("cleanPreviewSamples");
+                const samples = data.samples || [];
+                if (samples.length) {
+                    let html = "<table style='width:100%;border-collapse:collapse;font-size:12px'><thead><tr><th style='padding:6px 8px;border-bottom:1px solid #ddd;text-align:left;background:#fafafa'>修改前</th><th style='padding:6px 8px;border-bottom:1px solid #ddd;text-align:left;background:#fafafa'>修改后</th></tr></thead><tbody>";
+                    samples.forEach(s => {
+                        html += `<tr><td style='padding:6px 8px;border-bottom:1px solid #f0f0f0;max-width:260px;word-break:break-all'>${escapeHtml(s.before)}</td><td style='padding:6px 8px;border-bottom:1px solid #f0f0f0;max-width:260px;word-break:break-all;color:#e8590c;font-weight:600'>${escapeHtml(s.after)}</td></tr>`;
+                    });
+                    html += "</tbody></table>";
+                    samplesEl.innerHTML = html;
+                } else {
+                    samplesEl.innerHTML = "<div style='padding:24px;text-align:center;color:#999;font-size:13px'>无样本可预览</div>";
+                }
+                pendingCleanAction = onConfirm;
+                document.getElementById("cleanPreviewModal").classList.remove("hidden");
+            } catch (e) { showToast("预览失败: " + e.message); }
+        }
+        document.getElementById("cleanPreviewCancelBtn").addEventListener("click", () => {
+            document.getElementById("cleanPreviewModal").classList.add("hidden");
+            pendingCleanAction = null;
+        });
+        document.getElementById("cleanPreviewConfirmBtn").addEventListener("click", async () => {
+            document.getElementById("cleanPreviewModal").classList.add("hidden");
+            const action = pendingCleanAction;
+            pendingCleanAction = null;
+            if (action) await action();
+        });
+
+        document.getElementById("undoBtn").addEventListener("click", async () => {
+            if (!state.sessionId || !state.currentTable) { showToast("请先选择表"); return; }
+            if (!confirm("撤销上一步清洗操作？")) return;
+            try {
+                const res = await fetch(`/api/data/${state.sessionId}/undo/${encodeURIComponent(state.currentTable)}`, { method: "POST" });
+                const data = await res.json();
+                if (!res.ok) { showToast("撤销失败: " + (data.detail || "")); return; }
+                showToast("已撤销上一步");
                 resetAndLoad();
-            } catch (e) { alert("去重失败: " + e.message); }
+            } catch (e) { showToast("撤销失败: " + e.message); }
+        });
+
+        document.getElementById("dedupBtn").addEventListener("click", async () => {
+            const col = document.getElementById("dedupColumn").value;
+            await showCleanPreview(
+                { operation: "deduplicate", tableName: state.currentTable, columns: col ? [col] : null },
+                async () => {
+                    try {
+                        await snapshotBeforeClean();
+                        const res = await fetch(`/api/data/${state.sessionId}/clean/deduplicate?tableName=${encodeURIComponent(state.currentTable)}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(col ? [col] : null)
+                        });
+                        const data = await res.json();
+                        showToast(`去重完成，删除 ${data.removed || 0} 条重复记录，剩余 ${data.remaining || 0} 条`);
+                        resetAndLoad();
+                    } catch (e) { showToast("去重失败: " + e.message); }
+                }
+            );
         });
 
         document.getElementById("fillBtn").addEventListener("click", async () => {
             const col = document.getElementById("fillColumn").value;
             const val = document.getElementById("fillValue").value;
-            if (!col) { alert("请选择列"); return; }
-            try {
-                const res = await fetch(`/api/data/${state.sessionId}/clean/fill-empty?tableName=${encodeURIComponent(state.currentTable)}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ fillColumn: col, fillValue: val })
-                });
-                const data = await res.json();
-                alert(`填充完成，更新 ${data.updated || 0} 条记录`);
-                resetAndLoad();
-            } catch (e) { alert("填充失败: " + e.message); }
+            if (!col) { showToast("请选择列"); return; }
+            await showCleanPreview(
+                { operation: "fill-empty", tableName: state.currentTable, fillColumn: col, fillValue: val },
+                async () => {
+                    try {
+                        await snapshotBeforeClean();
+                        const res = await fetch(`/api/data/${state.sessionId}/clean/fill-empty?tableName=${encodeURIComponent(state.currentTable)}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ fillColumn: col, fillValue: val })
+                        });
+                        const data = await res.json();
+                        showToast(`填充完成，更新 ${data.updated || 0} 条记录`);
+                        resetAndLoad();
+                    } catch (e) { showToast("填充失败: " + e.message); }
+                }
+            );
         });
 
         // 正则替换
@@ -3945,38 +4617,48 @@
             const col = document.getElementById("regexColumn").value;
             const pattern = document.getElementById("regexPattern").value;
             const replacement = document.getElementById("regexReplacement").value;
-            if (!col || !pattern) { alert("请选择列并输入匹配模式"); return; }
-            if (!confirm(`对列 "${col}" 执行正则替换？`)) return;
-            try {
-                const res = await fetch(`/api/data/${state.sessionId}/clean/regex-replace`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ tableName: state.currentTable, column: col, pattern, replacement })
-                });
-                const data = await res.json();
-                if (data.success) { alert(`替换完成，更新 ${data.updated || 0} 条`); resetAndLoad(); }
-                else alert("替换失败: " + (data.detail || ""));
-            } catch (e) { alert("替换失败: " + e.message); }
+            if (!col || !pattern) { showToast("请选择列并输入匹配模式"); return; }
+            await showCleanPreview(
+                { operation: "regex-replace", tableName: state.currentTable, column: col, pattern, replacement },
+                async () => {
+                    try {
+                        await snapshotBeforeClean();
+                        const res = await fetch(`/api/data/${state.sessionId}/clean/regex-replace`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ tableName: state.currentTable, column: col, pattern, replacement })
+                        });
+                        const data = await res.json();
+                        if (data.success) { showToast(`替换完成，更新 ${data.updated || 0} 条`); resetAndLoad(); }
+                        else showToast("替换失败: " + (data.detail || ""));
+                    } catch (e) { showToast("替换失败: " + e.message); }
+                }
+            );
         });
 
         // 列拆分
         document.getElementById("splitColumnBtn").addEventListener("click", async () => {
             const col = document.getElementById("splitSourceColumn").value;
             const delimiter = document.getElementById("splitDelimiter").value;
-            if (!col || !delimiter) { alert("请选择列并输入分隔符"); return; }
-            if (!confirm(`对列 "${col}" 按 "${delimiter}" 拆分？`)) return;
-            try {
-                const res = await fetch(`/api/data/${state.sessionId}/clean/split-column`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ tableName: state.currentTable, sourceColumn: col, delimiter })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`拆分完成，新增 ${data.newColumns?.length || 0} 列，处理 ${data.affectedRows || 0} 行`);
-                    resetAndLoad();
-                } else alert("拆分失败: " + (data.detail || ""));
-            } catch (e) { alert("拆分失败: " + e.message); }
+            if (!col || !delimiter) { showToast("请选择列并输入分隔符"); return; }
+            await showCleanPreview(
+                { operation: "split-column", tableName: state.currentTable, sourceColumn: col, delimiter },
+                async () => {
+                    try {
+                        await snapshotBeforeClean();
+                        const res = await fetch(`/api/data/${state.sessionId}/clean/split-column`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ tableName: state.currentTable, sourceColumn: col, delimiter })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            showToast(`拆分完成，新增 ${data.newColumns?.length || 0} 列，处理 ${data.affectedRows || 0} 行`);
+                            resetAndLoad();
+                        } else showToast("拆分失败: " + (data.detail || ""));
+                    } catch (e) { showToast("拆分失败: " + e.message); }
+                }
+            );
         });
 
         // 数据类型转换
@@ -3987,25 +4669,45 @@
             const col = document.getElementById("convertColumn").value;
             const targetType = document.getElementById("convertTargetType").value;
             const dateFormat = document.getElementById("convertDateFormat").value;
-            if (!col) { alert("请选择列"); return; }
-            if (!confirm(`将列 "${col}" 转换为 ${targetType}？`)) return;
-            try {
-                const res = await fetch(`/api/data/${state.sessionId}/clean/convert-type`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ tableName: state.currentTable, column: col, targetType, dateFormat })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    let msg = `转换完成，成功 ${data.updated || 0} 条`;
-                    if (data.errors?.length) msg += `，失败 ${data.errors.length} 条`;
-                    alert(msg);
-                    resetAndLoad();
-                } else alert("转换失败: " + (data.detail || ""));
-            } catch (e) { alert("转换失败: " + e.message); }
+            if (!col) { showToast("请选择列"); return; }
+            await showCleanPreview(
+                { operation: "convert-type", tableName: state.currentTable, column: col, targetType, dateFormat },
+                async () => {
+                    try {
+                        await snapshotBeforeClean();
+                        const res = await fetch(`/api/data/${state.sessionId}/clean/convert-type`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ tableName: state.currentTable, column: col, targetType, dateFormat })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            let msg = `转换完成，成功 ${data.updated || 0} 条`;
+                            if (data.errors?.length) msg += `，失败 ${data.errors.length} 条`;
+                            showToast(msg);
+                            resetAndLoad();
+                        } else showToast("转换失败: " + (data.detail || ""));
+                    } catch (e) { showToast("转换失败: " + e.message); }
+                }
+            );
         });
 
         // 数据校验
+        window.updateRuleParams = function (selectEl) {
+            const input = selectEl.parentElement.querySelector(".vr-params");
+            if (!input) return;
+            const type = selectEl.value;
+            if (type === "range") {
+                input.style.display = "";
+                input.placeholder = "如 0,100（最小值,最大值）";
+            } else if (type === "regex") {
+                input.style.display = "";
+                input.placeholder = "正则表达式（高级），如 ^\\d+$";
+            } else {
+                input.style.display = "none";
+                input.placeholder = "";
+            }
+        };
         document.getElementById("addValidationRuleBtn").addEventListener("click", () => {
             const container = document.getElementById("validationRules");
             const idx = container.children.length;
@@ -4017,21 +4719,22 @@
             div.style.marginBottom = "6px";
             div.innerHTML = `
             <select class="vr-column" style="flex:2">${state.headers.map(h => `<option value="${h}">${h}</option>`).join("")}</select>
-            <select class="vr-type" style="flex:2">
+            <select class="vr-type" style="flex:2" onchange="updateRuleParams(this)">
                 <option value="not_empty">非空</option>
                 <option value="email">邮箱</option>
                 <option value="phone">手机号</option>
                 <option value="range">数值范围</option>
-                <option value="regex">正则匹配</option>
+                <option value="regex">正则匹配（高级）</option>
             </select>
-            <input type="text" class="vr-params" placeholder='参数 (如 min:0,max:100 或 ^\d+$)' style="flex:3">
+            <input type="text" class="vr-params" placeholder="选规则后自动提示" style="flex:3;display:none">
             <button class="btn btn-danger" onclick="this.parentElement.remove()" style="padding:4px 8px">×</button>
         `;
+            updateRuleParams(div.querySelector(".vr-type"));
             container.appendChild(div);
         });
         document.getElementById("validateBtn").addEventListener("click", async () => {
             const ruleDivs = document.querySelectorAll("#validationRules > div");
-            if (ruleDivs.length === 0) { alert("请先添加校验规则"); return; }
+            if (ruleDivs.length === 0) { showToast("请先添加校验规则"); return; }
             const rules = Array.from(ruleDivs).map(div => {
                 const column = div.querySelector(".vr-column").value;
                 const ruleType = div.querySelector(".vr-type").value;
@@ -4039,10 +4742,16 @@
                 const params = {};
                 if (paramsStr) {
                     if (ruleType === "range") {
-                        paramsStr.split(",").forEach(p => {
-                            const [k, v] = p.split(":").map(s => s.trim());
-                            if (k && v !== undefined) params[k] = parseFloat(v);
-                        });
+                        const parts = paramsStr.split(",").map(s => s.trim()).filter(Boolean);
+                        if (parts.length === 2 && !parts[0].includes(":")) {
+                            params.min = parseFloat(parts[0]);
+                            params.max = parseFloat(parts[1]);
+                        } else {
+                            parts.forEach(p => {
+                                const [k, v] = p.split(":").map(s => s.trim());
+                                if (k && v !== undefined) params[k] = parseFloat(v);
+                            });
+                        }
                     } else if (ruleType === "regex") {
                         params.pattern = paramsStr;
                     }
@@ -4070,17 +4779,23 @@
                         html += '</table></div>';
                         resultsDiv.innerHTML = html;
                     }
-                } else alert("校验失败: " + (data.detail || ""));
-            } catch (e) { alert("校验失败: " + e.message); }
+                } else showToast("校验失败: " + (data.detail || ""));
+            } catch (e) { showToast("校验失败: " + e.message); }
         });
 
         // ==================== CRUD：行/列操作 ====================
 
-        // 全选 checkbox
+        // 全选 / 单选 checkbox（选中态存 Set，虚拟重渲染后保留）
         document.addEventListener("change", (e) => {
             if (e.target.id === "selectAllRows") {
                 const checked = e.target.checked;
-                document.querySelectorAll(".row-checkbox").forEach(cb => cb.checked = checked);
+                state.selectedRowIds.clear();
+                if (checked) state.browseRows.forEach(r => state.selectedRowIds.add(r[0]));
+                renderVirtual();
+            } else if (e.target.classList.contains("row-checkbox")) {
+                const rowId = parseInt(e.target.value);
+                if (e.target.checked) state.selectedRowIds.add(rowId);
+                else state.selectedRowIds.delete(rowId);
             }
         });
 
@@ -4104,8 +4819,8 @@
                     state.allRows = null;
                     els.tableBody.innerHTML = "";
                     loadData();
-                } else alert("插入失败: " + (data.detail || ""));
-            } catch (e) { alert("插入失败: " + e.message); }
+                } else showToast("插入失败: " + (data.detail || ""));
+            } catch (e) { showToast("插入失败: " + e.message); }
         });
         */
 
@@ -4113,7 +4828,7 @@
         /*
         document.getElementById("deleteRowBtn").addEventListener("click", async () => {
             const checked = document.querySelectorAll('.row-checkbox:checked');
-            if (checked.length === 0) { alert("请先勾选要删除的行"); return; }
+            if (checked.length === 0) { showToast("请先勾选要删除的行"); return; }
             if (!confirm(`确定删除 ${checked.length} 行？`)) return;
             const rowIds = Array.from(checked).map(cb => parseInt(cb.value));
             try {
@@ -4124,8 +4839,8 @@
                 });
                 const data = await res.json();
                 if (data.success) resetAndLoad();
-                else alert("删除失败: " + (data.detail || ""));
-            } catch (e) { alert("删除失败: " + e.message); }
+                else showToast("删除失败: " + (data.detail || ""));
+            } catch (e) { showToast("删除失败: " + e.message); }
         });
         */
 
@@ -4180,7 +4895,7 @@
         }
 
         document.getElementById("columnSettingsBtn").addEventListener("click", async () => {
-            if (!state.sessionId || !state.currentTable) { alert("请先选择表"); return; }
+            if (!state.sessionId || !state.currentTable) { showToast("请先选择表"); return; }
             const headers = state.headers || [];
             // 如果还没有设置，初始化为默认顺序
             if (!state.columnOrder.length) {
@@ -4311,7 +5026,7 @@
         });
         document.getElementById("addColumnSaveBtn").addEventListener("click", async () => {
             const colName = document.getElementById("newColumnName").value.trim();
-            if (!colName) { alert("列名不能为空"); return; }
+            if (!colName) { showToast("列名不能为空"); return; }
             const defaultVal = document.getElementById("newColumnDefault").value;
             try {
                 const res = await fetch(`/api/data/${state.sessionId}/columns`, {
@@ -4327,8 +5042,8 @@
                     setTimeout(() => {
                         document.getElementById("columnSettingsBtn").click();
                     }, 500);
-                } else alert("新增列失败: " + (data.detail || ""));
-            } catch (e) { alert("新增列失败: " + e.message); }
+                } else showToast("新增列失败: " + (data.detail || ""));
+            } catch (e) { showToast("新增列失败: " + e.message); }
         });
 
         document.getElementById("colSettingsRenameBtn").addEventListener("click", () => {
@@ -4344,7 +5059,7 @@
         document.getElementById("renameColumnSaveBtn").addEventListener("click", async () => {
             const oldName = document.getElementById("renameColumnFrom").value;
             const newName = document.getElementById("renameColumnTo").value.trim();
-            if (!newName) { alert("新列名不能为空"); return; }
+            if (!newName) { showToast("新列名不能为空"); return; }
             try {
                 const res = await fetch(`/api/data/${state.sessionId}/columns/${encodeURIComponent(oldName)}`, {
                     method: "PUT",
@@ -4359,8 +5074,8 @@
                     setTimeout(() => {
                         document.getElementById("columnSettingsBtn").click();
                     }, 500);
-                } else alert("重命名失败: " + (data.detail || ""));
-            } catch (e) { alert("重命名失败: " + e.message); }
+                } else showToast("重命名失败: " + (data.detail || ""));
+            } catch (e) { showToast("重命名失败: " + e.message); }
         });
 
         document.getElementById("colSettingsDeleteHiddenBtn").addEventListener("click", async () => {
@@ -4370,7 +5085,7 @@
                 if (cb && !cb.checked) hiddenCols.push(el.dataset.col);
             });
             if (hiddenCols.length === 0) {
-                alert("没有隐藏的列。取消勾选要删除的列后再点击此按钮。");
+                showToast("没有隐藏的列。取消勾选要删除的列后再点击此按钮。");
                 return;
             }
             if (!confirm(`确定要从数据库中永久删除以下 ${hiddenCols.length} 列？\n\n${hiddenCols.join("、")}\n\n此操作不可撤销！`)) return;
@@ -4388,7 +5103,7 @@
             document.getElementById("columnSettingsModal").classList.add("hidden");
             resetAndLoad();
             if (failed > 0) {
-                alert(`删除完成，${failed} 列失败`);
+                showToast(`删除完成，${failed} 列失败`);
             }
         });
         */
@@ -4413,7 +5128,6 @@
             if (!sheetA || !sheetB) return;
             const tableA = compareSheetsA.find(t => t.name === sheetA);
             const tableB = compareSheetsB.find(t => t.name === sheetB);
-            console.log("updateCompareKeyCol debug:", { sheetA, sheetB, tableA: tableA ? tableA.name : null, tableB: tableB ? tableB.name : null, headersA: tableA?.headers, headersB: tableB?.headers });
             if (!tableA || !tableB || !tableA.headers || !tableB.headers) return;
             const headersA = tableA.headers;
             const headersB = tableB.headers;
@@ -4457,7 +5171,7 @@
             const tableB = document.getElementById("compareSheetB").value;
             const keyCol = document.getElementById("compareKeyCol").value;
             if (!sidA || !sidB || !tableA || !tableB || !keyCol) {
-                alert("请完成所有选择"); return;
+                showToast("请完成所有选择"); return;
             }
             try {
                 const res = await fetch(`/api/data/compare`, {
@@ -4472,21 +5186,53 @@
                 document.getElementById("compareBoth").textContent = stats.both || 0;
                 document.getElementById("compareRowsA").textContent = (stats.onlyA || 0) + (stats.both || 0);
                 document.getElementById("compareRowsB").textContent = (stats.onlyB || 0) + (stats.both || 0);
-                const head = document.getElementById("compareHead");
-                const body = document.getElementById("compareBody");
-                const sampleChanged = data.sampleChanged || [];
-                if (sampleChanged.length > 0) {
-                    head.innerHTML = "<tr><th>Key</th><th>变化列</th></tr>";
-                    body.innerHTML = sampleChanged.map(item =>
-                        `<tr><td>${item.key ?? ""}</td><td>${(item.changedColumns || []).join(", ")}</td></tr>`
-                    ).join("");
-                } else {
-                    head.innerHTML = "<tr><th>Key</th><th>变化列</th></tr>";
-                    body.innerHTML = "";
-                }
+                compareChangedRows = data.changedRows || [];
+                comparePage = 1;
+                const info = document.getElementById("compareChangedInfo");
+                info.style.display = "";
+                info.innerHTML = `共 <b style="color:#e8590c">${compareChangedRows.length}</b> 条变化记录${compareChangedRows.length === 0 ? "（两文件在共有记录上完全一致）" : ""}`;
+                renderComparePage();
                 document.getElementById("compareResult").classList.remove("hidden");
-            } catch (e) { alert("对比失败: " + e.message); }
+            } catch (e) { showToast("对比失败: " + e.message); }
         });
+
+        // 对比结果分页
+        let compareChangedRows = [];
+        let comparePage = 1;
+        const COMPARE_PAGE_SIZE = 20;
+        function renderComparePage() {
+            const head = document.getElementById("compareHead");
+            const body = document.getElementById("compareBody");
+            head.innerHTML = "<tr><th style='width:160px'>匹配列（" + escapeHtml(document.getElementById("compareKeyCol").value || "") + "）</th><th>变化明细（修改前 -> 修改后）</th></tr>";
+            const total = compareChangedRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / COMPARE_PAGE_SIZE));
+            if (comparePage > totalPages) comparePage = totalPages;
+            if (comparePage < 1) comparePage = 1;
+            const start = (comparePage - 1) * COMPARE_PAGE_SIZE;
+            const slice = compareChangedRows.slice(start, start + COMPARE_PAGE_SIZE);
+            if (slice.length === 0) {
+                body.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#999;padding:20px">无变化记录</td></tr>`;
+            } else {
+                body.innerHTML = slice.map(item => {
+                    const changes = item.changes || {};
+                    const detail = Object.keys(changes).map(col =>
+                        `<div style="margin:2px 0"><b>${escapeHtml(col)}</b>：${escapeHtml(changes[col].a ?? "")} <span style="color:#aaa">→</span> <b style="color:#e8590c">${escapeHtml(changes[col].b ?? "")}</b></div>`
+                    ).join("");
+                    return `<tr><td style="vertical-align:top">${escapeHtml(item.key ?? "")}</td><td>${detail}</td></tr>`;
+                }).join("");
+            }
+            const pager = document.getElementById("comparePager");
+            if (total > COMPARE_PAGE_SIZE) {
+                pager.style.display = "flex";
+                document.getElementById("comparePageInfo").textContent = `第 ${comparePage} / ${totalPages} 页（每页 ${COMPARE_PAGE_SIZE} 条）`;
+                document.getElementById("comparePrevBtn").disabled = comparePage <= 1;
+                document.getElementById("compareNextBtn").disabled = comparePage >= totalPages;
+            } else {
+                pager.style.display = "none";
+            }
+        }
+        document.getElementById("comparePrevBtn").addEventListener("click", () => { comparePage--; renderComparePage(); });
+        document.getElementById("compareNextBtn").addEventListener("click", () => { comparePage++; renderComparePage(); });
 
         // ==================== AI 对话 ====================
         async function initAiChat() {
@@ -4495,17 +5241,16 @@
                 const res = await fetch("/api/ai/config");
                 const cfg = await res.json();
                 const messagesEl = document.getElementById("aiChatMessages");
-                // 更新欢迎消息中的配置信息（仅在首条消息时）
+                // 仅在只有欢迎消息（无对话历史）时刷新欢迎语
                 if (messagesEl.children.length === 1) {
                     const firstMsg = messagesEl.children[0].querySelector(".msg-content");
                     if (firstMsg) {
-                        const text = firstMsg.textContent;
-                        if (text.includes("请先在右上角")) {
-                            // 未配置 API Key
-                            return;
+                        const examples = `你可以用自然语言问我关于这个 Excel 的问题，比如：<br>• "统计每个部门的总金额"<br>• "找出金额大于10000的记录"<br>• "按日期分组统计数量"<br><br>支持多轮追问，我会记住上下文。`;
+                        if (cfg.apiKey) {
+                            firstMsg.innerHTML = `👋 你好！我是 Excel AI 助手，当前配置：${cfg.provider} / ${cfg.model || "默认模型"}。<br>${examples}`;
+                        } else {
+                            firstMsg.innerHTML = `👋 你好！我是 Excel AI 助手。<br>${examples}<br>请先在右上角 ⚙️ 设置中配置 AI API Key。`;
                         }
-                        // 已配置，更新配置显示
-                        firstMsg.innerHTML = ` 你好！我是 Excel AI 助手，当前配置：${cfg.provider} / ${cfg.model || "默认模型"}。<br>你可以用自然语言问我关于这个 Excel 的问题，比如：<br>• "统计每个部门的总金额"<br>• "找出金额大于10000的记录"<br>• "按日期分组统计数量"<br><br>支持多轮追问，我会记住上下文。`;
                     }
                 }
             } catch (e) { /* ignore */ }
@@ -4582,9 +5327,6 @@
                     content: data.explanation || "查询成功"
                 });
                 let html = `<div class="msg-content">${data.explanation || "查询成功"}</div>`;
-                if (data.sql) {
-                    html += `<div class="msg-content" style="font-size:11px;color:#888;margin-top:4px">SQL: ${data.sql}</div>`;
-                }
                 if (data.rows && data.rows.length > 0) {
                     html += `<div class="msg-result">`;
                     html += "<table><thead><tr>" + data.columns.map(h => `<th>${h}</th>`).join("") + "</tr></thead><tbody>";
@@ -4616,6 +5358,29 @@
         });
 
         // ==================== 系统状态监控 ====================
+        // ==================== Toast 提示（替代 alert）====================
+        function showToast(msg) {
+            let container = document.getElementById("toastContainer");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "toastContainer";
+                container.className = "toast-container";
+                document.body.appendChild(container);
+            }
+            const t = document.createElement("div");
+            t.className = "toast-item";
+            let type = "info";
+            if (/失败|错误|不能为空|请先|请选择|请输入|请完成|不支持|请勾选|请检查|请输入密码/.test(msg)) type = "error";
+            else if (/完成|成功|已保存|已更新/.test(msg)) type = "success";
+            t.classList.add("toast-" + type);
+            t.textContent = msg;
+            container.appendChild(t);
+            setTimeout(() => {
+                t.classList.add("toast-hide");
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+
         function formatUptime(seconds) {
             const s = Math.floor(seconds || 0);
             if (s > 3600) {
@@ -4662,8 +5427,9 @@
             dot.className = "dot " + colorClass;
         }
 
-        setInterval(pollSystemStats, 10000);
-        pollSystemStats();
+        // 系统监控已隐藏（对普通办公人员无用），停掉轮询以节省资源
+        // setInterval(pollSystemStats, 10000);
+        // pollSystemStats();
 
         // ==================== 初始化 ====================
         refreshSessionList();

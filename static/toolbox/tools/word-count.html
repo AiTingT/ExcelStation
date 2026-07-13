@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字数统计</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  textarea { font-family: var(--font-mono); min-height: 200px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_text_2_line"></i> 字数统计</h2>
+      <p>粘贴文本，实时统计字数、字符数、行数</p>
+    </div>
+    <textarea id="input" placeholder="粘贴或输入文本…"></textarea>
+    <div class="actions">
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_chart_bar_line"></i> 统计结果</h2></div>
+    <div class="stats-grid" id="grid"></div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script>
+(function() {
+  'use strict';
+  var input = document.getElementById('input');
+  var grid = document.getElementById('grid');
+
+  function render() {
+    var s = input.value;
+    var charsAll = s.length;
+    var charsNoSpace = s.replace(/\s/g, '').length;
+    var cn = (s.match(/[一-龥]/g) || []).length;
+    var en = (s.match(/[a-zA-Z]+/g) || []).length;
+    var lines = s ? s.split(/\r?\n/).length : 0;
+    var paras = s ? s.split(/\n\s*\n/).filter(function(p){return p.trim().length;}).length : 0;
+    var data = [
+      { num: charsAll, label: '字符数（含空格）' },
+      { num: charsNoSpace, label: '字符数（不含空格）' },
+      { num: cn, label: '中文字数' },
+      { num: en, label: '英文单词数' },
+      { num: lines, label: '行数' },
+      { num: paras, label: '段落数' }
+    ];
+    grid.innerHTML = data.map(function(d) {
+      return '<div class="stat-box"><div class="num">' + d.num + '</div><div class="label">' + d.label + '</div></div>';
+    }).join('');
+  }
+  input.addEventListener('input', render);
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; render(); Toolbox.showToast('已清空');
+  });
+  render();
+})();
+</script>
+</body>
+</html>

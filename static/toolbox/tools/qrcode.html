@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二维码生成</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+  .qr-opts { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-3); align-items: center; }
+  .opt { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--fg-base); }
+  .opt select { width: auto; padding: 4px 10px; }
+  .qr-preview { text-align: center; margin-top: var(--space-2); }
+  .qr-preview img { max-width: 280px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-base); padding: 8px; background: #fff; }
+  .qr-preview .empty { color: var(--fg-subtle); font-size: var(--text-sm); padding: 60px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="tool-header">
+      <h2><i class="mgc_qrcode_2_line"></i> 二维码生成</h2>
+      <p>输入文本或链接，生成二维码图片，可下载</p>
+    </div>
+    <textarea id="input" placeholder="输入文本或链接…" style="min-height:100px"></textarea>
+    <div class="qr-opts">
+      <label class="opt">尺寸
+        <select id="size">
+          <option value="160">小 160×160</option>
+          <option value="240" selected>中 240×240</option>
+          <option value="320">大 320×320</option>
+        </select>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="btn" id="genBtn"><i class="mgc_play_line"></i> 生成</button>
+      <button class="btn secondary" id="downloadBtn"><i class="mgc_download_line"></i> 下载图片</button>
+      <button class="btn secondary" id="clearBtn"><i class="mgc_delete_2_line"></i> 清空</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tool-header"><h2><i class="mgc_qrcode_2_line"></i> 二维码预览</h2></div>
+    <div class="qr-preview" id="preview"><div class="empty">在上方输入内容后点击「生成」</div></div>
+  </div>
+</div>
+<script src="../js/common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+(function() {
+  'use strict';
+  var input = document.getElementById('input');
+  var preview = document.getElementById('preview');
+  var sizeSelect = document.getElementById('size');
+  var lastUrl = '';
+
+  function gen() {
+    var text = input.value.trim();
+    if (!text) { Toolbox.showToast('请输入内容'); return; }
+    if (typeof QRCode === 'undefined') { Toolbox.showToast('二维码库加载失败，请检查网络'); return; }
+    var size = +sizeSelect.value;
+    QRCode.toDataURL(text, { width: size, margin: 1, errorCorrectionLevel: 'M' }, function(err, url) {
+      if (err) { Toolbox.showToast('生成失败'); return; }
+      lastUrl = url;
+      preview.innerHTML = '<img src="' + url + '" alt="二维码">';
+    });
+  }
+  document.getElementById('genBtn').addEventListener('click', gen);
+  document.getElementById('downloadBtn').addEventListener('click', function() {
+    if (!lastUrl) { Toolbox.showToast('请先生成二维码'); return; }
+    var a = document.createElement('a');
+    a.href = lastUrl;
+    a.download = 'qrcode.png';
+    a.click();
+  });
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    input.value = ''; lastUrl = '';
+    preview.innerHTML = '<div class="empty">在上方输入内容后点击「生成」</div>';
+    Toolbox.showToast('已清空');
+  });
+})();
+</script>
+</body>
+</html>

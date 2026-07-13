@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>表格工作台工具箱</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235B7CF5'/><stop offset='1' stop-color='%234064E0'/></linearGradient></defs><rect width='36' height='36' rx='6' fill='url(%23g)'/><text x='18' y='25' text-anchor='middle' fill='white' font-family='system-ui,sans-serif' font-weight='700' font-size='20'>T</text></svg>">
+  <title>表格工具集 - 即开即用</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235B7CF5'/><stop offset='1' stop-color='%234064E0'/></linearGradient></defs><rect width='36' height='36' rx='6' fill='url(%23g)'/><text x='18' y='25' text-anchor='middle' fill='white' font-family='system-ui,sans-serif' font-weight='700' font-size='20'>T</text></svg>">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
   <style>
@@ -665,10 +666,16 @@
 <body>
   <header class="header">
     <div class="header-left">
-      <div class="logo">T</div>
+      <div class="logo"><svg width="20" height="20" viewBox="0 0 32 32">
+          <path d="M9 7 h10 l4 4 v12 a1 1 0 0 1-1 1 H9 a1 1 0 0 1-1-1 V8 a1 1 0 0 1 1-1z" fill="none" stroke="white"
+            stroke-width="2" stroke-linejoin="round" />
+          <line x1="11" y1="15" x2="21" y2="15" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="11" y1="18" x2="21" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="23" y1="9" x2="27" y2="5" stroke="white" stroke-width="2" stroke-linecap="round" />
+        </svg></div>
       <div>
-        <span class="brand">表格工作台工具箱</span>
-        <span class="slogan">本地处理 · 数据工具 · 即开即用</span>
+        <span class="brand">表格工具集</span>
+        <span class="slogan">日常办公常用小工具 · 本地处理</span>
       </div>
       <div class="header-tool-info" id="headerToolInfo">
         <div>
@@ -693,8 +700,8 @@
       <div class="iframe-wrap" id="iframeWrap">
         <div class="welcome" id="welcome">
           <div class="welcome-header">
-            <h1>表格工作台工具箱</h1>
-            <p>常用文本、开发、计算工具，保持本地处理和工作台一致体验</p>
+            <h1>表格工具集</h1>
+            <p>日常办公常用小工具，即开即用，本地完成</p>
           </div>
           <div class="tool-cards-grid" id="toolCardsGrid"></div>
         </div>
@@ -705,7 +712,7 @@
   </div>
 
   <footer class="footer">
-    © 2026 表格工作台工具箱
+    © 2026 表格工具集
   </footer>
 
   <script src="js/common.js"></script>
@@ -713,29 +720,34 @@
     (function () {
       'use strict';
 
-      // 只保留 8 个工具
+      // 表格工具集
       var tools = [
         {
-          category: '编码加密',
+          category: '文本处理',
           items: [
-            { id: 'base64', name: 'Base64 编解码', icon: 'mgc_lock_line', desc: '文本编码、文本解码', path: 'tools/base64.html' },
-            { id: 'hash', name: '哈希生成器', icon: 'mgc_fingerprint_line', desc: 'MD5 / SHA-1 / SHA-256 / SHA-512 摘要', path: 'tools/hash.html' }
+            { id: 'text-dedup', name: '文本去重去空行', icon: 'mgc_filter_line', desc: '一列文本去重、去空行、去首尾空格', path: 'tools/text-dedup.html' },
+            { id: 'text-sort', name: '文本排序', icon: 'mgc_sort_ascending_line', desc: '按拼音/笔画/长度排序一列文本', path: 'tools/text-sort.html' },
+            { id: 'word-count', name: '字数统计', icon: 'mgc_text_2_line', desc: '统计字数、字符数、行数、段落数', path: 'tools/word-count.html' },
+            { id: 'case', name: '大小写转换', icon: 'mgc_letter_spacing_line', desc: '全大写/全小写/首字母大写等格式转换', path: 'tools/case.html' }
+          ]
+        },
+        {
+          category: '数据校验',
+          items: [
+            { id: 'id-phone-check', name: '身份证/手机号校验', icon: 'mgc_shield_check_line', desc: '批量校验身份证号、手机号是否合法', path: 'tools/id-phone-check.html' }
           ]
         },
         {
           category: '格式转换',
           items: [
-            { id: 'json-format', name: 'JSON 格式化', icon: 'mgc_code_line', desc: '格式化 JSON、压缩 JSON、错误提示', path: 'tools/json-format.html' },
-            { id: 'json-yaml', name: 'JSON ↔ YAML', icon: 'mgc_file_code_line', desc: 'JSON 与 YAML 互转，支持配置文件', path: 'tools/json-yaml.html' },
-            { id: 'url-codec', name: 'URL 编解码', icon: 'mgc_link_line', desc: 'URL 编码 / 解码，query string 解析', path: 'tools/url-codec.html' },
-            { id: 'markdown', name: 'Markdown 预览', icon: 'mgc_text_2_line', desc: '实时编辑、实时渲染、复制 HTML', path: 'tools/markdown.html' },
-            { id: 'case', name: '大小写转换', icon: 'mgc_letter_spacing_line', desc: '驼峰/蛇形/帕斯卡等 14 种格式实时转换', path: 'tools/case.html' }
+            { id: 'money-uppercase', name: '金额大写转换', icon: 'mgc_currency_cny_line', desc: '数字金额转中文大写，报销发票常用', path: 'tools/money-uppercase.html' },
+            { id: 'date-format', name: '日期格式转换', icon: 'mgc_calendar_2_line', desc: '各种日期格式互转，识别多种写法', path: 'tools/date-format.html' }
           ]
         },
         {
-          category: '开发工具',
+          category: '生成工具',
           items: [
-            { id: 'timestamp', name: '时间戳转换', icon: 'mgc_time_line', desc: '时间戳转日期、日期转时间戳', path: 'tools/timestamp.html' }
+            { id: 'qrcode', name: '二维码生成', icon: 'mgc_qrcode_2_line', desc: '输入文本或链接生成二维码图片', path: 'tools/qrcode.html' }
           ]
         }
       ];
