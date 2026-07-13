@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel 智能助手</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%235ba3e6'/><stop offset='1' stop-color='%233a7bc8'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><rect x='7' y='8' width='18' height='3' rx='1' fill='white' opacity='0.95'/><rect x='7' y='14' width='18' height='10' rx='1.5' fill='white' opacity='0.25'/><line x1='7' y1='18' x2='25' y2='18' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='13' y1='14' x2='13' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/><line x1='19' y1='14' x2='19' y2='24' stroke='white' stroke-width='1.2' opacity='0.6'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'>%20%20<rect%20width='32'%20height='32'%20rx='7'%20fill='%234a90d9'/>%20%20<!--%20文档轮廓%20-->%20%20<path%20d='M9%207%20h10%20l4%204%20v12%20a1%201%200%200%201-1%201%20H9%20a1%201%200%200%201-1-1%20V8%20a1%201%200%200%201%201-1z'%20fill='none'%20stroke='white'%20stroke-width='1.5'%20stroke-linejoin='round'/>%20%20<!--%20文档折角%20-->%20%20<path%20d='M19%207%20v4%20h4'%20fill='none'%20stroke='white'%20stroke-width='1.5'%20stroke-linejoin='round'/>%20%20<!--%20文档内容行%20-->%20%20<line%20x1='11'%20y1='15'%20x2='21'%20y2='15'%20stroke='white'%20stroke-width='1.2'%20stroke-linecap='round'/>%20%20<line%20x1='11'%20y1='18'%20x2='21'%20y2='18'%20stroke='white'%20stroke-width='1.2'%20stroke-linecap='round'/>%20%20<line%20x1='11'%20y1='21'%20x2='17'%20y2='21'%20stroke='white'%20stroke-width='1.2'%20stroke-linecap='round'/>%20%20<!--%20魔法棒%20-->%20%20<line%20x1='23'%20y1='9'%20x2='27'%20y2='5'%20stroke='white'%20stroke-width='1.5'%20stroke-linecap='round'/>%20%20<!--%20魔法棒星星%20-->%20%20<path%20d='M27%205%20l0.5%201.5%20l1.5%200.5%20l-1.5%200.5%20l-0.5%201.5%20l-0.5-1.5%20l-1.5-0.5%20l1.5-0.5z'%20fill='white'/></svg>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
     <style>
         /* MingCute 图标继承父元素颜色 */
@@ -103,10 +102,8 @@
         }
 
         .sidebar-header h2 {
-            font-size: 15px;
-            line-height: 1.35;
+            font-size: 17px;
             color: #4a90d9;
-            overflow-wrap: anywhere;
         }
 
         .sidebar-header p {
@@ -1334,47 +1331,14 @@
             color: #888;
             margin-left: 12px;
         }
-
-        
         /* Toast 提示组件（替代 alert） */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .toast-item {
-            padding: 10px 16px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
-            max-width: 360px;
-            transition: opacity .3s, transform .3s;
-        }
-
-        .toast-success {
-            background: #2e7d32;
-        }
-
-        .toast-error {
-            background: #c62828;
-        }
-
-        .toast-info {
-            background: #424242;
-        }
-
-        .toast-hide {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-
-            </style>
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
+        .toast-item { padding: 10px 16px; border-radius: 8px; color: #fff; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.15); max-width: 360px; transition: opacity .3s, transform .3s; }
+        .toast-success { background: #2e7d32; }
+        .toast-error { background: #c62828; }
+        .toast-info { background: #424242; }
+        .toast-hide { opacity: 0; transform: translateX(20px); }
+    </style>
 </head>
 
 <body>
@@ -1383,21 +1347,14 @@
         <div class="sidebar" id="sidebar">
             <div class="collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</div>
             <div class="sidebar-header">
-                <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
-                    <p>会话列表</p>
-                    <h2 class="sidebar-title"><i class="mgc_file_ai_line"
-                            style="font-size:20px;vertical-align:middle;margin-right:6px;"></i> <span>Excel 智能助手</span>
-                    </h2>
-                    <p>最近文件</p>
-                                </div>
+                <h2 class="sidebar-title"><i class="mgc_file_ai_line" style="font-size:20px;vertical-align:middle;margin-right:6px;"></i> <span>Excel 智能助手</span></h2>
+                <p>最近文件</p>
+            </div>
             <div class="session-list" id="sessionList"></div>
             <div class="sidebar-footer">
                 <button class="btn" id="toolboxBtn" style="width:100%;margin-bottom:6px;text-align:center;">
-                    <span>工具箱</span>
-                        <span><i class="mgc_magic_1_line"
-                                style="font-size:16px;vertical-align:middle;margin-right:4px;"></i></span>
-                        <span>工具箱</span>
-                                        </button>
+                    <span><i class="mgc_magic_1_line" style="font-size:16px;vertical-align:middle;margin-right:4px;"></i></span> <span>工具箱</span>
+                </button>
                 <button class="btn btn-primary" id="newUploadBtn"><span>+</span> <span>上传新文件</span></button>
             </div>
         </div>
@@ -1406,11 +1363,9 @@
         <div class="main">
             <div class="header">
                 <div class="header-left">
-                    <h1 id="mainTitle">表格工作台</h1>
-                        <p id="mainSubtitle">超大 Excel 文件本地化 AI 处理平台</p>
-                        <h1 id="mainTitle">Excel 智能助手</h1>
-                        <p id="mainSubtitle">打开 Excel，问什么答什么</p>
-                                        </div>
+                    <h1 id="mainTitle">Excel 智能助手</h1>
+                    <p id="mainSubtitle">打开 Excel，问什么答什么</p>
+                </div>
                 <div class="header-right">
                     <div class="sys-stats hidden" id="sysStats">
                         <div class="sys-stat">
@@ -1426,381 +1381,374 @@
                             <div class="dot green" id="dotDisk"></div>磁盘 <span class="val" id="sysDisk">0K/0K</span>
                         </div>
                     </div>
-                    <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
-                        <button class="btn" id="performanceBtn" title="性能模式" style="position:relative">性能</button>
-                        <button class="btn" id="exportBtn">导出</button>
-                        <button class="btn" id="settingsBtn">AI 设置</button>
-                        <button class="btn" id="mergeBtn">🔀 合并文件</button>
-                        <button class="btn" id="exportBtn">📥 导出</button>
-                        <button class="btn" id="settingsBtn">⚙️ AI 设置</button>
-                                        </div>
+                    <button class="btn" id="mergeBtn">🔀 合并文件</button>
+                    <button class="btn" id="exportBtn">📥 导出</button>
+                    <button class="btn" id="settingsBtn">⚙️ AI 设置</button>
+                </div>
             </div>
             <div class="content" id="mainContent">
                 <div class="header-toggle-btn" id="headerToggleBtn" title="折叠顶部栏">▲ 收起</div>
                 <div class="upload-section" id="uploadSection">
                     <div class="upload-zone" id="uploadZone">
-                        <div class="upload-icon">▦
+                        <div class="upload-icon"><i class="mgc_file_upload_line" style="font-size:56px;"></i></div>
+                        <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
+                        <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
                     </div>
-                    <div class="upload-icon"><i class="mgc_file_upload_line" style="font-size:56px;"></i></div>
-                                        <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
-                    <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
-                </div>
-                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
-            </div>
-
-            <div id="loadingState" class="loading hidden">准备解析...</div>
-
-            <div id="dataSection" class="hidden">
-                <div class="tab-bar">
-                    <div class="tab-item active" data-tab="browse">数据浏览</div>
-                    <div class="tab-item" data-tab="pivot">透视表</div>
-                    <div class="tab-item" data-tab="clean">数据清洗</div>
-                    <div class="tab-item" data-tab="compare">对比分析</div>
-                    <div class="tab-item" data-tab="ai">AI 对话</div>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
                 </div>
 
-                <!-- 数据浏览 -->
-                <div id="tab-browse">
-                    <div class="toolbar">
-                        <select id="sheetSelect">
-                            <option value="">选择工作表</option>
-                        </select>
-                        <select id="pageSizeSelect">
-                            <option value="100" selected>100条/次</option>
-                            <option value="500">500条/次</option>
-                            <option value="1000">1000条/次</option>
-                            <option value="2000">2000条/次</option>
-                        </select>
-                        <input type="text" id="searchInput" placeholder="全局搜索...">
-                        <button class="btn" id="clearFilterBtn">清除筛选</button>
-                        <button class="btn" id="toggleChartBtn">显示图表</button>
-                        <button class="btn" id="columnSettingsBtn">列设置</button>
+                <div id="loadingState" class="loading hidden">准备解析...</div>
+
+                <div id="dataSection" class="hidden">
+                    <div class="tab-bar">
+                        <div class="tab-item active" data-tab="browse">📋 数据浏览</div>
+                        <div class="tab-item" data-tab="pivot">📊 透视表</div>
+                        <div class="tab-item" data-tab="clean">🧹 数据清洗</div>
+                        <div class="tab-item" data-tab="compare">🔍 对比分析</div>
+                        <div class="tab-item" data-tab="ai">🤖 AI 对话</div>
+                    </div>
+
+                    <!-- 数据浏览 -->
+                    <div id="tab-browse">
+                        <div class="toolbar">
+                            <select id="sheetSelect">
+                                <option value="">选择工作表</option>
+                            </select>
+                            <select id="pageSizeSelect">
+                                <option value="100" selected>100条/次</option>
+                                <option value="500">500条/次</option>
+                                <option value="1000">1000条/次</option>
+                                <option value="2000">2000条/次</option>
+                            </select>
+                            <input type="text" id="searchInput" placeholder="全局搜索...">
+                            <button class="btn" id="clearFilterBtn">清除筛选</button>
+                            <button class="btn" id="toggleChartBtn">显示图表</button>
                             <button class="btn" id="columnSettingsBtn">️ 列设置</button>
                             <button class="btn" id="qualityCheckBtn">🔍 数据体检</button>
-                                                        <span style="border-left:1px solid #ddd;margin:0 6px"></span>
+                            <span style="border-left:1px solid #ddd;margin:0 6px"></span>
                             <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
                             <button class="btn btn-danger" id="deleteRowBtn">- 行</button> -->
-                    </div>
-                    <div id="activeFilters" class="active-filters"></div>
-                    <div class="stats-bar" id="statsBar">
-                        <div class="stat-item">
-                            <div class="stat-value" id="totalRows">0</div>
-                            <div class="stat-label">总行数</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="filteredRows">0</div>
-                            <div class="stat-label">当前显示</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="loadedRowsDisplay">0</div>
-                            <div class="stat-label">已加载</div>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <div class="table-wrapper" id="tableWrapper">
-                            <table id="dataTable">
-                                <thead id="tableHead"></thead>
-                                <tbody id="tableBody"></tbody>
-                            </table>
-                        </div>
-                        <div id="loadingMore" class="loading-more hidden">加载中...</div>
-                        <div id="scrollInfo" style="text-align:center;padding:8px;font-size:12px;color:#888;"></div>
-                    </div>
-                    <div id="chartSection" class="chart-container hidden chart-section-wrap">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                            <h3 style="margin:0">数据图表</h3>
-                            <div style="display:flex;gap:6px;align-items:center">
-                                <select id="chartType"
-                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px">
-                                    <option value="bar">柱状图</option>
-                                    <option value="line">折线图</option>
-                                    <option value="pie">饼图</option>
-                                    <option value="scatter">散点图</option>
-                                </select>
-                                <select id="chartXAxis"
-                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
-                                <select id="chartYAxis"
-                                    style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
-                                <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">
-                                    AI 推荐</button>
-                            </div>
-                        </div>
-                        <div id="chart"></div>
-                        <div id="chartExplanation" style="margin-top:8px;font-size:11px;color:#888"></div>
-                    </div>
-                </div>
-
-                <!-- 透视表 -->
-                <div id="tab-pivot" class="hidden">
-                    <div class="panel">
-                        <h3>透视表</h3>
-                        <div class="panel-row">
-                            <label>行字段</label>
-                            <select id="pivotRowField"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>值字段</label>
-                            <select id="pivotValueField"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>列字段</label>
-                            <select id="pivotColField">
-                                <option value="">（无）</option>
-                            </select>
-                        </div>
-                        <div class="panel-row">
-                            <label>聚合方式</label>
-                            <select id="pivotAggFunc">
-                                <option value="sum">求和</option>
-                                <option value="count">计数</option>
-                                <option value="avg">平均值</option>
-                                <option value="min">最小值</option>
-                                <option value="max">最大值</option>
-                            </select>
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="pivotRunBtn">生成透视表</button>
-                            <button class="btn" id="pivotExportBtn">导出 CSV</button>
-                        </div>
-                    </div>
-                    <div class="table-container" id="pivotResultSection" style="display:none">
-                        <div class="table-wrapper">
-                            <table id="pivotTable">
-                                <thead id="pivotHead"></thead>
-                                <tbody id="pivotBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 数据清洗 -->
-                <div id="tab-clean" class="hidden" style="overflow: auto;">
-                    <div
-                        style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:12px;padding:0 4px">
-                        <span style="font-size:12px;color:#888;margin-right:auto">清洗前自动保存快照，可一键撤销上一步</span>
-                        <button class="btn" id="undoBtn">↩️ 撤销上一步</button>
-                        <button class="btn" id="cleanPlanBtn">🧹 清洗方案</button>
-                    </div>
-                    <div class="panel">
-                        <h3>数据去重</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">删除重复行，保留第一条记录</p>
-                        <div class="panel-row">
-                            <label>去重列</label>
-                            <select id="dedupColumn">
-                                <option value="">所有列</option>
-                            </select>
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="dedupBtn">执行去重</button>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <h3>📝 填充空值</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">将指定列的空值替换为指定内容</p>
-                        <div class="panel-row">
-                            <label>选择列</label>
-                            <select id="fillColumn"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>填充值</label>
-                            <input type="text" id="fillValue" placeholder="请输入填充内容">
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="fillBtn">执行填充</button>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <h3>🔤 按规则替换</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">批量替换列中的内容，可选常用规则或自定义</p>
-                        <div class="panel-row">
-                            <label>选择列</label><select id="regexColumn"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>常用规则</label>
-                            <select id="regexPreset">
-                                <option value="">自定义（手填匹配模式）</option>
-                                <option value="trim">去除首尾空格</option>
-                                <option value="innerSpace">去除所有空格</option>
-                                <option value="keepDigit">只保留数字</option>
-                                <option value="keepChinese">只保留中文</option>
-                                <option value="keepLetter">只保留字母</option>
-                                <option value="removeLetter">去除所有字母</option>
-                                <option value="removeSymbol">去除特殊符号</option>
-                            </select>
-                        </div>
-                        <div class="panel-row">
-                            <label>匹配模式</label><input type="text" id="regexPattern" placeholder="选常用规则可留空；自定义则填正则（高级）">
-                        </div>
-                        <div class="panel-row">
-                            <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容（删除则留空）">
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="regexReplaceBtn">执行替换</button>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <h3>✂️ 列拆分</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">按分隔符将一列拆分为多列</p>
-                        <div class="panel-row">
-                            <label>源列</label><select id="splitSourceColumn"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>分隔符</label><input type="text" id="splitDelimiter" value="," placeholder="如 , ; | 等">
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="splitColumnBtn">执行拆分</button>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <h3>🔄 数据类型转换</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">批量转换列的数据类型</p>
-                        <div class="panel-row">
-                            <label>选择列</label><select id="convertColumn"></select>
-                        </div>
-                        <div class="panel-row">
-                            <label>目标类型</label>
-                            <select id="convertTargetType">
-                                <option value="string">字符串</option>
-                                <option value="number">数值</option>
-                                <option value="date">日期</option>
-                            </select>
-                        </div>
-                        <div class="panel-row" id="dateFormatRow" style="display:none">
-                            <label>日期格式</label>
-                            <select id="convertDateFormat">
-                                <option value="%Y-%m-%d">2024-01-15</option>
-                                <option value="%Y/%m/%d">2024/01/15</option>
-                                <option value="%Y年%m月%d日">2024年01月15日</option>
-                                <option value="%Y%m%d">20240115</option>
-                                <option value="%d/%m/%Y">15/01/2024</option>
-                            </select>
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="convertTypeBtn">执行转换</button>
-                        </div>
-                    </div>
-                    <div class="panel">
-                        <h3>✅ 数据校验</h3>
-                        <p style="font-size:12px;color:#888;margin-bottom:10px">检查列数据是否符合规则</p>
-                        <div id="validationRules"></div>
-                        <button class="btn" id="addValidationRuleBtn" style="margin-bottom:10px">+ 添加规则</button>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="validateBtn">执行校验</button>
-                        </div>
-                        <div id="validationResults" style="margin-top:10px"></div>
-                    </div>
-                </div>
-
-                <!-- 对比分析 -->
-                <div id="tab-compare" class="hidden">
-                    <div class="panel">
-                        <h3>多文件对比分析</h3>
-                        <div class="compare-grid">
-                            <div class="compare-item">
-                                <h4>文件 A</h4>
-                                <select id="compareFileA">
-                                    <option value="">选择文件</option>
-                                </select>
-                                <select id="compareSheetA">
-                                    <option value="">选择工作表</option>
-                                </select>
-                                <div class="compare-stat">行数: <span id="compareRowsA">-</span></div>
-                            </div>
-                            <div class="compare-item">
-                                <h4>文件 B</h4>
-                                <select id="compareFileB">
-                                    <option value="">选择文件</option>
-                                </select>
-                                <select id="compareSheetB">
-                                    <option value="">选择工作表</option>
-                                </select>
-                                <div class="compare-stat">行数: <span id="compareRowsB">-</span></div>
-                            </div>
-                        </div>
-                        <div class="panel-row" style="margin-top:14px">
-                            <label>对比列</label>
-                            <select id="compareKeyCol">
-                                <option value="">选择用于对比的列</option>
-                            </select>
-                        </div>
-                        <div class="panel-actions">
-                            <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
-                            <button class="btn" id="reconcileBtn">📋 增强对账</button>
-                        </div>
-                    </div>
-                    <div id="compareResult" class="table-container hidden">
-                        <div class="stats-bar" style="margin:12px">
+                        <div id="activeFilters" class="active-filters"></div>
+                        <div class="stats-bar" id="statsBar">
                             <div class="stat-item">
-                                <div class="stat-value" id="compareOnlyA">0</div>
-                                <div class="stat-label">仅在A中</div>
+                                <div class="stat-value" id="totalRows">0</div>
+                                <div class="stat-label">总行数</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-value" id="compareOnlyB">0</div>
-                                <div class="stat-label">仅在B中</div>
+                                <div class="stat-value" id="filteredRows">0</div>
+                                <div class="stat-label">当前显示</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-value" id="compareBoth">0</div>
-                                <div class="stat-label">两者共有</div>
+                                <div class="stat-value" id="loadedRowsDisplay">0</div>
+                                <div class="stat-label">已加载</div>
                             </div>
                         </div>
-                        <div class="table-wrapper">
-                            <table id="compareTable">
-                                <thead id="compareHead"></thead>
-                                <tbody id="compareBody"></tbody>
-                            </table>
+                        <div class="table-container">
+                            <div class="table-wrapper" id="tableWrapper">
+                                <table id="dataTable">
+                                    <thead id="tableHead"></thead>
+                                    <tbody id="tableBody"></tbody>
+                                </table>
+                            </div>
+                            <div id="loadingMore" class="loading-more hidden">加载中...</div>
+                            <div id="scrollInfo" style="text-align:center;padding:8px;font-size:12px;color:#888;"></div>
                         </div>
-                        <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none">
-                        </div>
-                        <div id="comparePager"
-                            style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
-                            <button class="btn" id="comparePrevBtn" style="padding:4px 14px">上一页</button>
-                            <span id="comparePageInfo" style="font-size:13px;color:#666"></span>
-                            <button class="btn" id="compareNextBtn" style="padding:4px 14px">下一页</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI 对话 -->
-                <div id="tab-ai" class="hidden">
-                    <div class="ai-chat">
-                        <div
-                            style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee">
-                            <span style="font-size:13px;color:#888">💬 支持多轮追问，AI 会记住上下文</span>
-                            <button class="btn" id="aiClearBtn" style="padding:4px 10px;font-size:12px">清空对话</button>
-                        </div>
-                        <div class="ai-chat-messages" id="aiChatMessages">
-                            <div class="ai-message ai">
-                                <div class="msg-content">
-                                    👋 你好！我是 Excel AI 助手。<br>
-                                    你可以用自然语言问我关于这个 Excel 的问题，比如：<br>
-                                    • "统计每个部门的总金额"<br>
-                                    • "找出金额大于10000的记录"<br>
-                                    • "按日期分组统计数量"<br><br>
-                                    请先在右上角 AI 设置中配置 API Key。
+                        <div id="chartSection" class="chart-container hidden chart-section-wrap">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                                <h3 style="margin:0">📊 数据图表</h3>
+                                <div style="display:flex;gap:6px;align-items:center">
+                                    <select id="chartType"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px">
+                                        <option value="bar">柱状图</option>
+                                        <option value="line">折线图</option>
+                                        <option value="pie">饼图</option>
+                                        <option value="scatter">散点图</option>
+                                    </select>
+                                    <select id="chartXAxis"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                    <select id="chartYAxis"
+                                        style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
+                                    <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">🤖
+                                        智能推荐</button>
                                 </div>
                             </div>
+                            <div id="chart"></div>
+                            <div id="chartExplanation" style="margin-top:8px;font-size:11px;color:#888"></div>
                         </div>
-                        <div class="ai-chat-input">
-                            <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
-                            <button class="btn btn-primary" id="aiSendBtn">发送</button>
+                    </div>
+
+                    <!-- 透视表 -->
+                    <div id="tab-pivot" class="hidden">
+                        <div class="panel">
+                            <h3>📊 透视表</h3>
+                            <div class="panel-row">
+                                <label>行字段</label>
+                                <select id="pivotRowField"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>值字段</label>
+                                <select id="pivotValueField"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>列字段</label>
+                                <select id="pivotColField">
+                                    <option value="">（无）</option>
+                                </select>
+                            </div>
+                            <div class="panel-row">
+                                <label>聚合方式</label>
+                                <select id="pivotAggFunc">
+                                    <option value="sum">求和</option>
+                                    <option value="count">计数</option>
+                                    <option value="avg">平均值</option>
+                                    <option value="min">最小值</option>
+                                    <option value="max">最大值</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="pivotRunBtn">生成透视表</button>
+                                <button class="btn" id="pivotExportBtn">导出 CSV</button>
+                            </div>
+                        </div>
+                        <div class="table-container" id="pivotResultSection" style="display:none">
+                            <div class="table-wrapper">
+                                <table id="pivotTable">
+                                    <thead id="pivotHead"></thead>
+                                    <tbody id="pivotBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据清洗 -->
+                    <div id="tab-clean" class="hidden" style="overflow: auto;">
+                        <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:12px;padding:0 4px">
+                            <span style="font-size:12px;color:#888;margin-right:auto">清洗前自动保存快照，可一键撤销上一步</span>
+                            <button class="btn" id="undoBtn">↩️ 撤销上一步</button>
+                            <button class="btn" id="cleanPlanBtn">🧹 清洗方案</button>
+                        </div>
+                        <div class="panel">
+                            <h3>🧹 数据去重</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">删除重复行，保留第一条记录</p>
+                            <div class="panel-row">
+                                <label>去重列</label>
+                                <select id="dedupColumn">
+                                    <option value="">所有列</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="dedupBtn">执行去重</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>📝 填充空值</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">将指定列的空值替换为指定内容</p>
+                            <div class="panel-row">
+                                <label>选择列</label>
+                                <select id="fillColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>填充值</label>
+                                <input type="text" id="fillValue" placeholder="请输入填充内容">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="fillBtn">执行填充</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>🔤 按规则替换</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">批量替换列中的内容，可选常用规则或自定义</p>
+                            <div class="panel-row">
+                                <label>选择列</label><select id="regexColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>常用规则</label>
+                                <select id="regexPreset">
+                                    <option value="">自定义（手填匹配模式）</option>
+                                    <option value="trim">去除首尾空格</option>
+                                    <option value="innerSpace">去除所有空格</option>
+                                    <option value="keepDigit">只保留数字</option>
+                                    <option value="keepChinese">只保留中文</option>
+                                    <option value="keepLetter">只保留字母</option>
+                                    <option value="removeLetter">去除所有字母</option>
+                                    <option value="removeSymbol">去除特殊符号</option>
+                                </select>
+                            </div>
+                            <div class="panel-row">
+                                <label>匹配模式</label><input type="text" id="regexPattern" placeholder="选常用规则可留空；自定义则填正则（高级）">
+                            </div>
+                            <div class="panel-row">
+                                <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容（删除则留空）">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="regexReplaceBtn">执行替换</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>✂️ 列拆分</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">按分隔符将一列拆分为多列</p>
+                            <div class="panel-row">
+                                <label>源列</label><select id="splitSourceColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>分隔符</label><input type="text" id="splitDelimiter" value=","
+                                    placeholder="如 , ; | 等">
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="splitColumnBtn">执行拆分</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>🔄 数据类型转换</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">批量转换列的数据类型</p>
+                            <div class="panel-row">
+                                <label>选择列</label><select id="convertColumn"></select>
+                            </div>
+                            <div class="panel-row">
+                                <label>目标类型</label>
+                                <select id="convertTargetType">
+                                    <option value="string">字符串</option>
+                                    <option value="number">数值</option>
+                                    <option value="date">日期</option>
+                                </select>
+                            </div>
+                            <div class="panel-row" id="dateFormatRow" style="display:none">
+                                <label>日期格式</label>
+                                <select id="convertDateFormat">
+                                    <option value="%Y-%m-%d">2024-01-15</option>
+                                    <option value="%Y/%m/%d">2024/01/15</option>
+                                    <option value="%Y年%m月%d日">2024年01月15日</option>
+                                    <option value="%Y%m%d">20240115</option>
+                                    <option value="%d/%m/%Y">15/01/2024</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="convertTypeBtn">执行转换</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>✅ 数据校验</h3>
+                            <p style="font-size:12px;color:#888;margin-bottom:10px">检查列数据是否符合规则</p>
+                            <div id="validationRules"></div>
+                            <button class="btn" id="addValidationRuleBtn" style="margin-bottom:10px">+ 添加规则</button>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="validateBtn">执行校验</button>
+                            </div>
+                            <div id="validationResults" style="margin-top:10px"></div>
+                        </div>
+                    </div>
+
+                    <!-- 对比分析 -->
+                    <div id="tab-compare" class="hidden">
+                        <div class="panel">
+                            <h3>🔍 多文件对比分析</h3>
+                            <div class="compare-grid">
+                                <div class="compare-item">
+                                    <h4>文件 A</h4>
+                                    <select id="compareFileA">
+                                        <option value="">选择文件</option>
+                                    </select>
+                                    <select id="compareSheetA">
+                                        <option value="">选择工作表</option>
+                                    </select>
+                                    <div class="compare-stat">行数: <span id="compareRowsA">-</span></div>
+                                </div>
+                                <div class="compare-item">
+                                    <h4>文件 B</h4>
+                                    <select id="compareFileB">
+                                        <option value="">选择文件</option>
+                                    </select>
+                                    <select id="compareSheetB">
+                                        <option value="">选择工作表</option>
+                                    </select>
+                                    <div class="compare-stat">行数: <span id="compareRowsB">-</span></div>
+                                </div>
+                            </div>
+                            <div class="panel-row" style="margin-top:14px">
+                                <label>对比列</label>
+                                <select id="compareKeyCol">
+                                    <option value="">选择用于对比的列</option>
+                                </select>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
+                                <button class="btn" id="reconcileBtn">📋 增强对账</button>
+                            </div>
+                        </div>
+                        <div id="compareResult" class="table-container hidden">
+                            <div class="stats-bar" style="margin:12px">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareOnlyA">0</div>
+                                    <div class="stat-label">仅在A中</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareOnlyB">0</div>
+                                    <div class="stat-label">仅在B中</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareBoth">0</div>
+                                    <div class="stat-label">两者共有</div>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table id="compareTable">
+                                    <thead id="compareHead"></thead>
+                                    <tbody id="compareBody"></tbody>
+                                </table>
+                            </div>
+                            <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none"></div>
+                            <div id="comparePager" style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
+                                <button class="btn" id="comparePrevBtn" style="padding:4px 14px">上一页</button>
+                                <span id="comparePageInfo" style="font-size:13px;color:#666"></span>
+                                <button class="btn" id="compareNextBtn" style="padding:4px 14px">下一页</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI 对话 -->
+                    <div id="tab-ai" class="hidden">
+                        <div class="ai-chat">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee">
+                                <span style="font-size:13px;color:#888">💬 支持多轮追问，AI 会记住上下文</span>
+                                <button class="btn" id="aiClearBtn"
+                                    style="padding:4px 10px;font-size:12px">清空对话</button>
+                            </div>
+                            <div class="ai-chat-messages" id="aiChatMessages">
+                                <div class="ai-message ai">
+                                    <div class="msg-content">
+                                        👋 你好！我是 Excel AI 助手。<br>
+                                        你可以用自然语言问我关于这个 Excel 的问题，比如：<br>
+                                        • "统计每个部门的总金额"<br>
+                                        • "找出金额大于10000的记录"<br>
+                                        • "按日期分组统计数量"<br><br>
+                                        请先在右上角 ⚙️ 设置中配置 AI API Key。
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ai-chat-input">
+                                <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
+                                <button class="btn btn-primary" id="aiSendBtn">发送</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="emptyState" class="empty-state">
-                <h3>暂无数据</h3>
-                <p>请上传 Excel 文件开始分析</p>
+                <div id="emptyState" class="empty-state">
+                    <h3>暂无数据</h3>
+                    <p>请上传 Excel 文件开始分析</p>
+                </div>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- 工具箱覆盖层 -->
     <div class="toolbox-overlay" id="toolboxOverlay">
         <div class="toolbox-exit-bar">
             <button class="toolbox-exit-btn" id="toolboxExitBtn">← 返回工作站</button>
-            <span class="toolbox-title">表格工作台工具箱</span>
+            <span class="toolbox-title">轻量工具箱</span>
         </div>
         <iframe id="toolboxFrame" src="about:blank"></iframe>
     </div>
@@ -1814,7 +1762,7 @@
     <!-- AI 设置模态框 -->
     <div class="modal-overlay hidden" id="dbConfigModal">
         <div class="modal">
-            <h3>数据库配置</h3>
+            <h3>🗄️ 数据库配置</h3>
             <div class="modal-row">
                 <label>数据库类型</label>
                 <select id="dbTypeSelect">
@@ -1859,7 +1807,7 @@
 
     <div class="modal-overlay hidden" id="settingsModal">
         <div class="modal">
-            <h3>AI 设置</h3>
+            <h3>⚙️ AI 设置</h3>
             <div class="modal-row">
                 <label>AI 提供商</label>
                 <select id="settingsProvider">
@@ -1893,11 +1841,8 @@
     <div class="modal-overlay hidden" id="mergeModal">
         <div class="modal">
             <h3>🔀 合并文件</h3>
-            <p style="color:#888;margin-bottom:12px;font-size:13px">
-                勾选要合并的表，合并后生成新文件，并自动追加「来源文件名」「导入时间」两列。适合月报、日报、订单等结构相同的文件汇总。</p>
-            <div id="mergeSourceList"
-                style="max-height:300px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;background:#fafafa">
-            </div>
+            <p style="color:#888;margin-bottom:12px;font-size:13px">勾选要合并的表，合并后生成新文件，并自动追加「来源文件名」「导入时间」两列。适合月报、日报、订单等结构相同的文件汇总。</p>
+            <div id="mergeSourceList" style="max-height:300px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;background:#fafafa"></div>
             <div class="modal-row">
                 <label>列对齐方式</label>
                 <select id="mergeMode">
@@ -1933,18 +1878,11 @@
         <div class="modal" style="max-width:720px">
             <h3>📋 增强对账</h3>
             <p style="color:#888;font-size:13px;margin-bottom:12px">按多个匹配列核对两份数据，支持金额容差、日期容差，自动分类差异</p>
-            <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple
-                    style="height:90px"></select></div>
-            <div class="modal-row"><label>金额列（可选）</label><select id="reconcileAmountCol">
-                    <option value="">不比较</option>
-                </select></div>
-            <div class="modal-row"><label>金额容差</label><input type="number" id="reconcileAmountTol" value="0.01"
-                    step="0.01"></div>
-            <div class="modal-row"><label>日期列（可选）</label><select id="reconcileDateCol">
-                    <option value="">不比较</option>
-                </select></div>
-            <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0">
-            </div>
+            <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple style="height:90px"></select></div>
+            <div class="modal-row"><label>金额列（可选）</label><select id="reconcileAmountCol"><option value="">不比较</option></select></div>
+            <div class="modal-row"><label>金额容差</label><input type="number" id="reconcileAmountTol" value="0.01" step="0.01"></div>
+            <div class="modal-row"><label>日期列（可选）</label><select id="reconcileDateCol"><option value="">不比较</option></select></div>
+            <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0"></div>
             <div id="reconcileResult" style="margin-top:12px"></div>
             <div class="modal-actions">
                 <button class="btn" id="reconcileCloseBtn">关闭</button>
@@ -1973,11 +1911,9 @@
         <div class="modal">
             <h3>👀 清洗预览</h3>
             <p id="cleanPreviewNote" style="color:#555;font-size:13px;margin-bottom:10px"></p>
-            <div id="cleanPreviewSummary"
-                style="padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#f6f8fa"></div>
+            <div id="cleanPreviewSummary" style="padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#f6f8fa"></div>
             <div style="font-size:12px;color:#888;margin-bottom:6px">前 5 条变更样本（修改前 → 修改后）：</div>
-            <div id="cleanPreviewSamples"
-                style="max-height:280px;overflow:auto;border:1px solid #eee;border-radius:6px"></div>
+            <div id="cleanPreviewSamples" style="max-height:280px;overflow:auto;border:1px solid #eee;border-radius:6px"></div>
             <div class="modal-actions">
                 <button class="btn" id="cleanPreviewCancelBtn">取消</button>
                 <button class="btn btn-primary" id="cleanPreviewConfirmBtn">确认执行</button>
@@ -2020,7 +1956,7 @@
     <!-- 列设置对话框 -->
     <div class="modal-overlay hidden" id="columnSettingsModal">
         <div class="modal" style="max-width:500px">
-            <h3>列设置</h3>
+            <h3>️ 列设置</h3>
             <p style="font-size:12px;color:#888;margin-bottom:12px">拖拽调整列顺序，取消勾选隐藏列</p>
             <div id="columnSettingsList"
                 style="max-height:400px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:6px;padding:8px">
@@ -2897,7 +2833,7 @@
                 </div>`;
             }).join("");
         }
-        window.applyCleanPlan = async function (name) {
+        window.applyCleanPlan = async function(name) {
             const plans = getCleanPlans();
             const plan = plans[name];
             if (!plan) { showToast("方案不存在"); return; }
@@ -2934,7 +2870,7 @@
                 resetAndLoad();
             } catch (e) { showToast("执行失败: " + e.message); }
         };
-        window.deleteCleanPlan = function (name) {
+        window.deleteCleanPlan = function(name) {
             if (!confirm(`删除方案「${name}」？`)) return;
             const plans = getCleanPlans();
             delete plans[name];
@@ -4066,7 +4002,7 @@
         });
 
         // 数据校验
-        window.updateRuleParams = function (selectEl) {
+        window.updateRuleParams = function(selectEl) {
             const input = selectEl.parentElement.querySelector(".vr-params");
             if (!input) return;
             const type = selectEl.value;
@@ -4662,7 +4598,7 @@
             const loadingDiv = document.createElement("div");
             loadingDiv.className = "ai-message ai";
             loadingDiv.id = "aiLoadingMsg";
-            loadingDiv.innerHTML = `<div class="msg-content" style="color:#888"><span style="display:inline-block;animation:aiPulse 1s infinite">AI 正在思考中</span><span style="display:inline-block;animation:aiDots 1.5s infinite">...</span></div>`;
+            loadingDiv.innerHTML = `<div class="msg-content" style="color:#888"><span style="display:inline-block;animation:aiPulse 1s infinite">🤖 正在思考中</span><span style="display:inline-block;animation:aiDots 1.5s infinite">...</span></div>`;
             els.aiChatMessages.appendChild(loadingDiv);
             els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
 

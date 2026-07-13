@@ -16,7 +16,7 @@ logging.basicConfig(
 # 创建 FastAPI 应用
 app = FastAPI(
     title="Excel 智能助手",
-    description="本地表格数据处理、清洗、对比与 AI 问数工具",
+    description="超大 Excel 文件的本地化 AI 处理平台",
     version="1.0.0"
 )
 
