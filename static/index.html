@@ -1335,621 +1335,7 @@
             margin-left: 12px;
         }
 
-        <<<<<<< HEAD
-
-        /* ==================== 现代数据工作台主题 ==================== */
-        :root {
-            --color-bg: #f6f8fb;
-            --color-surface: #ffffff;
-            --color-surface-soft: #f8fafc;
-            --color-sidebar: #0f172a;
-            --color-sidebar-soft: #111c33;
-            --color-primary: #2563eb;
-            --color-primary-hover: #1d4ed8;
-            --color-accent: #14b8a6;
-            --color-warning: #f59e0b;
-            --color-danger: #ef4444;
-            --color-text: #111827;
-            --color-muted: #64748b;
-            --color-faint: #94a3b8;
-            --color-border: #e2e8f0;
-            --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
-            --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06);
-        }
-
-        body {
-            background: var(--color-bg);
-            color: var(--color-text);
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
-        }
-
-        .sidebar {
-            width: 256px;
-            background: linear-gradient(180deg, var(--color-sidebar) 0%, #0b1222 100%);
-            border-right: none;
-            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
-        }
-
-        .sidebar.collapsed {
-            width: 54px;
-        }
-
-        .collapse-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--color-faint);
-            font-size: 13px;
-        }
-
-        .collapse-btn:hover {
-            background: rgba(37, 99, 235, 0.18);
-            color: #ffffff;
-        }
-
-        .sidebar-header {
-            padding: 22px 18px 18px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .sidebar-header h2 {
-            color: #f8fafc;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0;
-            display: flex;
-            gap: 9px;
-            align-items: flex-start;
-        }
-
-        .brand-mark {
-            width: 24px;
-            height: 24px;
-            border-radius: 7px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex: 0 0 auto;
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
-        }
-
-        .sidebar-header p {
-            color: var(--color-faint);
-            margin-top: 7px;
-        }
-
-        .session-list {
-            padding: 10px;
-        }
-
-        .session-item {
-            border-radius: 9px;
-            border: 1px solid transparent;
-            color: #e2e8f0;
-        }
-
-        .session-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-
-        .session-item.active {
-            background: rgba(37, 99, 235, 0.22);
-            border-color: rgba(96, 165, 250, 0.48);
-        }
-
-        .session-item .session-name {
-            color: #f8fafc;
-        }
-
-        .session-item .session-meta,
-        .session-item .session-delete {
-            color: var(--color-faint);
-        }
-
-        .session-item .session-delete:hover {
-            color: #fecaca;
-        }
-
-        .sidebar-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(2, 6, 23, 0.24);
-        }
-
-        .sidebar-footer .btn {
-            border-color: rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.06);
-            color: #e2e8f0;
-        }
-
-        .sidebar-footer .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-
-        .sidebar-footer .btn-primary {
-            background: var(--color-primary);
-            border-color: var(--color-primary);
-            color: #ffffff;
-        }
-
-        .main {
-            background:
-                radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
-                var(--color-bg);
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.92);
-            border-bottom: 1px solid var(--color-border);
-            padding: 16px 24px;
-            gap: 16px;
-            box-shadow: var(--shadow-card);
-        }
-
-        .header-left {
-            flex: 1 1 320px;
-            min-width: 260px;
-        }
-
-        .header-left h1 {
-            color: var(--color-text);
-            font-size: 20px;
-            font-weight: 760;
-            line-height: 1.25;
-        }
-
-        .header-left p {
-            color: var(--color-muted);
-            margin-top: 4px;
-        }
-
-        .header-right {
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: 9px;
-        }
-
-        .sys-stats {
-            gap: 7px;
-            border-right: none;
-            padding-right: 0;
-            margin-right: 2px;
-            color: var(--color-muted);
-        }
-
-        .sys-stat {
-            background: var(--color-surface-soft);
-            border: 1px solid var(--color-border);
-            border-radius: 999px;
-            padding: 6px 9px;
-            box-shadow: var(--shadow-card);
-        }
-
-        .sys-stat .dot.green {
-            background: var(--color-accent);
-        }
-
-        .sys-stat .dot.yellow {
-            background: var(--color-warning);
-        }
-
-        .sys-stat .dot.red {
-            background: var(--color-danger);
-        }
-
-        .sys-stat .val {
-            color: var(--color-text);
-            font-weight: 650;
-        }
-
-        .content {
-            padding: 20px 24px;
-        }
-
-        .header-toggle-btn {
-            background: var(--color-surface);
-            color: var(--color-muted);
-            border-color: var(--color-border);
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
-            box-shadow: var(--shadow-card);
-        }
-
-        .header-toggle-btn:hover {
-            color: var(--color-primary);
-            background: #eff6ff;
-        }
-
-        .btn,
-        .pagination button {
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            background: var(--color-surface);
-            color: #334155;
-            font-weight: 650;
-            box-shadow: var(--shadow-card);
-        }
-
-        .btn:hover,
-        .pagination button:hover:not(:disabled) {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-            color: var(--color-primary);
-        }
-
-        .btn-primary {
-            background: var(--color-primary);
-            border-color: var(--color-primary);
-            color: #ffffff;
-        }
-
-        .btn-primary:hover {
-            background: var(--color-primary-hover);
-            border-color: var(--color-primary-hover);
-            color: #ffffff;
-        }
-
-        .btn-danger {
-            background: #fff1f2;
-            border-color: #fecdd3;
-            color: #be123c;
-        }
-
-        .btn-danger:hover {
-            background: #fee2e2;
-            border-color: #fca5a5;
-            color: #991b1b;
-        }
-
-        .upload-section {
-            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-            border: 1px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .upload-section.dragover {
-            border-color: var(--color-primary);
-            background: #eff6ff;
-        }
-
-        .upload-zone {
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .upload-icon {
-            width: 58px;
-            height: 58px;
-            border-radius: 18px;
-            margin-bottom: 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #dbeafe, #ccfbf1);
-            color: var(--color-primary);
-            font-size: 29px;
-            box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
-        }
-
-        .upload-text {
-            color: var(--color-text);
-            font-size: 16px;
-            font-weight: 650;
-        }
-
-        .upload-text span {
-            color: var(--color-primary);
-        }
-
-        .upload-hint {
-            color: var(--color-muted);
-            margin-top: 2px;
-        }
-
-        .tab-bar {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            padding: 5px;
-            gap: 4px;
-            box-shadow: var(--shadow-card);
-        }
-
-        .tab-item {
-            color: var(--color-muted);
-            border-radius: 9px;
-            font-weight: 650;
-            padding: 8px 15px;
-        }
-
-        .tab-item:hover {
-            background: #f1f5f9;
-            color: var(--color-text);
-        }
-
-        .tab-item.active {
-            background: var(--color-sidebar);
-            color: #ffffff;
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
-        }
-
-        .toolbar select,
-        .toolbar input[type="text"],
-        .panel-row select,
-        .panel-row input[type="text"],
-        .modal-row select,
-        .modal-row input,
-        .ai-chat-input input,
-        .compare-item select {
-            border-color: var(--color-border);
-            border-radius: 9px;
-            color: var(--color-text);
-            background: var(--color-surface);
-        }
-
-        .toolbar select:focus,
-        .toolbar input:focus,
-        .panel-row select:focus,
-        .panel-row input:focus,
-        .modal-row select:focus,
-        .modal-row input:focus,
-        .ai-chat-input input:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
-
-        .stats-bar,
-        .table-container,
-        .panel,
-        .chart-container,
-        .ai-chat,
-        .modal,
-        .compare-item {
-            border: 1px solid var(--color-border);
-            border-radius: 14px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .stats-bar {
-            gap: 18px;
-            background: var(--color-surface);
-        }
-
-        .stat-item {
-            min-width: 86px;
-            text-align: left;
-        }
-
-        .stat-value {
-            color: var(--color-primary);
-            font-size: 22px;
-            line-height: 1.1;
-        }
-
-        .stat-label,
-        .panel-row label,
-        .modal-row label,
-        .compare-item h4,
-        .compare-stat,
-        .pagination span,
-        .loading,
-        .empty-state,
-        .toolbox-title {
-            color: var(--color-muted);
-        }
-
-        .panel h3,
-        .modal h3,
-        .chart-container h3,
-        .empty-state h3 {
-            color: var(--color-text);
-        }
-
-        th {
-            background: #f8fafc;
-            border-bottom: 1px solid var(--color-border);
-            color: #334155;
-        }
-
-        th:hover,
-        th.filtered,
-        tr:hover,
-        .filter-dropdown-list label:hover,
-        .mode-dropdown-item:hover,
-        .column-setting-item:hover {
-            background: #eff6ff;
-        }
-
-        th.filtered,
-        th.sorted .sort-icon,
-        th .filter-btn:hover,
-        th .filter-btn.active,
-        .filter-tag span,
-        .mode-dropdown-item.active,
-        .compare-stat span {
-            color: var(--color-primary);
-        }
-
-        td {
-            border-bottom-color: #eef2f7;
-        }
-
-        .filter-tag {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-            border-radius: 999px;
-        }
-
-        .ai-message.user .msg-content {
-            background: var(--color-primary);
-        }
-
-        .ai-message.ai .msg-content {
-            background: #f1f5f9;
-            color: var(--color-text);
-        }
-
-        .scroll-top-btn,
-        .toolbox-exit-btn {
-            background: var(--color-primary);
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
-        }
-
-        .scroll-top-btn:hover,
-        .toolbox-exit-btn:hover {
-            background: var(--color-primary-hover);
-        }
-
-        .mode-dropdown,
-        .filter-dropdown {
-            border-color: var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
-        }
-
-        .modal-overlay {
-            background: rgba(15, 23, 42, 0.42);
-        }
-
-        .toolbox-overlay {
-            background: var(--color-bg);
-        }
-
-        .toolbox-exit-bar {
-            background: var(--color-surface);
-            border-bottom-color: var(--color-border);
-        }
-
-        .toolbox-overlay .toolbox-exit-bar {
-            display: none;
-        }
-
-        @media (max-width: 760px) {
-            .sidebar {
-                width: 72px;
-            }
-
-            .sidebar.collapsed {
-                width: 54px;
-            }
-
-            .sidebar-header {
-                padding: 16px 10px;
-            }
-
-            .sidebar-header h2 {
-                justify-content: center;
-            }
-
-            .sidebar-header h2 span:not(.brand-mark),
-            .sidebar-header p,
-            .session-name,
-            .session-meta,
-            .session-delete,
-            .sidebar-footer .btn span {
-                display: none;
-            }
-
-            .session-item {
-                min-height: 34px;
-                padding: 8px;
-            }
-
-            .sidebar-footer {
-                padding: 10px 8px;
-            }
-
-            .sidebar-footer .btn {
-                min-height: 34px;
-                padding: 7px;
-                font-size: 0;
-            }
-
-            .sidebar-footer .btn::before {
-                content: "+";
-                font-size: 13px;
-            }
-
-            #toolboxBtn::before {
-                content: "T";
-            }
-
-            .main {
-                min-width: 0;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-                padding: 14px 14px 12px;
-                max-height: none;
-                overflow: visible;
-            }
-
-            .header-left {
-                min-width: 0;
-                width: 100%;
-                flex: none;
-            }
-
-            .header-left h1 {
-                font-size: 16px;
-                line-height: 1.35;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: flex-start;
-                gap: 6px;
-            }
-
-            .header-right .btn {
-                padding: 6px 9px;
-                font-size: 11px;
-            }
-
-            .sys-stats {
-                width: 100%;
-                overflow-x: visible;
-                flex-wrap: wrap;
-                padding-bottom: 2px;
-            }
-
-            .content {
-                padding: 14px 12px;
-            }
-
-            .upload-section {
-                padding: 20px;
-            }
-
-            .upload-text {
-                font-size: 14px;
-                line-height: 1.6;
-            }
-
-            .tab-bar {
-                width: 100%;
-                overflow-x: auto;
-            }
-
-            .tab-item {
-                flex: 0 0 auto;
-            }
-        }
-
-        =======
-
+        
         /* Toast 提示组件（替代 alert） */
         .toast-container {
             position: fixed;
@@ -1988,8 +1374,7 @@
             transform: translateX(20px);
         }
 
-        >>>>>>>11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-    </style>
+            </style>
 </head>
 
 <body>
@@ -1998,25 +1383,21 @@
         <div class="sidebar" id="sidebar">
             <div class="collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</div>
             <div class="sidebar-header">
-                <<<<<<< HEAD <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
+                <h2 class="sidebar-title"><span class="brand-mark">T</span><span>表格工作台</span></h2>
                     <p>会话列表</p>
-                    =======
                     <h2 class="sidebar-title"><i class="mgc_file_ai_line"
                             style="font-size:20px;vertical-align:middle;margin-right:6px;"></i> <span>Excel 智能助手</span>
                     </h2>
                     <p>最近文件</p>
-                    >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-            </div>
+                                </div>
             <div class="session-list" id="sessionList"></div>
             <div class="sidebar-footer">
                 <button class="btn" id="toolboxBtn" style="width:100%;margin-bottom:6px;text-align:center;">
-                    <<<<<<< HEAD <span>工具箱</span>
-                        =======
+                    <span>工具箱</span>
                         <span><i class="mgc_magic_1_line"
                                 style="font-size:16px;vertical-align:middle;margin-right:4px;"></i></span>
                         <span>工具箱</span>
-                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-                </button>
+                                        </button>
                 <button class="btn btn-primary" id="newUploadBtn"><span>+</span> <span>上传新文件</span></button>
             </div>
         </div>
@@ -2025,13 +1406,11 @@
         <div class="main">
             <div class="header">
                 <div class="header-left">
-                    <<<<<<< HEAD <h1 id="mainTitle">表格工作台</h1>
+                    <h1 id="mainTitle">表格工作台</h1>
                         <p id="mainSubtitle">超大 Excel 文件本地化 AI 处理平台</p>
-                        =======
                         <h1 id="mainTitle">Excel 智能助手</h1>
                         <p id="mainSubtitle">打开 Excel，问什么答什么</p>
-                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-                </div>
+                                        </div>
                 <div class="header-right">
                     <div class="sys-stats hidden" id="sysStats">
                         <div class="sys-stat">
@@ -2047,27 +1426,23 @@
                             <div class="dot green" id="dotDisk"></div>磁盘 <span class="val" id="sysDisk">0K/0K</span>
                         </div>
                     </div>
-                    <<<<<<< HEAD <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
+                    <button class="btn" id="dbConfigBtn" title="数据库配置">数据库</button>
                         <button class="btn" id="performanceBtn" title="性能模式" style="position:relative">性能</button>
                         <button class="btn" id="exportBtn">导出</button>
                         <button class="btn" id="settingsBtn">AI 设置</button>
-                        =======
                         <button class="btn" id="mergeBtn">🔀 合并文件</button>
                         <button class="btn" id="exportBtn">📥 导出</button>
                         <button class="btn" id="settingsBtn">⚙️ AI 设置</button>
-                        >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-                </div>
+                                        </div>
             </div>
             <div class="content" id="mainContent">
                 <div class="header-toggle-btn" id="headerToggleBtn" title="折叠顶部栏">▲ 收起</div>
                 <div class="upload-section" id="uploadSection">
                     <div class="upload-zone" id="uploadZone">
-                        <<<<<<< HEAD <div class="upload-icon">▦
+                        <div class="upload-icon">▦
                     </div>
-                    =======
                     <div class="upload-icon"><i class="mgc_file_upload_line" style="font-size:56px;"></i></div>
-                    >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-                    <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
+                                        <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
                     <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
                 </div>
                 <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
@@ -2099,12 +1474,10 @@
                         <input type="text" id="searchInput" placeholder="全局搜索...">
                         <button class="btn" id="clearFilterBtn">清除筛选</button>
                         <button class="btn" id="toggleChartBtn">显示图表</button>
-                        <<<<<<< HEAD <button class="btn" id="columnSettingsBtn">列设置</button>
-                            =======
+                        <button class="btn" id="columnSettingsBtn">列设置</button>
                             <button class="btn" id="columnSettingsBtn">️ 列设置</button>
                             <button class="btn" id="qualityCheckBtn">🔍 数据体检</button>
-                            >>>>>>> 11a0c35 (feat: 虚拟滚动 + 打包分发 + 主题优化 + 工具箱完善)
-                            <span style="border-left:1px solid #ddd;margin:0 6px"></span>
+                                                        <span style="border-left:1px solid #ddd;margin:0 6px"></span>
                             <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
                             <button class="btn btn-danger" id="deleteRowBtn">- 行</button> -->
                     </div>
