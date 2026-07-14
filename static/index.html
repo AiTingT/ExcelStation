@@ -1435,11 +1435,11 @@
 
                 <div id="dataSection" class="hidden">
                     <div class="tab-bar">
-                        <div class="tab-item active" data-tab="browse"><i class="mgc_document_2_line"></i> 数据浏览</div>
-                        <div class="tab-item" data-tab="pivot"><i class="mgc_chart_pie_line"></i> 透视表</div>
-                        <div class="tab-item" data-tab="clean"><i class="mgc_brush_2_line"></i> 数据清洗</div>
-                        <div class="tab-item" data-tab="compare"><i class="mgc_scan_line"></i> 对比分析</div>
-                        <div class="tab-item" data-tab="ai"><i class="mgc_robot_line"></i> AI 对话</div>
+                        <div class="tab-item active" data-tab="browse">📋 数据浏览</div>
+                        <div class="tab-item" data-tab="pivot">📊 透视表</div>
+                        <div class="tab-item" data-tab="clean">🧹 数据清洗</div>
+                        <div class="tab-item" data-tab="compare">⚖️ 对比分析</div>
+                        <div class="tab-item" data-tab="ai">🤖 AI 对话</div>
                     </div>
 
                     <!-- 数据浏览 -->
@@ -1455,9 +1455,9 @@
                                 <option value="2000">2000条/次</option>
                             </select>
                             <input type="text" id="searchInput" placeholder="全局搜索...">
-                            <button class="btn" id="clearFilterBtn"><i class="mgc_close_circle_line"></i> 清除筛选</button>
-                            <button class="btn" id="toggleChartBtn"><i class="mgc_chart_bar_line"></i> 显示图表</button>
-                            <button class="btn" id="columnSettingsBtn"><i class="mgc_column_line"></i> 列设置</button>
+                            <button class="btn" id="clearFilterBtn">❌ 清除筛选</button>
+                            <button class="btn" id="toggleChartBtn">📈 显示图表</button>
+                            <button class="btn" id="columnSettingsBtn">📐 列设置</button>
                             <button class="btn" id="qualityCheckBtn">🔍 数据体检</button>
                             <span style="border-left:1px solid #ddd;margin:0 6px"></span>
                             <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
@@ -2348,7 +2348,7 @@
                 if (state.chartVisible) {
                     state.chartVisible = false;
                     els.chartSection.classList.add("hidden");
-                    document.getElementById("toggleChartBtn").innerHTML = '<i class="mgc_chart_bar_line"></i> 显示图表';
+                    document.getElementById("toggleChartBtn").innerHTML = '📈 显示图表';
                 }
             }
         }
@@ -2578,18 +2578,11 @@
                     updateProgressUI(data);
                     if (data.status === "completed") {
                         clearInterval(interval);
-                        state.sheets = data.sheets;
-                        state.currentTable = data.sheets[0]?.name || "";
-                        state.headers = data.sheets[0]?.headers || [];
-                        initSheetSelect();
-                        showData();
                         showProgress(false);
-                        renderTableHeader();
-                        resetAndLoad();
-                        refreshSessionList();
-                        initPivotFields();
-                        initCleanFields();
-                        initCompareForm();
+                        // 走 switchSession 做完整重置（activeFilters/cache/列设置），
+                        // 否则上一个文件的筛选与列状态会污染新文件，导致表格不渲染。
+                        await refreshSessionList();
+                        switchSession(data.sessionId);
                     } else if (data.status === "error") {
                         clearInterval(interval);
                         showProgress(false);
@@ -2690,8 +2683,8 @@
             state.chartVisible = !state.chartVisible;
             els.chartSection.classList.toggle("hidden", !state.chartVisible);
             document.getElementById("toggleChartBtn").innerHTML = state.chartVisible
-              ? '<i class="mgc_eye_close_line"></i> 隐藏图表'
-              : '<i class="mgc_chart_bar_line"></i> 显示图表';
+              ? '📉 隐藏图表'
+              : '📈 显示图表';
             if (state.chartVisible) {
                 if (!state.allRows) {
                     try {
@@ -3757,7 +3750,7 @@
         document.getElementById("chartYAxis").addEventListener("change", renderChart);
 
         // 智能图表推荐
-        document.getElementById("smartChartBtn").addEventListener("click", () => {
+        document.getElementById("smartChartBtn")?.addEventListener("click", () => {
             if (!state.allRows) return;
             const numericCols = [];
             const categoryCols = [];
@@ -4185,7 +4178,7 @@
 
         // 插入行（已注释）
         /*
-        document.getElementById("addRowBtn").addEventListener("click", async () => {
+        document.getElementById("addRowBtn")?.addEventListener("click", async () => {
             if (!state.sessionId || !state.currentTable) return;
             const newRow = {};
             state.headers.forEach(h => newRow[h] = "");
@@ -4210,7 +4203,7 @@
 
         // 删除行（已注释）
         /*
-        document.getElementById("deleteRowBtn").addEventListener("click", async () => {
+        document.getElementById("deleteRowBtn")?.addEventListener("click", async () => {
             const checked = document.querySelectorAll('.row-checkbox:checked');
             if (checked.length === 0) { showToast("请先勾选要删除的行"); return; }
             if (!confirm(`确定删除 ${checked.length} 行？`)) return;
@@ -4400,7 +4393,7 @@
 
         // 新增列、改名、删除隐藏列（已注释）
         /*
-        document.getElementById("colSettingsAddColBtn").addEventListener("click", () => {
+        document.getElementById("colSettingsAddColBtn")?.addEventListener("click", () => {
             document.getElementById("newColumnName").value = "";
             document.getElementById("newColumnDefault").value = "";
             document.getElementById("addColumnModal").classList.remove("hidden");
@@ -4430,7 +4423,7 @@
             } catch (e) { showToast("新增列失败: " + e.message); }
         });
 
-        document.getElementById("colSettingsRenameBtn").addEventListener("click", () => {
+        document.getElementById("colSettingsRenameBtn")?.addEventListener("click", () => {
             const sel = document.getElementById("renameColumnFrom");
             sel.innerHTML = "";
             state.headers.forEach(h => sel.appendChild(new Option(h, h)));
@@ -4462,7 +4455,7 @@
             } catch (e) { showToast("重命名失败: " + e.message); }
         });
 
-        document.getElementById("colSettingsDeleteHiddenBtn").addEventListener("click", async () => {
+        document.getElementById("colSettingsDeleteHiddenBtn")?.addEventListener("click", async () => {
             const hiddenCols = [];
             document.querySelectorAll("#columnSettingsList .column-setting-item").forEach(el => {
                 const cb = el.querySelector("input[type=checkbox]");
@@ -4816,19 +4809,20 @@
         // pollSystemStats();
 
         // ==================== 初始化 ====================
-        refreshSessionList();
+        // 先拉取会话列表，再恢复上次活跃会话（避免 300ms 猜测等待导致的时序问题）
+        (async () => {
+            await refreshSessionList();
+            restoreLastSession();
+        })();
 
         // 恢复上次活跃的会话（从 localStorage）
-        async function restoreLastSession() {
+        function restoreLastSession() {
             try {
                 const lastSessionId = localStorage.getItem("lastSessionId");
                 const lastTable = localStorage.getItem("lastTable");
                 if (!lastSessionId) return;
 
-                // 等待 session 列表加载完成
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                // 检查 session 是否还存在
+                // 检查 session 是否还存在（sessions 已由 refreshSessionList 填充）
                 const session = sessions.find(s => s.sessionId === lastSessionId);
                 if (session) {
                     switchSession(lastSessionId);
@@ -4841,7 +4835,6 @@
                 }
             } catch (e) { /* ignore */ }
         }
-        restoreLastSession();
     </script>
 </body>
 
