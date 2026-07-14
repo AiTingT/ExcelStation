@@ -72,5 +72,19 @@ class Config:
         session_db_dir.mkdir(exist_ok=True)
         return session_db_dir / f"{session_id}.db"
 
+    @classmethod
+    def get_meta_path(cls, session_id: str) -> Path:
+        """获取指定会话的元数据持久化路径（与 .db 并排）"""
+        session_db_dir = cls.DATA_DIR / "sessions"
+        session_db_dir.mkdir(exist_ok=True)
+        return session_db_dir / f"{session_id}.meta.json"
+
+    @classmethod
+    def sessions_dir(cls) -> Path:
+        """会话目录（.db 与 .meta.json 均存放于此）"""
+        session_db_dir = cls.DATA_DIR / "sessions"
+        session_db_dir.mkdir(exist_ok=True)
+        return session_db_dir
+
 
 config = Config()

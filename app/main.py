@@ -6,6 +6,7 @@ import logging
 
 from app.config import config
 from app.routers import upload, data, ai, system, database
+from app.services.taskManager import taskManager
 
 # 配置日志
 logging.basicConfig(
@@ -36,6 +37,8 @@ app.include_router(database.router)
 async def _load_persisted_db_config():
     """启动时从 data/db_config.json 恢复数据库配置（优先级高于环境变量默认值）"""
     database.load_db_config()
+    # 恢复上次运行持久化的会话清单，使重启后文件列表不丢失
+    taskManager.load_persisted_sessions()
 
 
 @app.get("/")
