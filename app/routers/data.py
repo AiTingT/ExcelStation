@@ -646,93 +646,49 @@ async def compare_files(
     cols_a, data_a = build_query(db_path_a, table_name_a, headers_a, keyColumn)
     cols_b, data_b = build_query(db_path_b, table_name_b, headers_b, keyColumn)
 
-    # 辅助函数：判断两个值是否满足"包含"关系
-    def is_match(val_a, val_b):
-        """如果 A 包含 B，或 B 包含 A，则认为匹配"""
-        str_a = str(val_a or "").strip()
-        str_b = str(val_b or "").strip()
-        if not str_a or not str_b:
-            return False
-        return str_a in str_b or str_b in str_a
+    map_a = {row[keyColumn]: row for row in data_a}
+    map_b = {row[keyColumn]: row for row in data_b}
 
-    # 优化：两阶段匹配
-    # 阶段 1：精确匹配（快速，O(n)）
-    matched_pairs = []
-    matched_a = set()
-    matched_b = set()
+    keys_a = set(map_a.keys())
+    keys_b = set(map_b.keys())
 
-    # 建立 B 的索引：key -> [indices]
-    b_index = {}
-    for j, row_b in enumerate(data_b):
-        key = str(row_b[keyColumn] or "").strip()
-        if key:
-            if key not in b_index:
-                b_index[key] = []
-            b_index[key].append(j)
+    only_a_keys = keys_a - keys_b
+    only_b_keys = keys_b - keys_a
+    both_keys = keys_a & keys_b
 
-    # 精确匹配
-    for i, row_a in enumerate(data_a):
-        key_a = str(row_a[keyColumn] or "").strip()
-        if key_a and key_a in b_index:
-            for j in b_index[key_a]:
-                matched_pairs.append((i, j))
-                matched_a.add(i)
-                matched_b.add(j)
-
-    # 阶段 2：对未匹配的项做包含匹配（只处理未匹配的行）
-    unmatched_a = [i for i in range(len(data_a)) if i not in matched_a]
-    unmatched_b = [j for j in range(len(data_b)) if j not in matched_b]
-
-    for i in unmatched_a:
-        row_a = data_a[i]
-        for j in unmatched_b:
-            if is_match(row_a[keyColumn], data_b[j][keyColumn]):
-                matched_pairs.append((i, j))
-                matched_a.add(i)
-                matched_b.add(j)
-
-    only_a_indices = [i for i in range(len(data_a)) if i not in matched_a]
-    only_b_indices = [j for j in range(len(data_b)) if j not in matched_b]
-
-    # 计算差异详情
     diff_details = []
-    for i, j in matched_pairs:
-        row_a = data_a[i]
-        row_b = data_b[j]
+    for key in both_keys:
+        row_a = map_a[key]
+        row_b = map_b[key]
         changes = {}
         for col in cols_to_compare:
             if col in row_a and col in row_b:
-                val_a = row_a[col]
-                val_b = row_b[col]
-                # 如果值不完全相等，记录差异
-                if str(val_a or "") != str(val_b or ""):
-                    changes[col] = {"a": val_a, "b": val_b}
+                if str(row_a[col] or "") != str(row_b[col] or ""):
+                    changes[col] = {"a": row_a[col], "b": row_b[col]}
         if changes:
             diff_details.append({
-                "key": f"{row_a[keyColumn]} ↔ {row_b[keyColumn]}",
+                "key": key,
                 "changes": changes
             })
 
-    def sample_rows(indices, data_list, limit=100):
+    def sample_rows(keys, data_map, limit=100):
         result = []
-        for idx in indices[:limit]:
-            result.append(data_list[idx])
+        for k in list(keys)[:limit]:
+            result.append(data_map[k])
         return result
 
     return {
         "keyColumn": keyColumn,
         "compareColumns": cols_to_compare,
         "stats": {
-            "onlyA": len(only_a_indices),
-            "onlyB": len(only_b_indices),
-            "both": len(matched_a),
-            "changed": len(diff_details),
-            "matchedPairs": len(matched_pairs),
-            "matchedB": len(matched_b)
+            "onlyA": len(only_a_keys),
+            "onlyB": len(only_b_keys),
+            "both": len(both_keys),
+            "changed": len(diff_details)
         },
-        "sampleOnlyA": sample_rows(only_a_indices, data_a),
-        "sampleOnlyB": sample_rows(only_b_indices, data_b),
-        "sampleBoth": sample_rows(list(matched_a), data_a),
+        "sampleOnlyA": sample_rows(only_a_keys, map_a),
+        "sampleOnlyB": sample_rows(only_b_keys, map_b),
+        "sampleBoth": sample_rows(both_keys, map_a),
         "changedRows": diff_details
     }
 
