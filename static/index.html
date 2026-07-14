@@ -1435,11 +1435,11 @@
 
                 <div id="dataSection" class="hidden">
                     <div class="tab-bar">
-                        <div class="tab-item active" data-tab="browse">📋 数据浏览</div>
-                        <div class="tab-item" data-tab="pivot">📊 透视表</div>
-                        <div class="tab-item" data-tab="clean">🧹 数据清洗</div>
-                        <div class="tab-item" data-tab="compare">🔍 对比分析</div>
-                        <div class="tab-item" data-tab="ai">🤖 AI 对话</div>
+                        <div class="tab-item active" data-tab="browse"><i class="mgc_document_2_line"></i> 数据浏览</div>
+                        <div class="tab-item" data-tab="pivot"><i class="mgc_chart_pie_line"></i> 透视表</div>
+                        <div class="tab-item" data-tab="clean"><i class="mgc_brush_2_line"></i> 数据清洗</div>
+                        <div class="tab-item" data-tab="compare"><i class="mgc_scan_line"></i> 对比分析</div>
+                        <div class="tab-item" data-tab="ai"><i class="mgc_robot_line"></i> AI 对话</div>
                     </div>
 
                     <!-- 数据浏览 -->
@@ -1455,9 +1455,9 @@
                                 <option value="2000">2000条/次</option>
                             </select>
                             <input type="text" id="searchInput" placeholder="全局搜索...">
-                            <button class="btn" id="clearFilterBtn">清除筛选</button>
-                            <button class="btn" id="toggleChartBtn">显示图表</button>
-                            <button class="btn" id="columnSettingsBtn">️ 列设置</button>
+                            <button class="btn" id="clearFilterBtn"><i class="mgc_close_circle_line"></i> 清除筛选</button>
+                            <button class="btn" id="toggleChartBtn"><i class="mgc_chart_bar_line"></i> 显示图表</button>
+                            <button class="btn" id="columnSettingsBtn"><i class="mgc_column_line"></i> 列设置</button>
                             <button class="btn" id="qualityCheckBtn">🔍 数据体检</button>
                             <span style="border-left:1px solid #ddd;margin:0 6px"></span>
                             <!-- <button class="btn btn-primary" id="addRowBtn">+ 行</button>
@@ -1504,8 +1504,8 @@
                                         style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
                                     <select id="chartYAxis"
                                         style="padding:5px 8px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;color:#333;font-size:11px"></select>
-                                    <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">🤖
-                                        智能推荐</button>
+                                    <!-- <button class="btn" id="smartChartBtn" style="padding:5px 10px;font-size:11px">🤖
+                                        智能推荐</button> -->
                                 </div>
                             </div>
                             <div id="chart"></div>
@@ -2325,7 +2325,7 @@
                 if (state.chartVisible) {
                     state.chartVisible = false;
                     els.chartSection.classList.add("hidden");
-                    document.getElementById("toggleChartBtn").textContent = "显示图表";
+                    document.getElementById("toggleChartBtn").innerHTML = '<i class="mgc_chart_bar_line"></i> 显示图表';
                 }
             }
         }
@@ -2666,7 +2666,9 @@
             }
             state.chartVisible = !state.chartVisible;
             els.chartSection.classList.toggle("hidden", !state.chartVisible);
-            document.getElementById("toggleChartBtn").textContent = state.chartVisible ? "隐藏图表" : "显示图表";
+            document.getElementById("toggleChartBtn").innerHTML = state.chartVisible
+              ? '<i class="mgc_eye_close_line"></i> 隐藏图表'
+              : '<i class="mgc_chart_bar_line"></i> 显示图表';
             if (state.chartVisible) {
                 if (!state.allRows) {
                     try {
