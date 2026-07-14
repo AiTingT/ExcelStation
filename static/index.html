@@ -1331,13 +1331,44 @@
             color: #888;
             margin-left: 12px;
         }
+
         /* Toast 提示组件（替代 alert） */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
-        .toast-item { padding: 10px 16px; border-radius: 8px; color: #fff; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.15); max-width: 360px; transition: opacity .3s, transform .3s; }
-        .toast-success { background: #2e7d32; }
-        .toast-error { background: #c62828; }
-        .toast-info { background: #424242; }
-        .toast-hide { opacity: 0; transform: translateX(20px); }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast-item {
+            padding: 10px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            max-width: 360px;
+            transition: opacity .3s, transform .3s;
+        }
+
+        .toast-success {
+            background: #2e7d32;
+        }
+
+        .toast-error {
+            background: #c62828;
+        }
+
+        .toast-info {
+            background: #424242;
+        }
+
+        .toast-hide {
+            opacity: 0;
+            transform: translateX(20px);
+        }
     </style>
 </head>
 
@@ -1347,13 +1378,15 @@
         <div class="sidebar" id="sidebar">
             <div class="collapse-btn" id="sidebarCollapseBtn" title="折叠侧边栏">◀</div>
             <div class="sidebar-header">
-                <h2 class="sidebar-title"><img src="/toolbox/Excel.svg" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;" alt=""> <span>Excel 智能助手</span></h2>
+                <h2 class="sidebar-title"><img src="/toolbox/Excel.svg"
+                        style="width:20px;height:20px;vertical-align:middle;margin-right:6px;" alt=""> <span>Excel
+                        智能助手</span></h2>
                 <p>最近文件</p>
             </div>
             <div class="session-list" id="sessionList"></div>
             <div class="sidebar-footer">
                 <button class="btn" id="toolboxBtn" style="width:100%;margin-bottom:6px;text-align:center;">
-                    <span><i class="mgc_magic_1_line" style="font-size:16px;vertical-align:middle;margin-right:4px;"></i></span> <span>工具箱</span>
+                    <span>工具箱</span>
                 </button>
                 <button class="btn btn-primary" id="newUploadBtn"><span>+</span> <span>上传新文件</span></button>
             </div>
@@ -1390,7 +1423,8 @@
                 <div class="header-toggle-btn" id="headerToggleBtn" title="折叠顶部栏">▲ 收起</div>
                 <div class="upload-section" id="uploadSection">
                     <div class="upload-zone" id="uploadZone">
-                        <div class="upload-icon"><img src="/toolbox/Upload.svg" style="width:56px;height:56px;" alt=""></div>
+                        <div class="upload-icon"><img src="/toolbox/Upload.svg" style="width:56px;height:56px;" alt="">
+                        </div>
                         <div class="upload-text">拖拽 Excel 文件到此处，或 <span>点击选择文件</span></div>
                         <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大 500MB</div>
                     </div>
@@ -1524,7 +1558,8 @@
 
                     <!-- 数据清洗 -->
                     <div id="tab-clean" class="hidden" style="overflow: auto;">
-                        <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:12px;padding:0 4px">
+                        <div
+                            style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:12px;padding:0 4px">
                             <span style="font-size:12px;color:#888;margin-right:auto">清洗前自动保存快照，可一键撤销上一步</span>
                             <button class="btn" id="undoBtn">↩️ 撤销上一步</button>
                             <button class="btn" id="cleanPlanBtn">🧹 清洗方案</button>
@@ -1577,7 +1612,8 @@
                                 </select>
                             </div>
                             <div class="panel-row">
-                                <label>匹配模式</label><input type="text" id="regexPattern" placeholder="选常用规则可留空；自定义则填正则（高级）">
+                                <label>匹配模式</label><input type="text" id="regexPattern"
+                                    placeholder="选常用规则可留空；自定义则填正则（高级）">
                             </div>
                             <div class="panel-row">
                                 <label>替换为</label><input type="text" id="regexReplacement" placeholder="替换内容（删除则留空）">
@@ -1698,8 +1734,10 @@
                                     <tbody id="compareBody"></tbody>
                                 </table>
                             </div>
-                            <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none"></div>
-                            <div id="comparePager" style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
+                            <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none">
+                            </div>
+                            <div id="comparePager"
+                                style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
                                 <button class="btn" id="comparePrevBtn" style="padding:4px 14px">上一页</button>
                                 <span id="comparePageInfo" style="font-size:13px;color:#666"></span>
                                 <button class="btn" id="compareNextBtn" style="padding:4px 14px">下一页</button>
@@ -1841,8 +1879,11 @@
     <div class="modal-overlay hidden" id="mergeModal">
         <div class="modal">
             <h3>🔀 合并文件</h3>
-            <p style="color:#888;margin-bottom:12px;font-size:13px">勾选要合并的表，合并后生成新文件，并自动追加「来源文件名」「导入时间」两列。适合月报、日报、订单等结构相同的文件汇总。</p>
-            <div id="mergeSourceList" style="max-height:300px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;background:#fafafa"></div>
+            <p style="color:#888;margin-bottom:12px;font-size:13px">
+                勾选要合并的表，合并后生成新文件，并自动追加「来源文件名」「导入时间」两列。适合月报、日报、订单等结构相同的文件汇总。</p>
+            <div id="mergeSourceList"
+                style="max-height:300px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:12px;background:#fafafa">
+            </div>
             <div class="modal-row">
                 <label>列对齐方式</label>
                 <select id="mergeMode">
@@ -1878,11 +1919,18 @@
         <div class="modal" style="max-width:720px">
             <h3>📋 增强对账</h3>
             <p style="color:#888;font-size:13px;margin-bottom:12px">按多个匹配列核对两份数据，支持金额容差、日期容差，自动分类差异</p>
-            <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple style="height:90px"></select></div>
-            <div class="modal-row"><label>金额列（可选）</label><select id="reconcileAmountCol"><option value="">不比较</option></select></div>
-            <div class="modal-row"><label>金额容差</label><input type="number" id="reconcileAmountTol" value="0.01" step="0.01"></div>
-            <div class="modal-row"><label>日期列（可选）</label><select id="reconcileDateCol"><option value="">不比较</option></select></div>
-            <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0"></div>
+            <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple
+                    style="height:90px"></select></div>
+            <div class="modal-row"><label>金额列（可选）</label><select id="reconcileAmountCol">
+                    <option value="">不比较</option>
+                </select></div>
+            <div class="modal-row"><label>金额容差</label><input type="number" id="reconcileAmountTol" value="0.01"
+                    step="0.01"></div>
+            <div class="modal-row"><label>日期列（可选）</label><select id="reconcileDateCol">
+                    <option value="">不比较</option>
+                </select></div>
+            <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0">
+            </div>
             <div id="reconcileResult" style="margin-top:12px"></div>
             <div class="modal-actions">
                 <button class="btn" id="reconcileCloseBtn">关闭</button>
@@ -1911,9 +1959,11 @@
         <div class="modal">
             <h3>👀 清洗预览</h3>
             <p id="cleanPreviewNote" style="color:#555;font-size:13px;margin-bottom:10px"></p>
-            <div id="cleanPreviewSummary" style="padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#f6f8fa"></div>
+            <div id="cleanPreviewSummary"
+                style="padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#f6f8fa"></div>
             <div style="font-size:12px;color:#888;margin-bottom:6px">前 5 条变更样本（修改前 → 修改后）：</div>
-            <div id="cleanPreviewSamples" style="max-height:280px;overflow:auto;border:1px solid #eee;border-radius:6px"></div>
+            <div id="cleanPreviewSamples"
+                style="max-height:280px;overflow:auto;border:1px solid #eee;border-radius:6px"></div>
             <div class="modal-actions">
                 <button class="btn" id="cleanPreviewCancelBtn">取消</button>
                 <button class="btn btn-primary" id="cleanPreviewConfirmBtn">确认执行</button>
@@ -2205,7 +2255,7 @@
         const toolboxExitBtn = document.getElementById("toolboxExitBtn");
 
         // 页面加载后延迟预加载工具箱 iframe，后台缓存（带版本号破浏览器缓存）
-        const TOOLBOX_VER = "20260713";
+        const TOOLBOX_VER = "20260714e";
         setTimeout(() => {
             if (toolboxFrame.src === "about:blank" || toolboxFrame.src === "") {
                 toolboxFrame.src = "/toolbox/index.html?v=" + TOOLBOX_VER;
@@ -2833,7 +2883,7 @@
                 </div>`;
             }).join("");
         }
-        window.applyCleanPlan = async function(name) {
+        window.applyCleanPlan = async function (name) {
             const plans = getCleanPlans();
             const plan = plans[name];
             if (!plan) { showToast("方案不存在"); return; }
@@ -2870,7 +2920,7 @@
                 resetAndLoad();
             } catch (e) { showToast("执行失败: " + e.message); }
         };
-        window.deleteCleanPlan = function(name) {
+        window.deleteCleanPlan = function (name) {
             if (!confirm(`删除方案「${name}」？`)) return;
             const plans = getCleanPlans();
             delete plans[name];
@@ -4002,7 +4052,7 @@
         });
 
         // 数据校验
-        window.updateRuleParams = function(selectEl) {
+        window.updateRuleParams = function (selectEl) {
             const input = selectEl.parentElement.querySelector(".vr-params");
             if (!input) return;
             const type = selectEl.value;

@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-**Excel 轻量工作站 (Excel Station)** — a local-first web app for working with large Excel files. Python/FastAPI backend with a single-file vanilla-JS frontend (`static/index.html`, ~2200 lines). Supports data browsing, pivot tables, data cleaning, cross-file diff, and AI-powered natural-language queries (NL2SQL) via DeepSeek / OpenAI / Qwen / Ollama.
+**Excel 智能助手 (Excel Station)** — a local-first web app for working with large Excel files. Python/FastAPI backend with a single-file vanilla-JS frontend (`static/index.html`, ~2200 lines). Supports data browsing, pivot tables, data cleaning, cross-file diff, and AI-powered natural-language queries (NL2SQL) via DeepSeek / OpenAI / Qwen / Ollama.
 
 ## Running the App
 
