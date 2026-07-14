@@ -1711,6 +1711,7 @@
                             <div class="panel-actions">
                                 <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
                                 <button class="btn" id="reconcileBtn">📋 增强对账</button>
+                                <button class="btn" id="compareClearBtn">🗑 清空</button>
                             </div>
                         </div>
                         <div id="compareResult" class="table-container hidden">
@@ -4486,6 +4487,15 @@
         */
 
         // ==================== 对比分析 ====================
+        // 对比分析状态缓存（切换 tab 时恢复）
+        const compareState = {
+            fileA: "",
+            fileB: "",
+            sheetA: "",
+            sheetB: "",
+            keyCol: ""
+        };
+
         function initCompareForm() {
             const fileA = document.getElementById("compareFileA");
             const fileB = document.getElementById("compareFileB");
@@ -4495,6 +4505,47 @@
                 fileA.appendChild(new Option(s.fileName, s.sessionId));
                 fileB.appendChild(new Option(s.fileName, s.sessionId));
             });
+
+            // 恢复之前的选择
+            if (compareState.fileA) fileA.value = compareState.fileA;
+            if (compareState.fileB) fileB.value = compareState.fileB;
+
+            // 触发 change 事件以加载工作表列表
+            if (compareState.fileA) {
+                fileA.dispatchEvent(new Event("change"));
+            } else {
+                compareSheetsA = [];
+            }
+            if (compareState.fileB) {
+                fileB.dispatchEvent(new Event("change"));
+            } else {
+                compareSheetsB = [];
+            }
+
+            // 恢复工作表选择（等异步加载完成后）
+            setTimeout(() => {
+                if (compareState.sheetA) {
+                    document.getElementById("compareSheetA").value = compareState.sheetA;
+                    // 如果只有一个工作表，自动选择
+                    const sheetA = document.getElementById("compareSheetA");
+                    if (sheetA.options.length === 2 && sheetA.value === "") {
+                        sheetA.value = sheetA.options[1].value;
+                        compareState.sheetA = sheetA.value;
+                    }
+                }
+                if (compareState.sheetB) {
+                    document.getElementById("compareSheetB").value = compareState.sheetB;
+                    const sheetB = document.getElementById("compareSheetB");
+                    if (sheetB.options.length === 2 && sheetB.value === "") {
+                        sheetB.value = sheetB.options[1].value;
+                        compareState.sheetB = sheetB.value;
+                    }
+                }
+                if (compareState.keyCol) {
+                    document.getElementById("compareKeyCol").value = compareState.keyCol;
+                }
+                updateCompareKeyCol();
+            }, 500);
         }
 
         function updateCompareKeyCol() {
@@ -4517,11 +4568,18 @@
             const sheetSel = document.getElementById("compareSheetA");
             sheetSel.innerHTML = '<option value="">选择工作表</option>';
             compareSheetsA = [];
+            compareState.fileA = sid;
+            compareState.sheetA = "";
             if (!sid) { updateCompareKeyCol(); return; }
             const res = await fetch(`/api/data/${sid}/tables`);
             const data = await res.json();
             compareSheetsA = data.tables || [];
             compareSheetsA.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
+            // 如果只有一个工作表，自动选择
+            if (compareSheetsA.length === 1) {
+                sheetSel.value = compareSheetsA[0].name;
+                compareState.sheetA = compareSheetsA[0].name;
+            }
             updateCompareKeyCol();
         });
 
@@ -4530,16 +4588,57 @@
             const sheetSel = document.getElementById("compareSheetB");
             sheetSel.innerHTML = '<option value="">选择工作表</option>';
             compareSheetsB = [];
+            compareState.fileB = sid;
+            compareState.sheetB = "";
             if (!sid) { updateCompareKeyCol(); return; }
             const res = await fetch(`/api/data/${sid}/tables`);
             const data = await res.json();
             compareSheetsB = data.tables || [];
             compareSheetsB.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
+            // 如果只有一个工作表，自动选择
+            if (compareSheetsB.length === 1) {
+                sheetSel.value = compareSheetsB[0].name;
+                compareState.sheetB = compareSheetsB[0].name;
+            }
             updateCompareKeyCol();
         });
 
-        document.getElementById("compareSheetA").addEventListener("change", updateCompareKeyCol);
-        document.getElementById("compareSheetB").addEventListener("change", updateCompareKeyCol);
+        document.getElementById("compareSheetA").addEventListener("change", () => {
+            compareState.sheetA = document.getElementById("compareSheetA").value;
+            updateCompareKeyCol();
+        });
+        document.getElementById("compareSheetB").addEventListener("change", () => {
+            compareState.sheetB = document.getElementById("compareSheetB").value;
+            updateCompareKeyCol();
+        });
+        document.getElementById("compareKeyCol").addEventListener("change", () => {
+            compareState.keyCol = document.getElementById("compareKeyCol").value;
+        });
+
+        document.getElementById("compareClearBtn").addEventListener("click", () => {
+            // 清空选择状态
+            document.getElementById("compareFileA").value = "";
+            document.getElementById("compareFileB").value = "";
+            document.getElementById("compareSheetA").innerHTML = '<option value="">选择工作表</option>';
+            document.getElementById("compareSheetB").innerHTML = '<option value="">选择工作表</option>';
+            document.getElementById("compareKeyCol").innerHTML = '<option value="">选择用于对比的列</option>';
+            compareSheetsA = [];
+            compareSheetsB = [];
+
+            // 清空缓存的状态
+            compareState.fileA = "";
+            compareState.fileB = "";
+            compareState.sheetA = "";
+            compareState.sheetB = "";
+            compareState.keyCol = "";
+
+            // 隐藏结果区域
+            document.getElementById("compareResult").classList.add("hidden");
+            compareChangedRows = [];
+            comparePage = 1;
+
+            showToast("已清空对比条件");
+        });
 
         document.getElementById("compareRunBtn").addEventListener("click", async () => {
             const sidA = document.getElementById("compareFileA").value;
