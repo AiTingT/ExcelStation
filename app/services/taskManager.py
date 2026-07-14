@@ -49,6 +49,7 @@ class ParseProgress:
     sessionId: str
     fileName: str
     status: str
+    userId: str = ""
     sheets: List[SheetInfo] = field(default_factory=list)
     currentSheet: str = ""
     totalRows: int = 0
@@ -66,13 +67,14 @@ class ParseTaskManager:
         self._tasks: Dict[str, ParseProgress] = {}
         self._lock = threading.Lock()
 
-    def create_task(self, file_name: str, file_path: Path, password: Optional[str] = None) -> str:
+    def create_task(self, file_name: str, file_path: Path, password: Optional[str] = None, user_id: str = "") -> str:
         """创建解析任务，返回 sessionId"""
         session_id = str(uuid.uuid4())[:8]
         progress = ParseProgress(
             sessionId=session_id,
             fileName=file_name,
             status="pending",
+            userId=user_id,
             password=password
         )
 
@@ -88,11 +90,13 @@ class ParseTaskManager:
 
         return session_id
 
-    def retry_with_password(self, session_id: str, password: str) -> bool:
+    def retry_with_password(self, session_id: str, password: str, user_id: str = "") -> bool:
         """使用密码重试解析加密文件"""
         with self._lock:
             task = self._tasks.get(session_id)
             if not task or task.status != "error" or not task.isEncrypted:
+                return False
+            if user_id and task.userId != user_id:
                 return False
             task.status = "pending"
             task.error = None
@@ -119,9 +123,12 @@ class ParseTaskManager:
         with self._lock:
             return self._tasks.get(session_id)
 
-    def list_sessions(self) -> List[dict]:
-        """列出所有会话"""
+    def list_sessions(self, user_id: str = "") -> List[dict]:
+        """列出当前用户的会话"""
         with self._lock:
+            tasks = self._tasks.values()
+            if user_id:
+                tasks = [s for s in tasks if s.userId == user_id]
             return [
                 {
                     "sessionId": s.sessionId,
@@ -132,13 +139,15 @@ class ParseTaskManager:
                     "parseTime": s.parseTime,
                     "sheets": [{"name": sh.name, "rowCount": sh.rowCount, "headers": sh.headers} for sh in s.sheets]
                 }
-                for s in self._tasks.values()
+                for s in tasks
             ]
 
-    def delete_session(self, session_id: str) -> bool:
+    def delete_session(self, session_id: str, user_id: str = "") -> bool:
         """删除会话及数据"""
         with self._lock:
             if session_id not in self._tasks:
+                return False
+            if user_id and self._tasks[session_id].userId != user_id:
                 return False
             del self._tasks[session_id]
 

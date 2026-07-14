@@ -2058,6 +2058,29 @@
 
     <script src="/_shared/js/echarts.min.js"></script>
     <script>
+        // ==================== 用户隔离 ====================
+        // 每个浏览器生成唯一 userId，所有 API 请求自动带上 X-User-Id 头
+        // 服务端按 userId 隔离 session，不同用户互不可见
+        let USER_ID = localStorage.getItem("userId");
+        if (!USER_ID) {
+            USER_ID = "u_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+            localStorage.setItem("userId", USER_ID);
+        }
+
+        // 拦截所有 fetch 请求，自动注入 X-User-Id 头
+        (function () {
+            var _fetch = window.fetch;
+            window.fetch = function (url, options) {
+                options = options || {};
+                options.headers = options.headers || {};
+                // 只给 /api/ 请求加头，静态资源不加
+                if (typeof url === "string" && url.indexOf("/api/") === 0) {
+                    options.headers["X-User-Id"] = USER_ID;
+                }
+                return _fetch.call(this, url, options);
+            };
+        })();
+
         // 全局状态
         const state = {
             sessionId: null, fileName: null,

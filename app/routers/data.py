@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Body
+from fastapi import APIRouter, Query, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
 from typing import Optional, List
 import math
@@ -20,6 +20,20 @@ from app.services.database import DatabaseService
 from app.services.taskManager import taskManager
 
 router = APIRouter(prefix="/api/data", tags=["数据查询"])
+
+
+def _user_id(req: Request) -> str:
+    """从请求头获取用户 ID"""
+    return req.headers.get("X-User-Id", "")
+
+
+def _check_session_ownership(session_id: str, user_id: str):
+    """校验 session 归属，不匹配则抛 404"""
+    if not user_id:
+        return
+    progress = taskManager.get_progress(session_id)
+    if progress and progress.userId and progress.userId != user_id:
+        raise HTTPException(status_code=404, detail="会话不存在")
 
 try:
     import openpyxl
@@ -109,8 +123,9 @@ class MergeRequest(BaseModel):
 
 
 @router.get("/{session_id}/tables")
-async def list_tables(session_id: str):
+async def list_tables(req: Request, session_id: str):
     """列出所有可用的表（sheet）"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -128,6 +143,7 @@ async def list_tables(session_id: str):
 
 @router.get("/{session_id}/query", response_model=TableData)
 async def query_data(
+    req: Request,
     session_id: str,
     tableName: str = Query(default="data"),
     page: int = Query(default=1, ge=1),
@@ -140,6 +156,7 @@ async def query_data(
     """
     分页查询数据，支持多列组合筛选和全局搜索
     """
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -178,8 +195,9 @@ async def query_data(
 
 
 @router.get("/{session_id}/stats")
-async def get_stats(session_id: str, tableName: str = Query(default="data")):
+async def get_stats(req: Request, session_id: str, tableName: str = Query(default="data")):
     """获取表统计信息"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -190,7 +208,7 @@ async def get_stats(session_id: str, tableName: str = Query(default="data")):
 
 
 @router.get("/{session_id}/filters/{column}")
-async def get_filter_options(session_id: str, column: str, tableName: str = Query(default="data")):
+async def get_filter_options(req: Request, session_id: str, column: str, tableName: str = Query(default="data")):
     """获取列的筛选选项"""
     db_path = get_db_path(session_id)
     if not db_path:
@@ -206,10 +224,12 @@ async def get_filter_options(session_id: str, column: str, tableName: str = Quer
 
 @router.put("/{session_id}/update")
 async def update_data(
+    req: Request,
     session_id: str,
     request: UpdateDataRequest
 ):
     """更新数据行"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -221,6 +241,7 @@ async def update_data(
 
 @router.get("/{session_id}/export")
 async def export_data(
+    req: Request,
     session_id: str,
     tableName: str = Query(default="data"),
     format: str = Query(default="csv", regex="^(csv|xlsx)$"),
@@ -229,6 +250,7 @@ async def export_data(
     allSheets: bool = Query(default=False)
 ):
     """导出数据（支持 CSV 和 XLSX 格式，可导出当前筛选后的数据）"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -309,11 +331,13 @@ async def export_data(
 
 @router.post("/{session_id}/clean/deduplicate")
 async def deduplicate_data(
+    req: Request,
     session_id: str,
     tableName: str = Query(default="data"),
     columns: Optional[List[str]] = Body(default=None)
 ):
     """数据去重（基于指定列或所有列）"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -382,6 +406,7 @@ async def deduplicate_data(
 
 @router.post("/{session_id}/clean/fill-empty")
 async def fill_empty_values(
+    req: Request,
     session_id: str,
     tableName: str = Query(default="data"),
     fillColumn: str = Body(...),
@@ -420,6 +445,7 @@ async def fill_empty_values(
 
 @router.get("/{session_id}/pivot")
 async def pivot_table(
+    req: Request,
     session_id: str,
     tableName: str = Query(default="data"),
     rowField: str = Query(...),
@@ -670,8 +696,9 @@ async def compare_files(
 # ==================== CRUD：行/列操作 ====================
 
 @router.post("/{session_id}/rows")
-async def insert_rows(session_id: str, request: InsertRowsRequest):
+async def insert_rows(req: Request, session_id: str, request: InsertRowsRequest):
     """插入单行/多行"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -693,8 +720,9 @@ async def insert_rows(session_id: str, request: InsertRowsRequest):
 
 
 @router.delete("/{session_id}/rows")
-async def delete_rows(session_id: str, request: DeleteRowsRequest):
+async def delete_rows(req: Request, session_id: str, request: DeleteRowsRequest):
     """按 row_id 删除单行/多行"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -709,8 +737,9 @@ async def delete_rows(session_id: str, request: DeleteRowsRequest):
 
 
 @router.post("/{session_id}/columns")
-async def add_column(session_id: str, request: AddColumnRequest):
+async def add_column(req: Request, session_id: str, request: AddColumnRequest):
     """新增列"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -726,7 +755,7 @@ async def add_column(session_id: str, request: AddColumnRequest):
 
 
 @router.delete("/{session_id}/columns/{column}")
-async def drop_column(session_id: str, column: str, tableName: str = Query(default="data")):
+async def drop_column(req: Request, session_id: str, column: str, tableName: str = Query(default="data")):
     """删除列"""
     db_path = get_db_path(session_id)
     if not db_path:
@@ -743,8 +772,9 @@ async def drop_column(session_id: str, column: str, tableName: str = Query(defau
 
 
 @router.put("/{session_id}/columns/{column}")
-async def rename_column(session_id: str, column: str, request: RenameColumnRequest):
+async def rename_column(req: Request, session_id: str, column: str, request: RenameColumnRequest):
     """重命名列"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -764,8 +794,9 @@ async def rename_column(session_id: str, column: str, request: RenameColumnReque
 # ==================== 数据清洗增强 ====================
 
 @router.post("/{session_id}/clean/regex-replace")
-async def regex_replace(session_id: str, request: RegexReplaceRequest):
+async def regex_replace(req: Request, session_id: str, request: RegexReplaceRequest):
     """正则替换"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -789,8 +820,9 @@ async def regex_replace(session_id: str, request: RegexReplaceRequest):
 
 
 @router.post("/{session_id}/clean/split-column")
-async def split_column(session_id: str, request: SplitColumnRequest):
+async def split_column(req: Request, session_id: str, request: SplitColumnRequest):
     """按分隔符拆列"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -812,8 +844,9 @@ async def split_column(session_id: str, request: SplitColumnRequest):
 
 
 @router.post("/{session_id}/clean/convert-type")
-async def convert_type(session_id: str, request: ConvertTypeRequest):
+async def convert_type(req: Request, session_id: str, request: ConvertTypeRequest):
     """数据类型转换"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -835,8 +868,9 @@ async def convert_type(session_id: str, request: ConvertTypeRequest):
 
 
 @router.post("/{session_id}/clean/preview")
-async def clean_preview(session_id: str, request: CleanPreviewRequest):
+async def clean_preview(req: Request, session_id: str, request: CleanPreviewRequest):
     """清洗预览（dry-run）：返回将影响的行数与样本，不修改数据"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -1007,8 +1041,9 @@ async def clean_preview(session_id: str, request: CleanPreviewRequest):
 
 
 @router.post("/{session_id}/clean/validate")
-async def validate_data(session_id: str, request: ValidateRequest):
+async def validate_data(req: Request, session_id: str, request: ValidateRequest):
     """数据校验"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -1190,7 +1225,7 @@ async def merge_tables(request: MergeRequest):
 
 
 @router.post("/{session_id}/snapshot/{table_name}")
-async def create_snapshot(session_id: str, table_name: str):
+async def create_snapshot(req: Request, session_id: str, table_name: str):
     """保存当前表快照，供清洗操作撤销使用"""
     db_path = get_db_path(session_id)
     if not db_path:
@@ -1208,8 +1243,9 @@ async def create_snapshot(session_id: str, table_name: str):
 
 
 @router.post("/{session_id}/undo/{table_name}")
-async def undo_table(session_id: str, table_name: str):
+async def undo_table(req: Request, session_id: str, table_name: str):
     """撤销到上次快照（回退最近一次清洗操作）"""
+    _check_session_ownership(session_id, _user_id(req))
     db_path = get_db_path(session_id)
     if not db_path:
         raise HTTPException(status_code=404, detail="会话不存在或已过期")
@@ -1231,8 +1267,9 @@ async def undo_table(session_id: str, table_name: str):
 
 
 @router.get("/{session_id}/quality-check/{table_name}")
-async def quality_check(session_id: str, table_name: str):
+async def quality_check(req: Request, session_id: str, table_name: str):
     """一键数据质量体检：扫描空值、重复值、负数、日期格式错误等"""
+    _check_session_ownership(session_id, _user_id(req))
     from collections import Counter
     db_path = get_db_path(session_id)
     if not db_path:
