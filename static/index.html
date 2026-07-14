@@ -4625,6 +4625,10 @@
             compareSheetsA = [];
             compareSheetsB = [];
 
+            // 清空行数显示
+            document.getElementById("compareRowsA").textContent = "-";
+            document.getElementById("compareRowsB").textContent = "-";
+
             // 清空缓存的状态
             compareState.fileA = "";
             compareState.fileB = "";
