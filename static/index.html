@@ -19,18 +19,22 @@
             width: 8px;
             height: 8px;
         }
+
         *::-webkit-scrollbar-track {
             background: #f5f5f5;
             border-radius: 4px;
         }
+
         *::-webkit-scrollbar-thumb {
             background: #c0c0c0;
             border-radius: 4px;
             transition: background 0.2s;
         }
+
         *::-webkit-scrollbar-thumb:hover {
             background: #a0a0a0;
         }
+
         *::-webkit-scrollbar-corner {
             background: #f5f5f5;
         }
@@ -330,7 +334,8 @@
 
         .content {
             flex: 1;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding: 16px;
             display: flex;
             flex-direction: column;
@@ -1205,7 +1210,7 @@
             background: #ffffff;
             border-radius: 12px;
             padding: 20px;
-            width: 420px;
+            width: 440px;
             max-width: 90vw;
             border: 1px solid #e0e0e0;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -1835,7 +1840,8 @@
                                 </div>
                             </div>
                             <div class="ai-chat-input" style="display:flex;gap:8px;align-items:center">
-                                <select id="aiModeSelect" style="padding:6px 10px;border:1px solid var(--border-base);border-radius:6px;font-size:13px;background:white;cursor:pointer;min-width:110px">
+                                <select id="aiModeSelect"
+                                    style="padding:6px 10px;border:1px solid var(--border-base);border-radius:6px;font-size:13px;background:white;cursor:pointer;min-width:110px">
                                     <option value="sql">📊 数据查询</option>
                                     <option value="formula">📐 公式生成</option>
                                 </select>
@@ -1976,10 +1982,59 @@
 
     <!-- 数据体检报告 -->
     <div class="modal-overlay hidden" id="qualityModal">
-        <div class="modal" style="max-width:680px">
-            <h3>🔍 数据体检报告</h3>
+        <div class="modal" style="max-width:720px">
+            <h3> 数据体检报告</h3>
             <div id="qualitySummary" style="margin-bottom:12px;font-size:14px"></div>
-            <div id="qualityReport" style="max-height:420px;overflow:auto"></div>
+            <!-- 筛选条件 -->
+            <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+                <div style="flex:1;min-width:120px">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">问题类型</label>
+                    <select id="qualityFilterType"
+                        style="width:100%;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px">
+                        <option value="">全部类型</option>
+                        <option value="empty">空值</option>
+                        <option value="duplicate">重复值</option>
+                        <option value="negative">负数</option>
+                        <option value="bad_date">日期错误</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:120px">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">严重程度</label>
+                    <select id="qualityFilterLevel"
+                        style="width:100%;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px">
+                        <option value="">全部</option>
+                        <option value="error">仅异常</option>
+                        <option value="warning">仅警告</option>
+                        <option value="ok">仅健康</option>
+                    </select>
+                </div>
+                <div style="flex:2;min-width:200px">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">列名搜索</label>
+                    <input type="text" id="qualityFilterName" placeholder="输入列名关键字..."
+                        style="width:100%;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px">
+                </div>
+                <div style="flex:1;min-width:120px">
+                    <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">空值率 > </label>
+                    <select id="qualityFilterEmptyRate"
+                        style="width:100%;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px">
+                        <option value="0">不限</option>
+                        <option value="0.1">10%</option>
+                        <option value="0.3">30%</option>
+                        <option value="0.5">50%</option>
+                        <option value="0.8">80%</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <span id="qualityFilterCount" style="font-size:13px;color:#666"></span>
+                <div style="display:flex;gap:8px">
+                    <label style="font-size:12px;color:#888;display:flex;align-items:center;gap:4px;cursor:pointer">
+                        <input type="checkbox" id="qualitySortByIssue" style="cursor:pointer"> 按问题数排序
+                    </label>
+                    <button class="btn" id="qualityResetFilter" style="padding:4px 12px;font-size:12px">重置筛选</button>
+                </div>
+            </div>
+            <div id="qualityReport" style="max-height:380px;overflow:auto"></div>
             <div class="modal-actions">
                 <button class="btn" id="qualityCloseBtn">关闭</button>
             </div>
@@ -2823,6 +2878,9 @@
         });
 
         // ==================== 数据体检 ====================
+        // 存储体检数据供筛选使用
+        window.__qualityData = null;
+
         document.getElementById("qualityCheckBtn").addEventListener("click", async () => {
             if (!state.sessionId || !state.currentTable) { showToast("请先选择表"); return; }
             const btn = document.getElementById("qualityCheckBtn");
@@ -2830,15 +2888,35 @@
             try {
                 const res = await fetch(`/api/data/${state.sessionId}/quality-check/${encodeURIComponent(state.currentTable)}`);
                 const data = await res.json();
-                if (!res.ok) { showToast("体检失败: " + (data.detail || "")); return; }
+                if (!res.ok) { showToast("体检失败：" + (data.detail || "")); return; }
+                window.__qualityData = data; // 保存原始数据
                 renderQualityReport(data);
                 document.getElementById("qualityModal").classList.remove("hidden");
-            } catch (e) { showToast("体检失败: " + e.message); }
+            } catch (e) { showToast("体检失败：" + e.message); }
             finally { btn.disabled = false; btn.textContent = "🔍 数据体检"; }
         });
         document.getElementById("qualityCloseBtn").addEventListener("click", () => {
             document.getElementById("qualityModal").classList.add("hidden");
         });
+
+        // 筛选事件绑定
+        ['qualityFilterType', 'qualityFilterLevel', 'qualityFilterName', 'qualityFilterEmptyRate'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                if (window.__qualityData) renderQualityReport(window.__qualityData);
+            });
+        });
+        document.getElementById('qualitySortByIssue').addEventListener('change', () => {
+            if (window.__qualityData) renderQualityReport(window.__qualityData);
+        });
+        document.getElementById('qualityResetFilter').addEventListener('click', () => {
+            document.getElementById('qualityFilterType').value = '';
+            document.getElementById('qualityFilterLevel').value = '';
+            document.getElementById('qualityFilterName').value = '';
+            document.getElementById('qualityFilterEmptyRate').value = '0';
+            document.getElementById('qualitySortByIssue').checked = false;
+            if (window.__qualityData) renderQualityReport(window.__qualityData);
+        });
+
         function renderQualityReport(data) {
             const s = data.summary || {};
             document.getElementById("qualitySummary").innerHTML =
@@ -2847,20 +2925,59 @@
                 `<span style="color:#f57c00">警告 ${s.warningColumns}</span> · ` +
                 `<span style="color:#c62828">异常 ${s.errorColumns}</span> · ` +
                 `共发现 ${s.totalIssues} 个问题`;
+
+            // 获取筛选条件
+            const filterType = document.getElementById('qualityFilterType').value;
+            const filterLevel = document.getElementById('qualityFilterLevel').value;
+            const filterName = document.getElementById('qualityFilterName').value.toLowerCase();
+            const filterEmptyRate = parseFloat(document.getElementById('qualityFilterEmptyRate').value) || 0;
+            const sortByIssue = document.getElementById('qualitySortByIssue').checked;
+
+            // 筛选列
+            let filtered = (data.columns || []).filter(c => {
+                // 按严重程度筛选
+                if (filterLevel && c.level !== filterLevel) return false;
+                // 按列名搜索
+                if (filterName && !c.name.toLowerCase().includes(filterName)) return false;
+                // 按空值率筛选
+                if (filterEmptyRate > 0 && c.emptyRate < filterEmptyRate) return false;
+                // 按问题类型筛选
+                if (filterType) {
+                    const hasType = (c.issues || []).some(it => it.type === filterType);
+                    if (!hasType) return false;
+                }
+                return true;
+            });
+
+            // 排序
+            if (sortByIssue) {
+                filtered.sort((a, b) => (b.issues || []).length - (a.issues || []).length);
+            }
+
+            // 更新筛选结果计数
+            document.getElementById('qualityFilterCount').textContent = `显示 ${filtered.length} / ${data.columns.length} 列`;
+
+            // 渲染
             const typeLabel = { number: "数值", date: "日期", text: "文本" };
             const levelColor = { ok: "#2e7d32", warning: "#f57c00", error: "#c62828" };
             const levelText = { ok: "健康", warning: "警告", error: "异常" };
-            document.getElementById("qualityReport").innerHTML = (data.columns || []).map(c => {
+            const issueTypeLabel = { empty: "空值", duplicate: "重复", negative: "负数", bad_date: "日期错误" };
+
+            document.getElementById("qualityReport").innerHTML = filtered.length ? filtered.map(c => {
                 const issues = (c.issues || []).map(it =>
-                    `<div style="font-size:12px;color:#666;margin-top:3px;padding-left:12px">• ${it.detail}</div>`
+                    `<div style="font-size:12px;color:#666;margin-top:3px;padding-left:12px">
+                        <span style="display:inline-block;padding:2px 6px;background:${levelColor[c.level]}20;color:${levelColor[c.level]};border-radius:3px;margin-right:6px;font-size:11px">${issueTypeLabel[it.type] || it.type}</span>
+                        ${it.detail}
+                    </div>`
                 ).join("");
                 return `<div style="padding:10px 12px;border-left:3px solid ${levelColor[c.level]};background:#f9f9f9;border-radius:4px;margin-bottom:8px">` +
                     `<div style="display:flex;justify-content:space-between;align-items:center">` +
                     `<b>${c.name}</b> <span style="font-size:11px;color:#999">${typeLabel[c.type] || c.type}</span>` +
                     `<span style="font-size:12px;color:${levelColor[c.level]};font-weight:600">${levelText[c.level]}</span></div>` +
+                    `<div style="font-size:11px;color:#999;margin-top:3px">空值率：${Math.round(c.emptyRate * 100)}% · 重复：${c.duplicateCount} 行</div>` +
                     (issues || '<div style="font-size:12px;color:#999;margin-top:3px">无问题</div>') +
                     `</div>`;
-            }).join("");
+            }).join("") : '<div style="text-align:center;padding:40px;color:#999">没有符合筛选条件的列</div>';
         }
 
         // ==================== 增强对账 ====================
