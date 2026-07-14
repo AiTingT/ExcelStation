@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文本提取器</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <style>
+    [class^="mgc_"]::before, [class*=" mgc_"]::before { color: inherit; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      padding: var(--space-6);
+      line-height: var(--leading-normal);
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-6);
+      color: var(--fg-strong);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+    .input-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+    }
+    .input-section label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--fg-muted);
+    }
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: var(--space-3);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      background: var(--bg-input);
+      color: var(--fg-base);
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .options {
+      margin-top: var(--space-4);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-input);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+    .checkbox-label:hover {
+      background: var(--bg-hover);
+    }
+    .checkbox-label input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .checkbox-label.active {
+      background: var(--color-brand);
+      color: white;
+      border-color: var(--color-brand);
+    }
+    .result-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+    }
+    .result-tabs {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border-base);
+      padding-bottom: var(--space-2);
+    }
+    .result-tab {
+      padding: var(--space-2) var(--space-3);
+      border: none;
+      background: none;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--fg-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+    }
+    .result-tab:hover {
+      background: var(--bg-hover);
+    }
+    .result-tab.active {
+      background: var(--color-brand);
+      color: white;
+    }
+    .result-tab .count {
+      display: inline-block;
+      margin-left: var(--space-1);
+      padding: 2px 6px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 10px;
+      font-size: var(--text-xs);
+    }
+    .result-tab.active .count {
+      background: rgba(255,255,255,0.2);
+    }
+    .result-content {
+      min-height: 200px;
+    }
+    .result-item {
+      padding: var(--space-2) var(--space-3);
+      margin-bottom: var(--space-2);
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      word-break: break-all;
+    }
+    .empty-state {
+      text-align: center;
+      padding: var(--space-8);
+      color: var(--fg-muted);
+    }
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: var(--space-3);
+      opacity: 0.3;
+    }
+    .actions {
+      margin-top: var(--space-4);
+      display: flex;
+      gap: var(--space-2);
+    }
+    button {
+      padding: var(--space-2) var(--space-4);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--color-brand);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--color-brand-hover);
+    }
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      color: var(--fg-base);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="mgc_extract_line"></i> 文本提取器</h1>
+
+    <div class="layout">
+      <div class="input-section">
+        <label>输入文本</label>
+        <textarea id="inputText" placeholder="粘贴包含邮箱、手机号、URL、身份证号等内容的文本..."></textarea>
+
+        <div class="options">
+          <label class="checkbox-label active">
+            <input type="checkbox" data-type="email" checked>
+            <span>📧 邮箱</span>
+          </label>
+          <label class="checkbox-label active">
+            <input type="checkbox" data-type="phone" checked>
+            <span>📱 手机号</span>
+          </label>
+          <label class="checkbox-label active">
+            <input type="checkbox" data-type="url" checked>
+            <span>🔗 URL</span>
+          </label>
+          <label class="checkbox-label active">
+            <input type="checkbox" data-type="idcard" checked>
+            <span>🪪 身份证</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" data-type="ip">
+            <span>🌐 IP 地址</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" data-type="date">
+            <span>📅 日期</span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="extractBtn">
+            <i class="mgc_check_line"></i> 提取
+          </button>
+          <button class="btn-secondary" id="clearBtn">
+            <i class="mgc_close_circle_line"></i> 清空
+          </button>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-tabs" id="resultTabs">
+          <button class="result-tab active" data-type="email">
+            邮箱 <span class="count" id="count-email">0</span>
+          </button>
+          <button class="result-tab" data-type="phone">
+            手机号 <span class="count" id="count-phone">0</span>
+          </button>
+          <button class="result-tab" data-type="url">
+            URL <span class="count" id="count-url">0</span>
+          </button>
+          <button class="result-tab" data-type="idcard">
+            身份证 <span class="count" id="count-idcard">0</span>
+          </button>
+          <button class="result-tab" data-type="ip">
+            IP <span class="count" id="count-ip">0</span>
+          </button>
+          <button class="result-tab" data-type="date">
+            日期 <span class="count" id="count-date">0</span>
+          </button>
+        </div>
+
+        <div class="result-content" id="resultContent">
+          <div class="empty-state">
+            <i class="mgc_inbox_line"></i>
+            <p>输入文本后点击"提取"查看结果</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-secondary" id="copyBtn">
+            <i class="mgc_copy_2_line"></i> 复制结果
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 正则表达式定义
+    const patterns = {
+      email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+      phone: /1[3-9]\d{9}/g,
+      url: /https?:\/\/[^\s<>"{}|\\^`\[\]]+/g,
+      idcard: /\d{17}[\dXx]|\d{15}/g,
+      ip: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g,
+      date: /\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{2}[-/]\d{1,2}[-/]\d{2,4}/g
+    };
+
+    const inputText = document.getElementById('inputText');
+    const resultContent = document.getElementById('resultContent');
+    const resultTabs = document.getElementById('resultTabs');
+    let currentTab = 'email';
+    let extractedData = {};
+
+    // 复选框样式切换
+    document.querySelectorAll('.checkbox-label input').forEach(cb => {
+      cb.addEventListener('change', function() {
+        this.parentElement.classList.toggle('active', this.checked);
+      });
+    });
+
+    // Tab 切换
+    resultTabs.addEventListener('click', function(e) {
+      if (e.target.classList.contains('result-tab')) {
+        document.querySelectorAll('.result-tab').forEach(tab => tab.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.type;
+        renderResults();
+      }
+    });
+
+    function extract() {
+      const text = inputText.value;
+      extractedData = {};
+
+      document.querySelectorAll('.checkbox-label input:checked').forEach(cb => {
+        const type = cb.dataset.type;
+        const matches = text.match(patterns[type]) || [];
+        // 去重
+        extractedData[type] = [...new Set(matches)];
+        document.getElementById(`count-${type}`).textContent = extractedData[type].length;
+      });
+
+      // 未选中的类型计数清零
+      document.querySelectorAll('.checkbox-label input:not(:checked)').forEach(cb => {
+        const type = cb.dataset.type;
+        extractedData[type] = [];
+        document.getElementById(`count-${type}`).textContent = '0';
+      });
+
+      renderResults();
+    }
+
+    function renderResults() {
+      const items = extractedData[currentTab] || [];
+
+      if (items.length === 0) {
+        resultContent.innerHTML = `
+          <div class="empty-state">
+            <i class="mgc_inbox_line"></i>
+            <p>暂无${getTypeName(currentTab)}数据</p>
+          </div>
+        `;
+        return;
+      }
+
+      resultContent.innerHTML = items.map(item => `
+        <div class="result-item">${escapeHtml(item)}</div>
+      `).join('');
+    }
+
+    function getTypeName(type) {
+      const names = {
+        email: '邮箱',
+        phone: '手机号',
+        url: 'URL',
+        idcard: '身份证',
+        ip: 'IP 地址',
+        date: '日期'
+      };
+      return names[type] || type;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById('extractBtn').addEventListener('click', extract);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      inputText.value = '';
+      extractedData = {};
+      document.querySelectorAll('[id^="count-"]').forEach(el => el.textContent = '0');
+      resultContent.innerHTML = `
+        <div class="empty-state">
+          <i class="mgc_inbox_line"></i>
+          <p>输入文本后点击"提取"查看结果</p>
+        </div>
+      `;
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const items = extractedData[currentTab] || [];
+      if (items.length === 0) {
+        alert('当前类型没有数据可复制');
+        return;
+      }
+      const text = items.join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        alert(`已复制 ${items.length} 条${getTypeName(currentTab)}到剪贴板`);
+      });
+    });
+
+    // 输入时自动提取
+    inputText.addEventListener('input', extract);
+  </script>
+</body>
+</html>

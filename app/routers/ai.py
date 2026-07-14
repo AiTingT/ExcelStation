@@ -237,3 +237,71 @@ async def smart_chart_suggest(
         return result
     except Exception as e:
         return {"success": False, "error": humanize_ai_error(e)}
+
+
+@router.post("/formula")
+async def generate_excel_formula(request: dict = Body(...)):
+    """生成 Excel 公式（支持自然语言描述）"""
+    question = request.get("question", "")
+    columns = request.get("columns", [])
+    sample_data = request.get("sampleData", [])
+
+    if not question:
+        raise HTTPException(status_code=400, detail="请描述你想要的公式效果")
+
+    cfg = load_ai_config()
+    if not cfg.apiKey and cfg.provider != "ollama":
+        raise HTTPException(status_code=400, detail="请先在设置中配置 AI API Key")
+
+    # 构建列信息
+    col_info = ""
+    if columns:
+        col_info = "当前工作表的列：\n"
+        for i, col in enumerate(columns):
+            col_info += f"- 第{i+1}列：{col}\n"
+
+    # 构建示例数据
+    sample_info = ""
+    if sample_data:
+        sample_info = "示例数据（前 3 行）：\n"
+        for i, row in enumerate(sample_data[:3]):
+            sample_info += f"第{i+1}行：{row}\n"
+
+    prompt = f"""你是一个 Excel 公式专家。请根据用户的描述，生成对应的 Excel 公式。
+
+{col_info}
+{sample_info}
+用户需求：{question}
+
+请返回：
+1. 公式：直接可用的 Excel 公式（用 Excel 的语法，如 =CONCATENATE(A2,B2) 或 =A2&B2）
+2. 说明：简单解释公式的作用
+3. 示例：如果可能，给出一个具体例子
+
+格式要求：
+- 公式用 ``` 包裹
+- 说明用中文，简洁明了
+- 如果用户需求不明确，给出最常见的几种方案"""
+
+    try:
+        provider = create_provider(cfg)
+        response = provider.chat([{"role": "user", "content": prompt}])
+
+        # 解析响应
+        import re
+        formula_match = re.search(r'```(\s*=\s*[^`]+?)```', response, re.DOTALL)
+        formula = formula_match.group(1).strip() if formula_match else ""
+
+        # 提取说明（公式后的文本）
+        explanation = response
+        if formula_match:
+            explanation = response[formula_match.end():].strip()
+
+        return {
+            "success": True,
+            "formula": formula,
+            "explanation": explanation,
+            "rawResponse": response
+        }
+    except Exception as e:
+        return {"success": False, "error": humanize_ai_error(e)}

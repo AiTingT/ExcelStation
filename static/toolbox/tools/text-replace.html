@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文本查找替换</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <style>
+    [class^="mgc_"]::before, [class*=" mgc_"]::before { color: inherit; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      padding: var(--space-6);
+      line-height: var(--leading-normal);
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-6);
+      color: var(--fg-strong);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .input-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .input-section label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--fg-muted);
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: var(--space-3);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      background: var(--bg-input);
+      color: var(--fg-base);
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .find-replace-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .input-group label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--fg-muted);
+    }
+    .input-group input {
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      background: var(--bg-input);
+      color: var(--fg-base);
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .options {
+      display: flex;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+      align-items: center;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      cursor: pointer;
+    }
+    .checkbox-label input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .actions {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    button {
+      padding: var(--space-2) var(--space-4);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--color-brand);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--color-brand-hover);
+    }
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      color: var(--fg-base);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+    .result-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-3);
+    }
+    .result-header h2 {
+      font-size: var(--text-md);
+      font-weight: 600;
+      color: var(--fg-strong);
+    }
+    .stats {
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+    }
+    .stats .highlight {
+      color: var(--color-brand);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="mgc_find_replace_line"></i> 文本查找替换</h1>
+
+    <div class="input-section">
+      <label>输入文本（支持多行）</label>
+      <textarea id="inputText" placeholder="粘贴需要处理的文本..."></textarea>
+    </div>
+
+    <div class="find-replace-row">
+      <div class="input-group">
+        <label>查找内容</label>
+        <input type="text" id="findText" placeholder="输入要查找的文本">
+      </div>
+      <div class="input-group">
+        <label>替换为</label>
+        <input type="text" id="replaceText" placeholder="输入替换后的文本">
+      </div>
+    </div>
+
+    <div class="options">
+      <label class="checkbox-label">
+        <input type="checkbox" id="useRegex">
+        <span>使用正则表达式</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="caseSensitive">
+        <span>区分大小写</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="replaceBtn">
+        <i class="mgc_check_line"></i> 执行替换
+      </button>
+      <button class="btn-secondary" id="countBtn">
+        <i class="mgc_number_0_line"></i> 统计匹配数
+      </button>
+      <button class="btn-secondary" id="clearBtn">
+        <i class="mgc_close_circle_line"></i> 清空
+      </button>
+    </div>
+
+    <div class="result-section">
+      <div class="result-header">
+        <h2>替换结果</h2>
+        <div class="stats">
+          找到 <span class="highlight" id="matchCount">0</span> 处匹配
+        </div>
+      </div>
+      <textarea id="outputText" readonly placeholder="替换后的文本将显示在这里..."></textarea>
+    </div>
+  </div>
+
+  <script>
+    const inputText = document.getElementById('inputText');
+    const findText = document.getElementById('findText');
+    const replaceText = document.getElementById('replaceText');
+    const useRegex = document.getElementById('useRegex');
+    const caseSensitive = document.getElementById('caseSensitive');
+    const outputText = document.getElementById('outputText');
+    const matchCount = document.getElementById('matchCount');
+
+    function escapeRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function doReplace() {
+      const text = inputText.value;
+      const find = findText.value;
+      const replace = replaceText.value;
+
+      if (!find) {
+        matchCount.textContent = '0';
+        outputText.value = text;
+        return;
+      }
+
+      let flags = 'g';
+      if (!caseSensitive.checked) flags += 'i';
+
+      let pattern;
+      try {
+        if (useRegex.checked) {
+          pattern = new RegExp(find, flags);
+        } else {
+          pattern = new RegExp(escapeRegex(find), flags);
+        }
+      } catch (e) {
+        alert('正则表达式语法错误：' + e.message);
+        return;
+      }
+
+      const matches = text.match(pattern);
+      const count = matches ? matches.length : 0;
+      matchCount.textContent = count;
+
+      const result = text.replace(pattern, replace);
+      outputText.value = result;
+    }
+
+    function countMatches() {
+      const text = inputText.value;
+      const find = findText.value;
+
+      if (!find) {
+        matchCount.textContent = '0';
+        return;
+      }
+
+      let flags = 'g';
+      if (!caseSensitive.checked) flags += 'i';
+
+      let pattern;
+      try {
+        if (useRegex.checked) {
+          pattern = new RegExp(find, flags);
+        } else {
+          pattern = new RegExp(escapeRegex(find), flags);
+        }
+      } catch (e) {
+        alert('正则表达式语法错误：' + e.message);
+        return;
+      }
+
+      const matches = text.match(pattern);
+      const count = matches ? matches.length : 0;
+      matchCount.textContent = count;
+    }
+
+    document.getElementById('replaceBtn').addEventListener('click', doReplace);
+    document.getElementById('countBtn').addEventListener('click', countMatches);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      inputText.value = '';
+      findText.value = '';
+      replaceText.value = '';
+      outputText.value = '';
+      matchCount.textContent = '0';
+    });
+
+    // 实时预览（输入时自动替换）
+    inputText.addEventListener('input', doReplace);
+    findText.addEventListener('input', doReplace);
+    replaceText.addEventListener('input', doReplace);
+    useRegex.addEventListener('change', doReplace);
+    caseSensitive.addEventListener('change', doReplace);
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>图片转文字 (OCR)</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <style>
+    [class^="mgc_"]::before, [class*=" mgc_"]::before { color: inherit; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      padding: var(--space-6);
+      line-height: var(--leading-normal);
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .coming-soon {
+      background: var(--bg-surface);
+      border: 2px dashed var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-10) var(--space-6);
+      margin-top: var(--space-8);
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+      opacity: 0.3;
+    }
+    h1 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-3);
+      color: var(--fg-strong);
+    }
+    .description {
+      font-size: var(--text-md);
+      color: var(--fg-muted);
+      margin-bottom: var(--space-6);
+    }
+    .features {
+      text-align: left;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .features h3 {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+      color: var(--fg-strong);
+    }
+    .features ul {
+      list-style: none;
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+    }
+    .features li {
+      padding: var(--space-2) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .features li::before {
+      content: '✓';
+      color: var(--color-brand);
+      font-weight: bold;
+    }
+    .badge {
+      display: inline-block;
+      padding: var(--space-1) var(--space-3);
+      background: var(--color-brand);
+      color: white;
+      border-radius: 20px;
+      font-size: var(--text-xs);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="coming-soon">
+      <div class="icon">📷</div>
+      <h1>图片转文字 (OCR)</h1>
+      <p class="description">此功能正在开发中，敬请期待</p>
+
+      <div class="features">
+        <h3>即将支持的功能：</h3>
+        <ul>
+          <li>拍照识别表格内容</li>
+          <li>截图提取文字信息</li>
+          <li>支持中英文混合识别</li>
+          <li>批量图片处理</li>
+          <li>导出为 Excel/CSV</li>
+        </ul>
+      </div>
+
+      <span class="badge">开发中</span>
+    </div>
+  </div>
+
+  <script>
+    // 占位页面，无需功能逻辑
+  </script>
+</body>
+</html>
