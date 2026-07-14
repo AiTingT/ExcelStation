@@ -655,14 +655,38 @@ async def compare_files(
             return False
         return str_a in str_b or str_b in str_a
 
-    # 找出所有匹配对
-    matched_pairs = []  # [(index_a, index_b), ...]
+    # 优化：两阶段匹配
+    # 阶段 1：精确匹配（快速，O(n)）
+    matched_pairs = []
     matched_a = set()
     matched_b = set()
 
+    # 建立 B 的索引：key -> [indices]
+    b_index = {}
+    for j, row_b in enumerate(data_b):
+        key = str(row_b[keyColumn] or "").strip()
+        if key:
+            if key not in b_index:
+                b_index[key] = []
+            b_index[key].append(j)
+
+    # 精确匹配
     for i, row_a in enumerate(data_a):
-        for j, row_b in enumerate(data_b):
-            if is_match(row_a[keyColumn], row_b[keyColumn]):
+        key_a = str(row_a[keyColumn] or "").strip()
+        if key_a and key_a in b_index:
+            for j in b_index[key_a]:
+                matched_pairs.append((i, j))
+                matched_a.add(i)
+                matched_b.add(j)
+
+    # 阶段 2：对未匹配的项做包含匹配（只处理未匹配的行）
+    unmatched_a = [i for i in range(len(data_a)) if i not in matched_a]
+    unmatched_b = [j for j in range(len(data_b)) if j not in matched_b]
+
+    for i in unmatched_a:
+        row_a = data_a[i]
+        for j in unmatched_b:
+            if is_match(row_a[keyColumn], data_b[j][keyColumn]):
                 matched_pairs.append((i, j))
                 matched_a.add(i)
                 matched_b.add(j)
