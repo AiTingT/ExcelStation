@@ -632,7 +632,9 @@
         welcome.style.display = 'none';
         loading.classList.remove('hidden');
         toolFrame.style.display = 'none';
-        toolFrame.src = t.path;
+        // 添加版本号参数强制刷新，避免浏览器缓存旧版本
+        var version = '20260714';
+        toolFrame.src = t.path + '?v=' + version;
       }
 
       toolFrame.addEventListener('load', function () {

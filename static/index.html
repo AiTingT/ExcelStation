@@ -14,6 +14,27 @@
             color: inherit;
         }
 
+        /* 统一滚动条样式（跨平台） */
+        *::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        *::-webkit-scrollbar-track {
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+        *::-webkit-scrollbar-corner {
+            background: #f5f5f5;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -1967,7 +1988,7 @@
 
     <!-- 增强对账 -->
     <div class="modal-overlay hidden" id="reconcileModal">
-        <div class="modal" style="max-width:720px">
+        <div class="modal" style="max-width:720px;max-height:85vh;display:flex;flex-direction:column">
             <h3>📋 增强对账</h3>
             <p style="color:#888;font-size:13px;margin-bottom:12px">按多个匹配列核对两份数据，支持金额容差、日期容差，自动分类差异</p>
             <div class="modal-row"><label>匹配列（按住 Ctrl 多选）</label><select id="reconcileKeys" multiple
@@ -1982,8 +2003,8 @@
                 </select></div>
             <div class="modal-row"><label>日期容差(天)</label><input type="number" id="reconcileDateTol" value="0" min="0">
             </div>
-            <div id="reconcileResult" style="margin-top:12px"></div>
-            <div class="modal-actions">
+            <div id="reconcileResult" style="flex:1;overflow-y:auto;margin-top:12px;min-height:0"></div>
+            <div class="modal-actions" style="flex-shrink:0;margin-top:12px">
                 <button class="btn" id="reconcileCloseBtn">关闭</button>
                 <button class="btn btn-primary" id="reconcileRunBtn">开始对账</button>
             </div>
@@ -2892,28 +2913,53 @@
             finally { btn.disabled = false; btn.textContent = "开始对账"; }
         });
         function renderReconcileResult(data) {
+            // 存储数据到全局变量，供点击切换使用
+            window.__reconcileData = data;
+            renderReconcileTab('onlyA');
+        }
+        function renderReconcileTab(tabKey) {
+            const data = window.__reconcileData;
+            if (!data) return;
             const s = data.stats;
             const samples = data.samples || {};
-            const stat = (n, label, color) => `<div style="flex:1;text-align:center;padding:10px;background:#f5f5f5;border-radius:6px"><div style="font-size:20px;font-weight:700;color:${color}">${n}</div><div style="font-size:12px;color:#666">${label}</div></div>`;
-            let html = `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">`;
-            html += stat(s.matched, "匹配", "#2e7d32");
-            html += stat(s.onlyA, "仅A有", "#f57c00");
-            html += stat(s.onlyB, "仅B有", "#f57c00");
-            html += stat(s.amountMismatch, "金额不符", "#c62828");
-            html += stat(s.dateMismatch, "日期不符", "#c62828");
-            html += `</div>`;
-            const sampleTable = (title, items, color) => {
-                if (!items || !items.length) return "";
-                const rows = items.slice(0, 10).map(it => {
-                    if (typeof it === "string") return `<tr><td>${it}</td></tr>`;
-                    return `<tr><td>${it.key}</td><td>${it.a ?? ""}</td><td>${it.b ?? ""}</td>${it.diff !== undefined ? `<td>${it.diff}</td>` : ""}${it.diffDays !== undefined ? `<td>${it.diffDays}天</td>` : ""}</tr>`;
+
+            // Tab 配置
+            const tabs = [
+                { key: 'onlyA', label: '仅 A 有', count: s.onlyA, color: '#f57c00', items: samples.onlyA },
+                { key: 'onlyB', label: '仅 B 有', count: s.onlyB, color: '#f57c00', items: samples.onlyB },
+                { key: 'amountMismatch', label: '金额不符', count: s.amountMismatch, color: '#c62828', items: samples.amountMismatch },
+                { key: 'dateMismatch', label: '日期不符', count: s.dateMismatch, color: '#c62828', items: samples.dateMismatch }
+            ];
+
+            // 顶部 Tab 栏
+            const tabHtml = tabs.map(tab => {
+                const isActive = tab.key === tabKey;
+                return `<div onclick="renderReconcileTab('${tab.key}')" style="flex:1;text-align:center;padding:10px 8px;cursor:pointer;border-bottom:3px solid ${isActive ? tab.color : 'transparent'};background:${isActive ? tab.color + '15' : 'transparent'};transition:all 0.2s">
+                    <div style="font-size:13px;font-weight:600;color:${isActive ? tab.color : '#666'}">${tab.label}</div>
+                    <div style="font-size:20px;font-weight:700;color:${isActive ? tab.color : '#333'};margin-top:2px">${tab.count}</div>
+                </div>`;
+            }).join('');
+
+            // 当前 Tab 数据
+            const currentTab = tabs.find(t => t.key === tabKey);
+            const items = currentTab.items || [];
+            let tableContent = '';
+            if (items.length === 0) {
+                tableContent = '<div style="padding:60px 20px;text-align:center;color:#888;font-size:14px">暂无数据</div>';
+            } else {
+                const rows = items.map(it => {
+                    if (typeof it === "string") return `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0">${it}</td></tr>`;
+                    return `<tr><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;font-weight:500;color:#333">${it.key}</td><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#555">${it.a ?? ""}</td><td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#555">${it.b ?? ""}</td>${it.diff !== undefined ? `<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#c62828;font-weight:500">${it.diff}</td>` : ""}${it.diffDays !== undefined ? `<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#c62828;font-weight:500">${it.diffDays}天</td>` : ""}</tr>`;
                 }).join("");
-                return `<h4 style="color:${color};margin:10px 0 4px">${title}（${items.length}条）</h4><table style="width:100%;font-size:12px;border-collapse:collapse;border:1px solid #ddd"><tbody>${rows}</tbody></table>`;
-            };
-            html += sampleTable("仅 A 有", samples.onlyA, "#f57c00");
-            html += sampleTable("仅 B 有", samples.onlyB, "#f57c00");
-            html += sampleTable("金额不符", samples.amountMismatch, "#c62828");
-            html += sampleTable("日期不符", samples.dateMismatch, "#c62828");
+                const headers = typeof items[0] === 'string' ? '<th style="padding:8px 12px;background:#fafafa;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #e0e0e0">关键值</th>' : '<th style="padding:8px 12px;background:#fafafa;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #e0e0e0">关键值</th><th style="padding:8px 12px;background:#fafafa;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #e0e0e0">A 值</th><th style="padding:8px 12px;background:#fafafa;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #e0e0e0">B 值</th><th style="padding:8px 12px;background:#fafafa;text-align:left;font-weight:600;color:#666;border-bottom:2px solid #e0e0e0">差异</th>';
+                tableContent = `<div style="font-size:13px;color:#888;margin-bottom:10px">共 <b style="color:${currentTab.color}">${items.length}</b> 条记录</div><div style="border:1px solid #e8e8e8;border-radius:6px;overflow:hidden"><table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+            }
+
+            const html = `<div style="display:flex;flex-direction:column">
+                <div style="display:flex;border-bottom:1px solid #e0e0e0;margin-bottom:12px">${tabHtml}</div>
+                <div style="flex:1;overflow-y:auto;min-height:0;padding:4px">${tableContent}</div>
+            </div>`;
+
             document.getElementById("reconcileResult").innerHTML = html;
         }
 

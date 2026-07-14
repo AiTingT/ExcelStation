@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <title>文本提取器</title>
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
   <style>
-    [class^="mgc_"]::before, [class*=" mgc_"]::before { color: inherit; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [class^="mgc_"]::before,
+    [class*=" mgc_"]::before {
+      color: inherit;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: var(--font-sans);
       background: var(--bg-page);
@@ -15,7 +25,12 @@
       padding: var(--space-6);
       line-height: var(--leading-normal);
     }
-    .container { max-width: 1000px; margin: 0 auto; }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     h1 {
       font-size: var(--text-xl);
       font-weight: 700;
@@ -25,24 +40,27 @@
       align-items: center;
       gap: var(--space-2);
     }
+
     .layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: var(--space-6);
     }
+
     .input-section {
       background: var(--bg-surface);
       border: 1px solid var(--border-base);
       border-radius: var(--radius-md);
       padding: var(--space-4);
     }
+
     .input-section label {
-      display: block;
       font-size: var(--text-sm);
       font-weight: 600;
       margin-bottom: var(--space-2);
       color: var(--fg-muted);
     }
+
     textarea {
       width: 100%;
       min-height: 200px;
@@ -55,16 +73,19 @@
       color: var(--fg-base);
       resize: vertical;
     }
+
     textarea:focus {
       outline: none;
       border-color: var(--color-brand);
     }
+
     .options {
       margin-top: var(--space-4);
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-3);
     }
+
     .checkbox-label {
       display: flex;
       align-items: center;
@@ -77,25 +98,30 @@
       border-radius: var(--radius-sm);
       transition: all 0.2s;
     }
+
     .checkbox-label:hover {
       background: var(--bg-hover);
     }
+
     .checkbox-label input {
       width: 16px;
       height: 16px;
       cursor: pointer;
     }
+
     .checkbox-label.active {
       background: var(--color-brand);
       color: white;
       border-color: var(--color-brand);
     }
+
     .result-section {
       background: var(--bg-surface);
       border: 1px solid var(--border-base);
       border-radius: var(--radius-md);
       padding: var(--space-4);
     }
+
     .result-tabs {
       display: flex;
       gap: var(--space-2);
@@ -103,6 +129,7 @@
       border-bottom: 1px solid var(--border-base);
       padding-bottom: var(--space-2);
     }
+
     .result-tab {
       padding: var(--space-2) var(--space-3);
       border: none;
@@ -114,27 +141,33 @@
       border-radius: var(--radius-sm);
       transition: all 0.2s;
     }
+
     .result-tab:hover {
       background: var(--bg-hover);
     }
+
     .result-tab.active {
       background: var(--color-brand);
       color: white;
     }
+
     .result-tab .count {
       display: inline-block;
       margin-left: var(--space-1);
       padding: 2px 6px;
-      background: rgba(0,0,0,0.1);
+      background: rgba(0, 0, 0, 0.1);
       border-radius: 10px;
       font-size: var(--text-xs);
     }
+
     .result-tab.active .count {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
     }
+
     .result-content {
       min-height: 200px;
     }
+
     .result-item {
       padding: var(--space-2) var(--space-3);
       margin-bottom: var(--space-2);
@@ -144,21 +177,25 @@
       font-size: var(--text-sm);
       word-break: break-all;
     }
+
     .empty-state {
       text-align: center;
       padding: var(--space-8);
       color: var(--fg-muted);
     }
+
     .empty-state i {
       font-size: 48px;
       margin-bottom: var(--space-3);
       opacity: 0.3;
     }
+
     .actions {
       margin-top: var(--space-4);
       display: flex;
       gap: var(--space-2);
     }
+
     button {
       padding: var(--space-2) var(--space-4);
       border: none;
@@ -168,23 +205,28 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .btn-primary {
       background: var(--color-brand);
       color: white;
     }
+
     .btn-primary:hover {
       background: var(--color-brand-hover);
     }
+
     .btn-secondary {
       background: var(--bg-surface);
       border: 1px solid var(--border-base);
       color: var(--fg-base);
     }
+
     .btn-secondary:hover {
       background: var(--bg-hover);
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1><i class="mgc_extract_line"></i> 文本提取器</h1>
@@ -288,13 +330,13 @@
 
     // 复选框样式切换
     document.querySelectorAll('.checkbox-label input').forEach(cb => {
-      cb.addEventListener('change', function() {
+      cb.addEventListener('change', function () {
         this.parentElement.classList.toggle('active', this.checked);
       });
     });
 
     // Tab 切换
-    resultTabs.addEventListener('click', function(e) {
+    resultTabs.addEventListener('click', function (e) {
       if (e.target.classList.contains('result-tab')) {
         document.querySelectorAll('.result-tab').forEach(tab => tab.classList.remove('active'));
         e.target.classList.add('active');
@@ -390,4 +432,5 @@
     inputText.addEventListener('input', extract);
   </script>
 </body>
+
 </html>
