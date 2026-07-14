@@ -15,7 +15,7 @@
       padding: var(--space-6);
       line-height: var(--leading-normal);
     }
-    .container { max-width: 700px; margin: 0 auto; }
+    .container { max-width: 1100px; margin: 0 auto; }
     h1 {
       font-size: var(--text-xl);
       font-weight: 700;
@@ -25,12 +25,17 @@
       align-items: center;
       gap: var(--space-2);
     }
-    .converter-card {
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .converter-card, .rate-editor {
       background: var(--bg-surface);
       border: 1px solid var(--border-base);
       border-radius: var(--radius-md);
       padding: var(--space-6);
-      margin-bottom: var(--space-4);
     }
     .amount-input {
       margin-bottom: var(--space-4);
@@ -124,11 +129,6 @@
       font-size: var(--text-sm);
       color: var(--fg-muted);
     }
-    .rate-editor {
-      margin-top: var(--space-6);
-      padding-top: var(--space-4);
-      border-top: 1px solid var(--border-base);
-    }
     .rate-editor h3 {
       font-size: var(--text-md);
       font-weight: 600;
@@ -175,11 +175,6 @@
       font-size: var(--text-xs);
       color: #874d00;
     }
-    .actions {
-      margin-top: var(--space-4);
-      display: flex;
-      gap: var(--space-2);
-    }
     button {
       padding: var(--space-2) var(--space-4);
       border: none;
@@ -189,13 +184,6 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-primary {
-      background: var(--color-brand);
-      color: white;
-    }
-    .btn-primary:hover {
-      background: var(--color-brand-hover);
-    }
     .btn-secondary {
       background: var(--bg-surface);
       border: 1px solid var(--border-base);
@@ -204,96 +192,104 @@
     .btn-secondary:hover {
       background: var(--bg-hover);
     }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><i class="mgc_currency_exchange_line"></i> 汇率计算</h1>
+    <h1><i class="mgc_exchange_dollar_line"></i> 汇率计算</h1>
 
-    <div class="converter-card">
-      <div class="amount-input">
-        <label>金额</label>
-        <input type="number" id="amountInput" placeholder="输入金额" value="100" step="0.01">
-      </div>
+    <div class="layout">
+      <!-- 左侧：汇率设置 -->
+      <div class="rate-editor">
+        <h3>
+          <span>⚙️ 汇率设置（相对于人民币）</span>
+          <button class="btn-secondary" id="resetRatesBtn">重置默认</button>
+        </h3>
 
-      <div class="currency-row">
-        <div class="currency-select">
-          <label>源货币</label>
-          <select id="fromCurrency">
-            <option value="CNY">🇨🇳 人民币 (CNY)</option>
-            <option value="USD" selected>🇺🇸 美元 (USD)</option>
-            <option value="EUR">🇪🇺 欧元 (EUR)</option>
-            <option value="GBP">🇬🇧 英镑 (GBP)</option>
-            <option value="JPY">🇯🇵 日元 (JPY)</option>
-            <option value="HKD">🇭🇰 港币 (HKD)</option>
-            <option value="KRW">🇰🇷 韩元 (KRW)</option>
-            <option value="SGD">🇸🇬 新加坡元 (SGD)</option>
-            <option value="AUD">🇦🇺 澳元 (AUD)</option>
-            <option value="CAD">🇨🇦 加元 (CAD)</option>
-            <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
-            <option value="THB">🇹🇭 泰铢 (THB)</option>
-            <option value="MYR">🇲🇾 马来西亚林吉特 (MYR)</option>
-          </select>
-        </div>
+        <table class="rate-table">
+          <thead>
+            <tr>
+              <th>货币</th>
+              <th>代码</th>
+              <th>汇率（1单位 = ? 人民币）</th>
+            </tr>
+          </thead>
+          <tbody id="rateTableBody">
+            <!-- 动态生成 -->
+          </tbody>
+        </table>
 
-        <div class="swap-btn" id="swapBtn" title="交换货币">
-          <i class="mgc_swap_line"></i>
-        </div>
-
-        <div class="currency-select">
-          <label>目标货币</label>
-          <select id="toCurrency">
-            <option value="CNY" selected>🇨🇳 人民币 (CNY)</option>
-            <option value="USD">🇺🇸 美元 (USD)</option>
-            <option value="EUR">🇪🇺 欧元 (EUR)</option>
-            <option value="GBP">🇧 英镑 (GBP)</option>
-            <option value="JPY">🇯🇵 日元 (JPY)</option>
-            <option value="HKD">🇭🇰 港币 (HKD)</option>
-            <option value="KRW">🇰🇷 韩元 (KRW)</option>
-            <option value="SGD">🇬 新加坡元 (SGD)</option>
-            <option value="AUD">🇺 澳元 (AUD)</option>
-            <option value="CAD">🇨🇦 加元 (CAD)</option>
-            <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
-            <option value="THB">🇭 泰铢 (THB)</option>
-            <option value="MYR">🇾 马来西亚林吉特 (MYR)</option>
-          </select>
+        <div class="rate-info">
+          💡 提示：以上为参考汇率，实际交易汇率请以银行为准。修改汇率后计算结果会实时更新。
         </div>
       </div>
 
-      <div class="result-box">
-        <div class="result-amount" id="resultAmount">720.00</div>
-        <div class="result-formula" id="resultFormula">100 USD = 720.00 CNY (汇率：7.20)</div>
-      </div>
-    </div>
+      <!-- 右侧：转换器 -->
+      <div class="converter-card">
+        <div class="amount-input">
+          <label>金额</label>
+          <input type="number" id="amountInput" placeholder="输入金额" value="100" step="0.01">
+        </div>
 
-    <div class="converter-card rate-editor">
-      <h3>
-        <span>️ 汇率设置（相对于人民币）</span>
-        <button class="btn-secondary" id="resetRatesBtn">重置默认</button>
-      </h3>
+        <div class="currency-row">
+          <div class="currency-select">
+            <label>源货币</label>
+            <select id="fromCurrency">
+              <option value="CNY">🇨🇳 人民币 (CNY)</option>
+              <option value="USD" selected>🇺🇸 美元 (USD)</option>
+              <option value="EUR">🇪🇺 欧元 (EUR)</option>
+              <option value="GBP">🇬🇧 英镑 (GBP)</option>
+              <option value="JPY">🇯🇵 日元 (JPY)</option>
+              <option value="HKD">🇭🇰 港币 (HKD)</option>
+              <option value="KRW">🇰🇷 韩元 (KRW)</option>
+              <option value="SGD">🇸🇬 新加坡元 (SGD)</option>
+              <option value="AUD">🇦 澳元 (AUD)</option>
+              <option value="CAD">🇨🇦 加元 (CAD)</option>
+              <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
+              <option value="THB">🇹🇭 泰铢 (THB)</option>
+              <option value="MYR">🇲🇾 马来西亚林吉特 (MYR)</option>
+            </select>
+          </div>
 
-      <table class="rate-table">
-        <thead>
-          <tr>
-            <th>货币</th>
-            <th>代码</th>
-            <th>汇率（1单位 = ? 人民币）</th>
-          </tr>
-        </thead>
-        <tbody id="rateTableBody">
-          <!-- 动态生成 -->
-        </tbody>
-      </table>
+          <div class="swap-btn" id="swapBtn" title="交换货币">
+            <i class="mgc_swap_line"></i>
+          </div>
 
-      <div class="rate-info">
-        💡 提示：以上为参考汇率，实际交易汇率请以银行为准。修改汇率后计算结果会实时更新。
+          <div class="currency-select">
+            <label>目标货币</label>
+            <select id="toCurrency">
+              <option value="CNY" selected>🇳 人民币 (CNY)</option>
+              <option value="USD">🇺 美元 (USD)</option>
+              <option value="EUR">🇪🇺 欧元 (EUR)</option>
+              <option value="GBP">🇬🇧 英镑 (GBP)</option>
+              <option value="JPY">🇯🇵 日元 (JPY)</option>
+              <option value="HKD">🇰 港币 (HKD)</option>
+              <option value="KRW">🇷 韩元 (KRW)</option>
+              <option value="SGD">🇬 新加坡元 (SGD)</option>
+              <option value="AUD">🇺 澳元 (AUD)</option>
+              <option value="CAD">🇨 加元 (CAD)</option>
+              <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
+              <option value="THB">🇹🇭 泰铢 (THB)</option>
+              <option value="MYR">🇲 马来西亚林吉特 (MYR)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="result-amount" id="resultAmount">720.00</div>
+          <div class="result-formula" id="resultFormula">100 USD = 720.00 CNY (汇率：7.20)</div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     // 默认汇率（相对于人民币，1单位外币 = ? 人民币）
-    // 数据来源：参考汇率，实际使用时请更新
     const defaultRates = {
       CNY: 1.0000,
       USD: 7.2000,
@@ -310,7 +306,6 @@
       MYR: 1.5500
     };
 
-    // 从 localStorage 加载或初始化汇率
     let rates = {};
     try {
       const saved = localStorage.getItem('exchangeRates');
@@ -328,7 +323,6 @@
     const rateTableBody = document.getElementById('rateTableBody');
     const resetRatesBtn = document.getElementById('resetRatesBtn');
 
-    // 货币名称映射
     const currencyNames = {
       CNY: '人民币', USD: '美元', EUR: '欧元', GBP: '英镑',
       JPY: '日元', HKD: '港币', KRW: '韩元', SGD: '新加坡元',
@@ -339,13 +333,9 @@
       const amount = parseFloat(amountInput.value) || 0;
       const from = fromCurrency.value;
       const to = toCurrency.value;
-
-      // 先转成人民币，再转成目标货币
       const amountInCNY = amount * rates[from];
       const result = amountInCNY / rates[to];
-
       const rate = rates[from] / rates[to];
-
       resultAmount.textContent = result.toFixed(2);
       resultFormula.textContent = `${amount} ${from} = ${result.toFixed(2)} ${to} (汇率：${rate.toFixed(4)})`;
     }
@@ -353,7 +343,7 @@
     function renderRateTable() {
       rateTableBody.innerHTML = '';
       Object.keys(rates).forEach(code => {
-        if (code === 'CNY') return; // 人民币是基准，不显示
+        if (code === 'CNY') return;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${currencyNames[code] || code}</td>
@@ -362,8 +352,6 @@
         `;
         rateTableBody.appendChild(tr);
       });
-
-      // 绑定输入事件
       rateTableBody.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', function() {
           const currency = this.dataset.currency;
@@ -378,11 +366,7 @@
     }
 
     function saveRates() {
-      try {
-        localStorage.setItem('exchangeRates', JSON.stringify(rates));
-      } catch (e) {
-        console.warn('无法保存汇率设置');
-      }
+      try { localStorage.setItem('exchangeRates', JSON.stringify(rates)); } catch (e) {}
     }
 
     function resetRates() {
@@ -401,14 +385,12 @@
       calculate();
     }
 
-    // 事件绑定
     amountInput.addEventListener('input', calculate);
     fromCurrency.addEventListener('change', calculate);
     toCurrency.addEventListener('change', calculate);
     swapBtn.addEventListener('click', swapCurrencies);
     resetRatesBtn.addEventListener('click', resetRates);
 
-    // 初始化
     renderRateTable();
     calculate();
   </script>
