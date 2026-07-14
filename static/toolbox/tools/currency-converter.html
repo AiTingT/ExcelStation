@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>汇率计算</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mingcute_icon@2.9.72/font/Mingcute.min.css">
+  <style>
+    [class^="mgc_"]::before, [class*=" mgc_"]::before { color: inherit; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--fg-base);
+      padding: var(--space-6);
+      line-height: var(--leading-normal);
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-6);
+      color: var(--fg-strong);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .converter-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-md);
+      padding: var(--space-6);
+      margin-bottom: var(--space-4);
+    }
+    .amount-input {
+      margin-bottom: var(--space-4);
+    }
+    .amount-input label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--fg-muted);
+    }
+    .amount-input input {
+      width: 100%;
+      padding: var(--space-3);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      background: var(--bg-input);
+      color: var(--fg-base);
+    }
+    .amount-input input:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .currency-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-4);
+      align-items: end;
+      margin-bottom: var(--space-4);
+    }
+    .currency-select label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      color: var(--fg-muted);
+    }
+    .currency-select select {
+      width: 100%;
+      padding: var(--space-3);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-md);
+      background: var(--bg-input);
+      color: var(--fg-base);
+      cursor: pointer;
+    }
+    .currency-select select:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .swap-btn {
+      padding: var(--space-3);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+    .swap-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--color-brand);
+      transform: rotate(180deg);
+    }
+    .swap-btn i {
+      font-size: 20px;
+      color: var(--fg-muted);
+    }
+    .result-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-base);
+      border-radius: var(--radius-sm);
+      padding: var(--space-4);
+      text-align: center;
+    }
+    .result-amount {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--color-brand);
+      margin-bottom: var(--space-2);
+    }
+    .result-formula {
+      font-size: var(--text-sm);
+      color: var(--fg-muted);
+    }
+    .rate-editor {
+      margin-top: var(--space-6);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-base);
+    }
+    .rate-editor h3 {
+      font-size: var(--text-md);
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+      color: var(--fg-strong);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .rate-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+    }
+    .rate-table th, .rate-table td {
+      padding: var(--space-2) var(--space-3);
+      text-align: left;
+      border-bottom: 1px solid var(--border-base);
+    }
+    .rate-table th {
+      font-weight: 600;
+      color: var(--fg-muted);
+      background: var(--bg-input);
+    }
+    .rate-table input {
+      width: 100px;
+      padding: 4px 8px;
+      border: 1px solid var(--border-base);
+      border-radius: 4px;
+      font-size: var(--text-sm);
+      background: var(--bg-page);
+      color: var(--fg-base);
+    }
+    .rate-table input:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .rate-info {
+      margin-top: var(--space-3);
+      padding: var(--space-3);
+      background: #fffbe6;
+      border: 1px solid #ffe58f;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+      color: #874d00;
+    }
+    .actions {
+      margin-top: var(--space-4);
+      display: flex;
+      gap: var(--space-2);
+    }
+    button {
+      padding: var(--space-2) var(--space-4);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--color-brand);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--color-brand-hover);
+    }
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-base);
+      color: var(--fg-base);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="mgc_currency_exchange_line"></i> 汇率计算</h1>
+
+    <div class="converter-card">
+      <div class="amount-input">
+        <label>金额</label>
+        <input type="number" id="amountInput" placeholder="输入金额" value="100" step="0.01">
+      </div>
+
+      <div class="currency-row">
+        <div class="currency-select">
+          <label>源货币</label>
+          <select id="fromCurrency">
+            <option value="CNY">🇨🇳 人民币 (CNY)</option>
+            <option value="USD" selected>🇺🇸 美元 (USD)</option>
+            <option value="EUR">🇪🇺 欧元 (EUR)</option>
+            <option value="GBP">🇬🇧 英镑 (GBP)</option>
+            <option value="JPY">🇯🇵 日元 (JPY)</option>
+            <option value="HKD">🇭🇰 港币 (HKD)</option>
+            <option value="KRW">🇰🇷 韩元 (KRW)</option>
+            <option value="SGD">🇸🇬 新加坡元 (SGD)</option>
+            <option value="AUD">🇦🇺 澳元 (AUD)</option>
+            <option value="CAD">🇨🇦 加元 (CAD)</option>
+            <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
+            <option value="THB">🇹🇭 泰铢 (THB)</option>
+            <option value="MYR">🇲🇾 马来西亚林吉特 (MYR)</option>
+          </select>
+        </div>
+
+        <div class="swap-btn" id="swapBtn" title="交换货币">
+          <i class="mgc_swap_line"></i>
+        </div>
+
+        <div class="currency-select">
+          <label>目标货币</label>
+          <select id="toCurrency">
+            <option value="CNY" selected>🇨🇳 人民币 (CNY)</option>
+            <option value="USD">🇺🇸 美元 (USD)</option>
+            <option value="EUR">🇪🇺 欧元 (EUR)</option>
+            <option value="GBP">🇧 英镑 (GBP)</option>
+            <option value="JPY">🇯🇵 日元 (JPY)</option>
+            <option value="HKD">🇭🇰 港币 (HKD)</option>
+            <option value="KRW">🇰🇷 韩元 (KRW)</option>
+            <option value="SGD">🇬 新加坡元 (SGD)</option>
+            <option value="AUD">🇺 澳元 (AUD)</option>
+            <option value="CAD">🇨🇦 加元 (CAD)</option>
+            <option value="CHF">🇨🇭 瑞士法郎 (CHF)</option>
+            <option value="THB">🇭 泰铢 (THB)</option>
+            <option value="MYR">🇾 马来西亚林吉特 (MYR)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result-box">
+        <div class="result-amount" id="resultAmount">720.00</div>
+        <div class="result-formula" id="resultFormula">100 USD = 720.00 CNY (汇率：7.20)</div>
+      </div>
+    </div>
+
+    <div class="converter-card rate-editor">
+      <h3>
+        <span>️ 汇率设置（相对于人民币）</span>
+        <button class="btn-secondary" id="resetRatesBtn">重置默认</button>
+      </h3>
+
+      <table class="rate-table">
+        <thead>
+          <tr>
+            <th>货币</th>
+            <th>代码</th>
+            <th>汇率（1单位 = ? 人民币）</th>
+          </tr>
+        </thead>
+        <tbody id="rateTableBody">
+          <!-- 动态生成 -->
+        </tbody>
+      </table>
+
+      <div class="rate-info">
+        💡 提示：以上为参考汇率，实际交易汇率请以银行为准。修改汇率后计算结果会实时更新。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 默认汇率（相对于人民币，1单位外币 = ? 人民币）
+    // 数据来源：参考汇率，实际使用时请更新
+    const defaultRates = {
+      CNY: 1.0000,
+      USD: 7.2000,
+      EUR: 7.8500,
+      GBP: 9.1500,
+      JPY: 0.0480,
+      HKD: 0.9200,
+      KRW: 0.0054,
+      SGD: 5.3500,
+      AUD: 4.7500,
+      CAD: 5.3000,
+      CHF: 8.1000,
+      THB: 0.2050,
+      MYR: 1.5500
+    };
+
+    // 从 localStorage 加载或初始化汇率
+    let rates = {};
+    try {
+      const saved = localStorage.getItem('exchangeRates');
+      rates = saved ? JSON.parse(saved) : { ...defaultRates };
+    } catch (e) {
+      rates = { ...defaultRates };
+    }
+
+    const amountInput = document.getElementById('amountInput');
+    const fromCurrency = document.getElementById('fromCurrency');
+    const toCurrency = document.getElementById('toCurrency');
+    const resultAmount = document.getElementById('resultAmount');
+    const resultFormula = document.getElementById('resultFormula');
+    const swapBtn = document.getElementById('swapBtn');
+    const rateTableBody = document.getElementById('rateTableBody');
+    const resetRatesBtn = document.getElementById('resetRatesBtn');
+
+    // 货币名称映射
+    const currencyNames = {
+      CNY: '人民币', USD: '美元', EUR: '欧元', GBP: '英镑',
+      JPY: '日元', HKD: '港币', KRW: '韩元', SGD: '新加坡元',
+      AUD: '澳元', CAD: '加元', CHF: '瑞士法郎', THB: '泰铢', MYR: '林吉特'
+    };
+
+    function calculate() {
+      const amount = parseFloat(amountInput.value) || 0;
+      const from = fromCurrency.value;
+      const to = toCurrency.value;
+
+      // 先转成人民币，再转成目标货币
+      const amountInCNY = amount * rates[from];
+      const result = amountInCNY / rates[to];
+
+      const rate = rates[from] / rates[to];
+
+      resultAmount.textContent = result.toFixed(2);
+      resultFormula.textContent = `${amount} ${from} = ${result.toFixed(2)} ${to} (汇率：${rate.toFixed(4)})`;
+    }
+
+    function renderRateTable() {
+      rateTableBody.innerHTML = '';
+      Object.keys(rates).forEach(code => {
+        if (code === 'CNY') return; // 人民币是基准，不显示
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${currencyNames[code] || code}</td>
+          <td><strong>${code}</strong></td>
+          <td><input type="number" step="0.0001" value="${rates[code]}" data-currency="${code}"></td>
+        `;
+        rateTableBody.appendChild(tr);
+      });
+
+      // 绑定输入事件
+      rateTableBody.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+          const currency = this.dataset.currency;
+          const newRate = parseFloat(this.value);
+          if (!isNaN(newRate) && newRate > 0) {
+            rates[currency] = newRate;
+            saveRates();
+            calculate();
+          }
+        });
+      });
+    }
+
+    function saveRates() {
+      try {
+        localStorage.setItem('exchangeRates', JSON.stringify(rates));
+      } catch (e) {
+        console.warn('无法保存汇率设置');
+      }
+    }
+
+    function resetRates() {
+      if (confirm('确定要重置为默认汇率吗？')) {
+        rates = { ...defaultRates };
+        saveRates();
+        renderRateTable();
+        calculate();
+      }
+    }
+
+    function swapCurrencies() {
+      const temp = fromCurrency.value;
+      fromCurrency.value = toCurrency.value;
+      toCurrency.value = temp;
+      calculate();
+    }
+
+    // 事件绑定
+    amountInput.addEventListener('input', calculate);
+    fromCurrency.addEventListener('change', calculate);
+    toCurrency.addEventListener('change', calculate);
+    swapBtn.addEventListener('click', swapCurrencies);
+    resetRatesBtn.addEventListener('click', resetRates);
+
+    // 初始化
+    renderRateTable();
+    calculate();
+  </script>
+</body>
+</html>
