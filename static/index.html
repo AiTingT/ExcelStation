@@ -310,7 +310,7 @@
         .content {
             flex: 1;
             overflow: hidden;
-            padding: 16px 24px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -1755,6 +1755,7 @@
                                 <button class="btn" id="aiClearBtn"
                                     style="padding:4px 10px;font-size:12px">清空对话</button>
                             </div>
+
                             <div class="ai-chat-messages" id="aiChatMessages">
                                 <div class="ai-message ai">
                                     <div class="msg-content">
@@ -1767,8 +1768,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="ai-chat-input">
-                                <input type="text" id="aiInput" placeholder="输入你的问题，回车发送...">
+                            <div class="ai-chat-input" style="display:flex;gap:8px;align-items:center">
+                                <select id="aiModeSelect" style="padding:6px 10px;border:1px solid var(--border-base);border-radius:6px;font-size:13px;background:white;cursor:pointer;min-width:110px">
+                                    <option value="sql">📊 数据查询</option>
+                                    <option value="formula">📐 公式生成</option>
+                                </select>
+                                <input type="text" id="aiInput" placeholder="输入你的问题，回车发送..." style="flex:1">
                                 <button class="btn btn-primary" id="aiSendBtn">发送</button>
                             </div>
                         </div>
@@ -2684,8 +2689,8 @@
             state.chartVisible = !state.chartVisible;
             els.chartSection.classList.toggle("hidden", !state.chartVisible);
             document.getElementById("toggleChartBtn").innerHTML = state.chartVisible
-              ? '📉 隐藏图表'
-              : '📈 显示图表';
+                ? '📉 隐藏图表'
+                : '📈 显示图表';
             if (state.chartVisible) {
                 if (!state.allRows) {
                     try {
@@ -4736,6 +4741,18 @@
             } catch (e) { /* ignore */ }
         }
 
+        // AI 模式切换（下拉框）
+        let aiMode = 'sql';
+        const aiModeSelect = document.getElementById("aiModeSelect");
+        aiModeSelect.addEventListener("change", () => {
+            aiMode = aiModeSelect.value;
+            if (aiMode === 'formula') {
+                document.getElementById("aiInput").placeholder = "描述你想要的公式效果，如：把 A 列和 B 列拼接起来...";
+            } else {
+                document.getElementById("aiInput").placeholder = "输入你的问题，回车发送...";
+            }
+        });
+
         document.getElementById("aiClearBtn").addEventListener("click", () => {
             if (!state.sessionId) return;
             state.aiHistory[state.sessionId] = [];
@@ -4757,7 +4774,6 @@
             if (!state.aiHistory[state.sessionId]) {
                 state.aiHistory[state.sessionId] = [];
             }
-            // 添加用户消息到历史
             state.aiHistory[state.sessionId].push({ role: "user", content: question });
 
             const msgDiv = document.createElement("div");
@@ -4765,7 +4781,6 @@
             msgDiv.innerHTML = `<div class="msg-content">${question}</div>`;
             els.aiChatMessages.appendChild(msgDiv);
 
-            // 显示 loading 指示器
             const loadingDiv = document.createElement("div");
             loadingDiv.className = "ai-message ai";
             loadingDiv.id = "aiLoadingMsg";
@@ -4773,59 +4788,82 @@
             els.aiChatMessages.appendChild(loadingDiv);
             els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
 
-            // 禁用发送按钮
             const sendBtn = document.getElementById("aiSendBtn");
             sendBtn.disabled = true;
             sendBtn.textContent = "等待中...";
 
             try {
-                const res = await fetch(`/api/ai/nl2sql/${state.sessionId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        question: question,
-                        history: state.aiHistory[state.sessionId].slice(0, -1)  // 不含当前消息
-                    })
-                });
-                const data = await res.json();
+                let data;
+                if (aiMode === 'formula') {
+                    // 公式生成模式
+                    const res = await fetch(`/api/ai/formula`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            question: question,
+                            columns: state.headers || [],
+                            sampleData: state.browseRows ? state.browseRows.slice(0, 3) : []
+                        })
+                    });
+                    data = await res.json();
+                    const loadingEl = document.getElementById("aiLoadingMsg");
+                    if (loadingEl) loadingEl.remove();
 
-                // 移除 loading 指示器
-                const loadingEl = document.getElementById("aiLoadingMsg");
-                if (loadingEl) loadingEl.remove();
-
-                const aiDiv = document.createElement("div");
-                aiDiv.className = "ai-message ai";
-                if (!data.success) {
-                    aiDiv.innerHTML = `<div class="msg-content"> ${data.error || "查询失败"}</div>`;
+                    const aiDiv = document.createElement("div");
+                    aiDiv.className = "ai-message ai";
+                    if (!data.success) {
+                        aiDiv.innerHTML = `<div class="msg-content">${data.error || "生成失败"}</div>`;
+                    } else {
+                        let html = `<div class="msg-content">`;
+                        if (data.formula) {
+                            html += `<div style="background:#f5f5f5;padding:12px;border-radius:6px;margin:8px 0;font-family:monospace;font-size:14px;border-left:3px solid #4a90d9"><strong>📐 公式：</strong><br><code>${data.formula}</code></div>`;
+                        }
+                        if (data.explanation) {
+                            html += `<div style="margin-top:8px">${data.explanation}</div>`;
+                        }
+                        html += `</div>`;
+                        aiDiv.innerHTML = html;
+                    }
                     els.aiChatMessages.appendChild(aiDiv);
-                    els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
-                    return;
+                } else {
+                    // 数据查询模式
+                    const res = await fetch(`/api/ai/nl2sql/${state.sessionId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            question: question,
+                            history: state.aiHistory[state.sessionId].slice(0, -1)
+                        })
+                    });
+                    data = await res.json();
+                    const loadingEl = document.getElementById("aiLoadingMsg");
+                    if (loadingEl) loadingEl.remove();
+
+                    const aiDiv = document.createElement("div");
+                    aiDiv.className = "ai-message ai";
+                    if (!data.success) {
+                        aiDiv.innerHTML = `<div class="msg-content">${data.error || "查询失败"}</div>`;
+                    } else {
+                        state.aiHistory[state.sessionId].push({ role: "assistant", content: data.explanation || "查询成功" });
+                        let html = `<div class="msg-content">${data.explanation || "查询成功"}</div>`;
+                        if (data.rows && data.rows.length > 0) {
+                            html += `<div class="msg-result"><table><thead><tr>` + data.columns.map(h => `<th>${h}</th>`).join("") + `</tr></thead><tbody>`;
+                            html += data.rows.slice(0, 50).map(row => "<tr>" + row.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>").join("");
+                            html += `</tbody></table>`;
+                            if (data.rows.length > 50) html += `<p>共 ${data.rows.length} 行，仅显示前 50 行</p>`;
+                            html += `</div>`;
+                        }
+                        aiDiv.innerHTML = html;
+                    }
+                    els.aiChatMessages.appendChild(aiDiv);
                 }
-                // 添加 AI 回复到历史
-                state.aiHistory[state.sessionId].push({
-                    role: "assistant",
-                    content: data.explanation || "查询成功"
-                });
-                let html = `<div class="msg-content">${data.explanation || "查询成功"}</div>`;
-                if (data.rows && data.rows.length > 0) {
-                    html += `<div class="msg-result">`;
-                    html += "<table><thead><tr>" + data.columns.map(h => `<th>${h}</th>`).join("") + "</tr></thead><tbody>";
-                    html += data.rows.slice(0, 50).map(row =>
-                        "<tr>" + row.map(c => `<td>${c ?? ""}</td>`).join("") + "</tr>"
-                    ).join("");
-                    html += "</tbody></table>";
-                    if (data.rows.length > 50) html += `<p>共 ${data.rows.length} 行，仅显示前 50 行</p>`;
-                    html += `</div>`;
-                }
-                aiDiv.innerHTML = html;
-                els.aiChatMessages.appendChild(aiDiv);
                 els.aiChatMessages.scrollTop = els.aiChatMessages.scrollHeight;
             } catch (e) {
                 const loadingEl = document.getElementById("aiLoadingMsg");
                 if (loadingEl) loadingEl.remove();
                 const errDiv = document.createElement("div");
                 errDiv.className = "ai-message ai";
-                errDiv.innerHTML = `<div class="msg-content">请求失败: ${e.message}</div>`;
+                errDiv.innerHTML = `<div class="msg-content">请求失败：${e.message}</div>`;
                 els.aiChatMessages.appendChild(errDiv);
             } finally {
                 sendBtn.disabled = false;
