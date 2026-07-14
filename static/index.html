@@ -1274,6 +1274,38 @@
             font-weight: bold;
         }
 
+        .compare-result-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 12px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+        }
+
+        .compare-tab-btn {
+            border: 1px solid #d0d7de;
+            background: #fff;
+            color: #444;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .compare-tab-btn.active {
+            background: #4a90d9;
+            border-color: #4a90d9;
+            color: #fff;
+        }
+
+        .compare-tab-btn span {
+            font-weight: 700;
+        }
+
+        #compareColumns {
+            min-height: 88px;
+        }
+
         /* ==================== 工具箱覆盖层 ==================== */
         .toolbox-overlay {
             position: fixed;
@@ -1703,10 +1735,14 @@
                                 </div>
                             </div>
                             <div class="panel-row" style="margin-top:14px">
-                                <label>对比列</label>
+                                <label>匹配列</label>
                                 <select id="compareKeyCol">
-                                    <option value="">选择用于对比的列</option>
+                                    <option value="">选择用于匹配两边记录的列</option>
                                 </select>
+                            </div>
+                            <div class="panel-row">
+                                <label>比较列</label>
+                                <select id="compareColumns" multiple></select>
                             </div>
                             <div class="panel-actions">
                                 <button class="btn btn-primary" id="compareRunBtn">开始对比</button>
@@ -1728,14 +1764,23 @@
                                     <div class="stat-value" id="compareBoth">0</div>
                                     <div class="stat-label">两者共有</div>
                                 </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="compareChanged">0</div>
+                                    <div class="stat-label">字段变化</div>
+                                </div>
+                            </div>
+                            <div class="compare-result-tabs">
+                                <button class="compare-tab-btn active" data-compare-view="changed">字段变化 <span id="compareTabChanged">0</span></button>
+                                <button class="compare-tab-btn" data-compare-view="onlyA">仅A明细 <span id="compareTabOnlyA">0</span></button>
+                                <button class="compare-tab-btn" data-compare-view="onlyB">仅B明细 <span id="compareTabOnlyB">0</span></button>
+                            </div>
+                            <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none">
                             </div>
                             <div class="table-wrapper">
                                 <table id="compareTable">
                                     <thead id="compareHead"></thead>
                                     <tbody id="compareBody"></tbody>
                                 </table>
-                            </div>
-                            <div id="compareChangedInfo" style="margin:8px 12px;font-size:13px;color:#666;display:none">
                             </div>
                             <div id="comparePager"
                                 style="display:none;justify-content:center;align-items:center;gap:10px;margin:8px 12px 14px">
@@ -4498,7 +4543,8 @@
             fileB: "",
             sheetA: "",
             sheetB: "",
-            keyCol: ""
+            keyCol: "",
+            compareCols: []
         };
 
         function initCompareForm() {
@@ -4557,31 +4603,67 @@
             const sheetA = document.getElementById("compareSheetA").value;
             const sheetB = document.getElementById("compareSheetB").value;
             const keyColSel = document.getElementById("compareKeyCol");
-            keyColSel.innerHTML = '<option value="">选择用于对比的列</option>';
-            if (!sheetA || !sheetB) return;
+            const previousKey = compareState.keyCol || keyColSel.value;
+            keyColSel.innerHTML = '<option value="">选择用于匹配两边记录的列</option>';
+            if (!sheetA || !sheetB) { updateCompareColumns(); return; }
+            const intersection = getCompareCommonHeaders();
+            intersection.forEach(h => keyColSel.appendChild(new Option(h, h)));
+            if (previousKey && intersection.includes(previousKey)) {
+                keyColSel.value = previousKey;
+            }
+            compareState.keyCol = keyColSel.value;
+            updateCompareColumns();
+        }
+
+        function getCompareCommonHeaders() {
+            const sheetA = document.getElementById("compareSheetA").value;
+            const sheetB = document.getElementById("compareSheetB").value;
             const tableA = compareSheetsA.find(t => t.name === sheetA);
             const tableB = compareSheetsB.find(t => t.name === sheetB);
-            if (!tableA || !tableB || !tableA.headers || !tableB.headers) return;
-            const headersA = tableA.headers;
-            const headersB = tableB.headers;
-            const intersection = headersA.filter(h => headersB.includes(h));
-            intersection.forEach(h => keyColSel.appendChild(new Option(h, h)));
+            if (!tableA || !tableB || !tableA.headers || !tableB.headers) return [];
+            return tableA.headers.filter(h => tableB.headers.includes(h));
+        }
+
+        function getSelectedCompareColumns() {
+            return Array.from(document.getElementById("compareColumns").selectedOptions).map(o => o.value);
+        }
+
+        function updateCompareColumns() {
+            const colSel = document.getElementById("compareColumns");
+            const keyCol = document.getElementById("compareKeyCol").value;
+            const previous = new Set(compareState.compareCols || []);
+            const hasSavedSelection = previous.size > 0;
+            colSel.innerHTML = "";
+            getCompareCommonHeaders()
+                .filter(h => h !== keyCol)
+                .forEach(h => {
+                    const opt = new Option(h, h);
+                    opt.selected = hasSavedSelection ? previous.has(h) : true;
+                    colSel.appendChild(opt);
+                });
+            compareState.compareCols = getSelectedCompareColumns();
         }
 
         document.getElementById("compareFileA").addEventListener("change", async () => {
             const sid = document.getElementById("compareFileA").value;
             const sheetSel = document.getElementById("compareSheetA");
+            const previousFile = compareState.fileA;
             sheetSel.innerHTML = '<option value="">选择工作表</option>';
             compareSheetsA = [];
             compareState.fileA = sid;
-            compareState.sheetA = "";
+            if (!sid || sid !== previousFile) {
+                compareState.sheetA = "";
+                compareState.compareCols = [];
+                resetCompareResult();
+            }
             if (!sid) { updateCompareKeyCol(); return; }
             const res = await fetch(`/api/data/${sid}/tables`);
             const data = await res.json();
             compareSheetsA = data.tables || [];
             compareSheetsA.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
-            // 如果只有一个工作表，自动选择
-            if (compareSheetsA.length === 1) {
+            if (compareState.sheetA && compareSheetsA.some(t => t.name === compareState.sheetA)) {
+                sheetSel.value = compareState.sheetA;
+            } else if (compareSheetsA.length === 1) {
                 sheetSel.value = compareSheetsA[0].name;
                 compareState.sheetA = compareSheetsA[0].name;
             }
@@ -4591,17 +4673,23 @@
         document.getElementById("compareFileB").addEventListener("change", async () => {
             const sid = document.getElementById("compareFileB").value;
             const sheetSel = document.getElementById("compareSheetB");
+            const previousFile = compareState.fileB;
             sheetSel.innerHTML = '<option value="">选择工作表</option>';
             compareSheetsB = [];
             compareState.fileB = sid;
-            compareState.sheetB = "";
+            if (!sid || sid !== previousFile) {
+                compareState.sheetB = "";
+                compareState.compareCols = [];
+                resetCompareResult();
+            }
             if (!sid) { updateCompareKeyCol(); return; }
             const res = await fetch(`/api/data/${sid}/tables`);
             const data = await res.json();
             compareSheetsB = data.tables || [];
             compareSheetsB.forEach(t => sheetSel.appendChild(new Option(t.name, t.name)));
-            // 如果只有一个工作表，自动选择
-            if (compareSheetsB.length === 1) {
+            if (compareState.sheetB && compareSheetsB.some(t => t.name === compareState.sheetB)) {
+                sheetSel.value = compareState.sheetB;
+            } else if (compareSheetsB.length === 1) {
                 sheetSel.value = compareSheetsB[0].name;
                 compareState.sheetB = compareSheetsB[0].name;
             }
@@ -4610,14 +4698,25 @@
 
         document.getElementById("compareSheetA").addEventListener("change", () => {
             compareState.sheetA = document.getElementById("compareSheetA").value;
+            compareState.compareCols = [];
+            resetCompareResult();
             updateCompareKeyCol();
         });
         document.getElementById("compareSheetB").addEventListener("change", () => {
             compareState.sheetB = document.getElementById("compareSheetB").value;
+            compareState.compareCols = [];
+            resetCompareResult();
             updateCompareKeyCol();
         });
         document.getElementById("compareKeyCol").addEventListener("change", () => {
             compareState.keyCol = document.getElementById("compareKeyCol").value;
+            compareState.compareCols = [];
+            resetCompareResult();
+            updateCompareColumns();
+        });
+        document.getElementById("compareColumns").addEventListener("change", () => {
+            compareState.compareCols = getSelectedCompareColumns();
+            resetCompareResult();
         });
 
         document.getElementById("compareClearBtn").addEventListener("click", () => {
@@ -4626,7 +4725,8 @@
             document.getElementById("compareFileB").value = "";
             document.getElementById("compareSheetA").innerHTML = '<option value="">选择工作表</option>';
             document.getElementById("compareSheetB").innerHTML = '<option value="">选择工作表</option>';
-            document.getElementById("compareKeyCol").innerHTML = '<option value="">选择用于对比的列</option>';
+            document.getElementById("compareKeyCol").innerHTML = '<option value="">选择用于匹配两边记录的列</option>';
+            document.getElementById("compareColumns").innerHTML = "";
             compareSheetsA = [];
             compareSheetsB = [];
 
@@ -4640,11 +4740,10 @@
             compareState.sheetA = "";
             compareState.sheetB = "";
             compareState.keyCol = "";
+            compareState.compareCols = [];
 
             // 隐藏结果区域
-            document.getElementById("compareResult").classList.add("hidden");
-            compareChangedRows = [];
-            comparePage = 1;
+            resetCompareResult(true);
 
             showToast("已清空对比条件");
         });
@@ -4655,57 +4754,112 @@
             const tableA = document.getElementById("compareSheetA").value;
             const tableB = document.getElementById("compareSheetB").value;
             const keyCol = document.getElementById("compareKeyCol").value;
+            const compareCols = getSelectedCompareColumns();
             if (!sidA || !sidB || !tableA || !tableB || !keyCol) {
                 showToast("请完成所有选择"); return;
+            }
+            if (compareCols.length === 0) {
+                showToast("请至少选择一个比较列"); return;
             }
             try {
                 const res = await fetch(`/api/data/compare`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ sessionA: sidA, tableA, sessionB: sidB, tableB, keyColumn: keyCol })
+                    body: JSON.stringify({ sessionA: sidA, tableA, sessionB: sidB, tableB, keyColumn: keyCol, compareColumns: compareCols })
                 });
                 const data = await res.json();
+                if (!res.ok) { showToast("对比失败: " + (data.detail || "")); return; }
                 const stats = data.stats || {};
                 document.getElementById("compareOnlyA").textContent = stats.onlyA || 0;
                 document.getElementById("compareOnlyB").textContent = stats.onlyB || 0;
                 document.getElementById("compareBoth").textContent = stats.both || 0;
+                document.getElementById("compareChanged").textContent = stats.changedCells || stats.changed || 0;
+                document.getElementById("compareTabOnlyA").textContent = stats.onlyA || 0;
+                document.getElementById("compareTabOnlyB").textContent = stats.onlyB || 0;
+                document.getElementById("compareTabChanged").textContent = stats.changedCells || stats.changed || 0;
                 document.getElementById("compareRowsA").textContent = (stats.onlyA || 0) + (stats.both || 0);
                 document.getElementById("compareRowsB").textContent = (stats.onlyB || 0) + (stats.both || 0);
-                compareChangedRows = data.changedRows || [];
-                comparePage = 1;
-                const info = document.getElementById("compareChangedInfo");
-                info.style.display = "";
-                info.innerHTML = `共 <b style="color:#e8590c">${compareChangedRows.length}</b> 条变化记录${compareChangedRows.length === 0 ? "（两文件在共有记录上完全一致）" : ""}`;
-                renderComparePage();
+                compareResultData = normalizeCompareResult(data);
+                const defaultView = (stats.changedCells || stats.changed) ? "changed" : ((stats.onlyB || 0) > 0 ? "onlyB" : ((stats.onlyA || 0) > 0 ? "onlyA" : "changed"));
+                setCompareView(defaultView);
                 document.getElementById("compareResult").classList.remove("hidden");
             } catch (e) { showToast("对比失败: " + e.message); }
         });
 
         // 对比结果分页
-        let compareChangedRows = [];
+        let compareResultData = null;
+        let compareActiveView = "changed";
         let comparePage = 1;
         const COMPARE_PAGE_SIZE = 20;
+
+        function normalizeCompareResult(data) {
+            const changedCells = data.changedCells || [];
+            if (changedCells.length === 0 && data.changedRows) {
+                data.changedRows.forEach(row => {
+                    Object.keys(row.changes || {}).forEach(col => {
+                        changedCells.push({
+                            key: row.key,
+                            column: col,
+                            a: row.changes[col].a,
+                            b: row.changes[col].b
+                        });
+                    });
+                });
+            }
+            return {
+                keyColumn: data.keyColumn || document.getElementById("compareKeyCol").value,
+                compareColumns: data.compareColumns || getSelectedCompareColumns(),
+                headersA: data.headersA || [],
+                headersB: data.headersB || [],
+                onlyARows: data.onlyARows || data.sampleOnlyA || [],
+                onlyBRows: data.onlyBRows || data.sampleOnlyB || [],
+                changedCells,
+                warnings: data.warnings || [],
+                stats: data.stats || {}
+            };
+        }
+
+        function resetCompareResult(hide = true) {
+            compareResultData = null;
+            comparePage = 1;
+            if (hide) {
+                document.getElementById("compareResult").classList.add("hidden");
+            }
+            document.getElementById("compareChangedInfo").style.display = "none";
+            document.getElementById("comparePager").style.display = "none";
+        }
+
+        function setCompareView(view) {
+            compareActiveView = view;
+            comparePage = 1;
+            document.querySelectorAll(".compare-tab-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.compareView === view);
+            });
+            renderComparePage();
+        }
+
+        document.querySelectorAll(".compare-tab-btn").forEach(btn => {
+            btn.addEventListener("click", () => setCompareView(btn.dataset.compareView));
+        });
+
         function renderComparePage() {
+            if (!compareResultData) return;
             const head = document.getElementById("compareHead");
             const body = document.getElementById("compareBody");
-            head.innerHTML = "<tr><th style='width:160px'>匹配列（" + escapeHtml(document.getElementById("compareKeyCol").value || "") + "）</th><th>变化明细（修改前 -> 修改后）</th></tr>";
-            const total = compareChangedRows.length;
+            const view = getCompareViewData();
+            const total = view.rows.length;
             const totalPages = Math.max(1, Math.ceil(total / COMPARE_PAGE_SIZE));
             if (comparePage > totalPages) comparePage = totalPages;
             if (comparePage < 1) comparePage = 1;
             const start = (comparePage - 1) * COMPARE_PAGE_SIZE;
-            const slice = compareChangedRows.slice(start, start + COMPARE_PAGE_SIZE);
+            const slice = view.rows.slice(start, start + COMPARE_PAGE_SIZE);
+            head.innerHTML = "<tr>" + view.headers.map(h => `<th>${escapeHtml(h)}</th>`).join("") + "</tr>";
             if (slice.length === 0) {
-                body.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#999;padding:20px">无变化记录</td></tr>`;
+                body.innerHTML = `<tr><td colspan="${Math.max(1, view.headers.length)}" style="text-align:center;color:#999;padding:20px">${view.emptyText}</td></tr>`;
             } else {
-                body.innerHTML = slice.map(item => {
-                    const changes = item.changes || {};
-                    const detail = Object.keys(changes).map(col =>
-                        `<div style="margin:2px 0"><b>${escapeHtml(col)}</b>：${escapeHtml(changes[col].a ?? "")} <span style="color:#aaa">→</span> <b style="color:#e8590c">${escapeHtml(changes[col].b ?? "")}</b></div>`
-                    ).join("");
-                    return `<tr><td style="vertical-align:top">${escapeHtml(item.key ?? "")}</td><td>${detail}</td></tr>`;
-                }).join("");
+                body.innerHTML = slice.map(row => "<tr>" + view.toCells(row).map(c => `<td>${escapeHtml(c ?? "")}</td>`).join("") + "</tr>").join("");
             }
+            renderCompareInfo(view, total);
             const pager = document.getElementById("comparePager");
             if (total > COMPARE_PAGE_SIZE) {
                 pager.style.display = "flex";
@@ -4718,6 +4872,46 @@
         }
         document.getElementById("comparePrevBtn").addEventListener("click", () => { comparePage--; renderComparePage(); });
         document.getElementById("compareNextBtn").addEventListener("click", () => { comparePage++; renderComparePage(); });
+
+        function getCompareViewData() {
+            const keyCol = compareResultData.keyColumn || "匹配值";
+            if (compareActiveView === "onlyA") {
+                const headers = compareResultData.headersA.length ? compareResultData.headersA : [keyCol];
+                return {
+                    title: "仅A明细",
+                    headers,
+                    rows: compareResultData.onlyARows,
+                    emptyText: "没有仅在 A 中的记录",
+                    toCells: row => headers.map(h => row[h])
+                };
+            }
+            if (compareActiveView === "onlyB") {
+                const headers = compareResultData.headersB.length ? compareResultData.headersB : [keyCol];
+                return {
+                    title: "仅B明细",
+                    headers,
+                    rows: compareResultData.onlyBRows,
+                    emptyText: "没有仅在 B 中的记录",
+                    toCells: row => headers.map(h => row[h])
+                };
+            }
+            return {
+                title: "字段变化",
+                headers: [keyCol, "字段名", "A中的值", "B中的值"],
+                rows: compareResultData.changedCells,
+                emptyText: "共有记录中没有字段变化",
+                toCells: row => [row.key, row.column, row.a, row.b]
+            };
+        }
+
+        function renderCompareInfo(view, total) {
+            const info = document.getElementById("compareChangedInfo");
+            const warnings = (compareResultData.warnings || []).map(w =>
+                `<div style="color:#e8590c;margin-top:4px">${escapeHtml(w)}</div>`
+            ).join("");
+            info.style.display = "";
+            info.innerHTML = `${escapeHtml(view.title)}：共 <b style="color:#e8590c">${total}</b> 条${warnings}`;
+        }
 
         // ==================== AI 对话 ====================
         async function initAiChat() {

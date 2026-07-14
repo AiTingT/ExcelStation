@@ -594,6 +594,7 @@ async def pivot_table(
 
 @router.post("/compare")
 async def compare_files(
+    req: Request,
     sessionA: str = Body(...),
     sessionB: str = Body(...),
     tableA: str = Body(default="data"),
@@ -605,6 +606,9 @@ async def compare_files(
     多文件对比分析
     基于指定的关键列对比两个表的数据，找出仅在A、仅在B、两者共有的记录
     """
+    _check_session_ownership(sessionA, _user_id(req))
+    _check_session_ownership(sessionB, _user_id(req))
+
     db_path_a = get_db_path(sessionA)
     db_path_b = get_db_path(sessionB)
     if not db_path_a:
@@ -623,7 +627,14 @@ async def compare_files(
     if keyColumn not in headers_b:
         raise HTTPException(status_code=400, detail=f"关键列 {keyColumn} 在表 B 中不存在")
 
-    cols_to_compare = compareColumns if compareColumns else list(set(headers_a) & set(headers_b) - {keyColumn})
+    common_headers = [h for h in headers_a if h in headers_b]
+    if compareColumns is None:
+        cols_to_compare = [h for h in common_headers if h != keyColumn]
+    else:
+        invalid_cols = [c for c in compareColumns if c not in common_headers]
+        if invalid_cols:
+            raise HTTPException(status_code=400, detail=f"比较列不存在于两表共有列: {', '.join(invalid_cols)}")
+        cols_to_compare = [c for c in compareColumns if c != keyColumn]
 
     def build_query(db_path, table_name, headers, key_col):
         all_cols = [key_col] + [c for c in headers if c != key_col]
@@ -646,8 +657,19 @@ async def compare_files(
     cols_a, data_a = build_query(db_path_a, table_name_a, headers_a, keyColumn)
     cols_b, data_b = build_query(db_path_b, table_name_b, headers_b, keyColumn)
 
-    map_a = {row[keyColumn]: row for row in data_a}
-    map_b = {row[keyColumn]: row for row in data_b}
+    def build_key_map(rows):
+        key_map = {}
+        duplicates = {}
+        for row in rows:
+            key = row.get(keyColumn)
+            if key in key_map:
+                duplicates[key] = duplicates.get(key, 1) + 1
+                continue
+            key_map[key] = row
+        return key_map, duplicates
+
+    map_a, duplicate_keys_a = build_key_map(data_a)
+    map_b, duplicate_keys_b = build_key_map(data_b)
 
     keys_a = set(map_a.keys())
     keys_b = set(map_b.keys())
@@ -656,39 +678,74 @@ async def compare_files(
     only_b_keys = keys_b - keys_a
     both_keys = keys_a & keys_b
 
+    def normalize_cell(value):
+        return "" if value is None else str(value)
+
     diff_details = []
-    for key in both_keys:
+    changed_cells = []
+    for key in sorted(both_keys, key=lambda v: normalize_cell(v)):
         row_a = map_a[key]
         row_b = map_b[key]
         changes = {}
         for col in cols_to_compare:
             if col in row_a and col in row_b:
-                if str(row_a[col] or "") != str(row_b[col] or ""):
+                a_val = normalize_cell(row_a[col])
+                b_val = normalize_cell(row_b[col])
+                if a_val != b_val:
                     changes[col] = {"a": row_a[col], "b": row_b[col]}
+                    changed_cells.append({
+                        "key": key,
+                        "column": col,
+                        "a": row_a[col],
+                        "b": row_b[col]
+                    })
         if changes:
             diff_details.append({
                 "key": key,
                 "changes": changes
             })
 
-    def sample_rows(keys, data_map, limit=100):
+    def rows_for_keys(keys, data_map, limit=None):
         result = []
-        for k in list(keys)[:limit]:
+        ordered_keys = sorted(keys, key=lambda v: normalize_cell(v))
+        if limit is not None:
+            ordered_keys = ordered_keys[:limit]
+        for k in ordered_keys:
             result.append(data_map[k])
         return result
+
+    only_a_rows = rows_for_keys(only_a_keys, map_a)
+    only_b_rows = rows_for_keys(only_b_keys, map_b)
+    warnings = []
+    if duplicate_keys_a:
+        warnings.append(f"表 A 的匹配列存在 {len(duplicate_keys_a)} 个重复值，结果仅按首次出现的记录比较")
+    if duplicate_keys_b:
+        warnings.append(f"表 B 的匹配列存在 {len(duplicate_keys_b)} 个重复值，结果仅按首次出现的记录比较")
 
     return {
         "keyColumn": keyColumn,
         "compareColumns": cols_to_compare,
+        "headersA": headers_a,
+        "headersB": headers_b,
+        "commonHeaders": common_headers,
         "stats": {
             "onlyA": len(only_a_keys),
             "onlyB": len(only_b_keys),
             "both": len(both_keys),
-            "changed": len(diff_details)
+            "changed": len(diff_details),
+            "changedCells": len(changed_cells),
+            "duplicateKeysA": len(duplicate_keys_a),
+            "duplicateKeysB": len(duplicate_keys_b)
         },
-        "sampleOnlyA": sample_rows(only_a_keys, map_a),
-        "sampleOnlyB": sample_rows(only_b_keys, map_b),
-        "sampleBoth": sample_rows(both_keys, map_a),
+        "onlyARows": only_a_rows,
+        "onlyBRows": only_b_rows,
+        "sampleOnlyA": rows_for_keys(only_a_keys, map_a, 100),
+        "sampleOnlyB": rows_for_keys(only_b_keys, map_b, 100),
+        "sampleBoth": rows_for_keys(both_keys, map_a, 100),
+        "changedCells": changed_cells,
+        "duplicateKeysA": [{"key": k, "count": v} for k, v in list(duplicate_keys_a.items())[:50]],
+        "duplicateKeysB": [{"key": k, "count": v} for k, v in list(duplicate_keys_b.items())[:50]],
+        "warnings": warnings,
         "changedRows": diff_details
     }
 
